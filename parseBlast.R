@@ -16,7 +16,7 @@ if(!file.exists(sqlFile)){
 
 blastFiles<-list.files('work/blast','.blast.gz$',full.names=TRUE)
 
-taxas<-lapply(blastFiles,function(ii){
+taxas<-cleanMclapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile){
   message(ii)
   outFile<-sub('.blast.gz$','_taxa.csv',ii)
   outFile2<-sub('.blast.gz$','_allHits.csv',ii)
@@ -28,6 +28,7 @@ taxas<-lapply(blastFiles,function(ii){
     message(' Creating ',outFile)
     message('  Reading blast')
     x<-read.blast(ii)
+    x<-x[x$tName!='ref',]
     x$accession<-sapply(strsplit(x$tName,'\\|'),'[[',3)
     message('  Accession to taxonomy')
     x$taxa<-accessionToTaxa(x$accession,sqlFile)
@@ -35,7 +36,7 @@ taxas<-lapply(blastFiles,function(ii){
     x<-x[x$score==x$maxBit&!is.na(x$taxa),]
     gc()
     message('  Getting upstream taxonomy')
-    taxonomy<-getTaxonomy(x$taxa,taxaNodes,taxaNames,mc.cores=10)
+    taxonomy<-getTaxonomy(x$taxa,taxaNodes,taxaNames,mc.cores=5)
     taxonomy<-as.data.frame(taxonomy,stringsAsFactors=FALSE)
     message('  Condensing taxonomy')
     taxaAssigns<-do.call(rbind,by(taxonomy,x$qName,FUN=condenseTaxa))
@@ -48,4 +49,4 @@ taxas<-lapply(blastFiles,function(ii){
     write.csv(taxaAssigns,outFile)
   }
   return(list('taxa'=taxaAssigns,'taxonomy'=taxonomy))
-})
+},taxaNodes,taxaNames,sqlFile,extraCode='library(dnar);library(taxonomizr);library(parallel)',mc.cores=4)
