@@ -49,4 +49,12 @@ taxas<-cleanMclapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile){
     write.csv(taxaAssigns,outFile)
   }
   return(list('taxa'=taxaAssigns,'taxonomy'=taxonomy))
-},taxaNodes,taxaNames,sqlFile,extraCode='library(dnar);library(taxonomizr);library(parallel)',mc.cores=4)
+},taxaNodes,taxaNames,sqlFile,extraCode='library(dnar);library(taxonomizr);library(parallel)',mc.cores=4,nSplits=40)
+
+
+taxonomy<-lapply(taxas,'[[','taxonomy')
+taxas<-lapply(taxas,'[[','taxa')
+names(taxas)<-names(taxonomy)<-basename(blastFiles)
+
+
+
