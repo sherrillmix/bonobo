@@ -64,27 +64,8 @@ dev.off()
 
 
 table(sub('^(.*[0-9]+).*','\\1',shortNames),sub('^.*[0-9]+','',shortNames))
-
-
-unifrac<-function(xx,yy,weighted=TRUE){
-  n<-ncol(xx)
-  if(ncol(yy)!=n)stop('Number of taxonomic ranks not the same')
-  dists<-do.call(rbind,lapply(n:1,function(ii){
-    xTaxa<-table(apply(xx[,1:ii,drop=FALSE],1,paste,collapse='_||_'))
-    yTaxa<-table(apply(yy[,1:ii,drop=FALSE],1,paste,collapse='_||_'))
-    merged<-merge(data.frame('name'=names(xTaxa),'x'=as.numeric(xTaxa)),data.frame('name'=names(yTaxa),'y'=as.numeric(yTaxa)),all=TRUE)
-    merged[is.na(merged)]<-0
-    if(weighted){
-      diffs<-apply(merged[,c('x','y')],1,diff)
-      out<-sum(abs(diffs))
-    }else{
-      notBoth<-apply(merged[,c('x','y')]>0,1,function(zz)zz[1]!=zz[2])
-      out<-sum(notBoth)
-    }
-    return(c(out,nrow(merged)))
-  }))
-  print(dists)
-  prop<-sum(dists[,1])/sum(dists[,2])
-  return(prop)
-}
-unifrac(matrix(c('a','c','b','b'),ncol=2,byrow=TRUE),matrix(c('a','b'),nrow=1),FALSE)
+length(chimpFilter)
+unifracMat<-cleanMclapply(1:length(chimpFilter),function(ii,chimpFilter){
+  library(dnar)
+  return(sapply(1:length(chimpFilter),function(jj){cat('.');unifracMatrix(chimpFilter[[ii]],chimpFilter[[jj]])}))
+},chimpFilter,mc.cores=4)
