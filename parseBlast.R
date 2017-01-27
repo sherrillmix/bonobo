@@ -56,5 +56,7 @@ taxonomy<-lapply(taxas,'[[','taxonomy')
 taxas<-lapply(taxas,'[[','taxa')
 names(taxas)<-names(taxonomy)<-basename(blastFiles)
 
+rm(taxaNames)
+rm(taxaNodes)
 
 
