@@ -1,8 +1,9 @@
 library(parallel)
 library(dnar)
 
+source('../readSamples.R',chdir=TRUE)
 
-runQiime<-function(seqs){
+runQiime<-function(seqs,storeDir=NULL){
   if(any(is.na(seqs)))stop(simpleError('NAs in seqs'))
   seqIds<-1:length(seqs)
   readDir<-tempfile()
@@ -12,7 +13,7 @@ runQiime<-function(seqs){
   seqNames<-sprintf('XXX_%d',seqIds)
   write.fa(seqNames,seqs,readFile)
   #miniconda doesn't like sh so need to use bash
-  cmd<-sprintf('echo "source activate qiime1; pick_de_novo_otus.py --input %s --output %s --parallel --jobs_to_start 16 --force"|bash',readFile,outDir)
+  cmd<-sprintf('echo "source activate qiime1; pick_de_novo_otus.py --input %s --output %s --parallel --jobs_to_start 32 --force"|bash',readFile,outDir)
   message(cmd)
   exit<-system(cmd)
   if(exit!=0)stop(simpleError('Problem running qiime'))
@@ -30,16 +31,73 @@ runQiime<-function(seqs){
   #get sequences
   seqs<-read.fa(file.path(outDir,'pynast_aligned_seqs/XXX_rep_set_aligned_pfiltered.fasta'))
   seqs<-structure(seqs$seq,.Names=seqs$name)
+  if(!is.null(storeDir)){
+    #avoid problems with cross filesystem copies
+    tmpDir<-tempfile(tmpdir='.')
+    dir.create(tmpDir)
+    file.copy(outDir,tmpDir)
+    file.rename(file.path(tmpDir,basename(outDir)),storeDir)
+  }
   return(list('otus'=out,'seqs'=seqs,'taxa'=taxa))
 }
 
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
-for(fastq in fastqs){
-  message(fastq)
-  outFiles<-sprintf(c('%s.otu','%s.otuSeq','%s.taxa'),sprintf('work/%s',sub('.fastq.gz$','',basename(fastq))))
-  seqs<-read.fastq(fastq)
-  out<-runQiime(seqs$seq)
-  writeLines(out[['otus']],outFiles[1])
-  write.fa(names(out[['seqs']]),out[[2]],outFiles[2])
-  write.csv(out[['taxa']],outFiles[3])
+#just get sequence to reduce memory
+allSeq<-lapply(fastqs,function(xx)read.fastq(xx)$seq)
+if(!file.exists('work/qiime')){
+  out<-runQiime(unlist(allSeq),storeDir='work/qiime')
+  withAs(outFile=gzfile('work/qiimeOtuIds.csv.gz'),write.csv(data.frame('file'=rep(sub('_Feces_1_1.fastq.gz','',basename(fastqs)),sapply(allSeq,length)),'otu'=out[['otus']],stringsAsFactors=FALSE),outFile,row.names=FALSE))
+  write.fa(names(out[['seqs']]),out[['seqs']],'work/qiimeOtus.fa.gz')
+  write.csv(data.frame('name'=names(out[['taxa']]),'taxa'=out[['taxa']],stringsAsFactors=FALSE),'work/qiimeOtus.taxa',row.names=FALSE)
 }
+otus<-read.csv('work/qiimeOtuIds.csv.gz',stringsAsFactors=FALSE)
+otuTab<-as.data.frame.matrix(table(otus$otu,otus$file))
+otuTab<-otuTab[apply(otuTab,1,sum)>3,]
+
+samples$name<-sapply(samples$Code,function(x)colnames(otuTab)[grep(sprintf('_%s$',x),colnames(otuTab))])
+
+library(phyloseq)
+tree<-read_tree('work/qiime/rep_set.tre')
+phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,samples$name],taxa_are_rows=TRUE)
+qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
+#check warning here
+uniDist<-UniFrac(qiimeData,weighted=TRUE)
+library(ape)
+uniPca<-pcoa(uniDist)
+predictors<-model.matrix(~0+Species+malaria+SIV+area,samples)
+colnames(predictors)<-sub('^Species','',colnames(predictors))
+colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+
+
+#areaCols<-rainbow.lab(length(unique(samples$area)),alpha=.8)
+colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB')
+nArea<-length(unique(samples$area))
+if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
+areaCols<-colorBrew[1:nArea]
+names(areaCols)<-unique(samples$area)
+areaPch<-sapply(names(areaCols),function(x)mostAbundant(samples$Species[samples$area==x]))
+malariaCols<-c('#00000022','#000000CC')
+names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
+speciesPch<-20+1:length(unique(samples$Species))
+names(speciesPch)<-unique(samples$Species)
+pdf('out/pcoa.pdf',height=10,width=10)
+  sapply(list(1:2,3:4,5:6),function(axes){
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[samples$Species],bg=areaCols[samples$area],col=malariaCols[samples$malaria+1],cex=1.8,lwd=2.5)
+    points(pos[samples$SIV=='Pos',],col='#FF000099',cex=2.5,lwd=2)
+    legend('bottomright',c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),inset=.01,pt.lwd=3,pt.cex=2)
+    bak<-par('cex')
+    par('cex'=.65)
+    biplot.pcoa(uniPca,predictors,plot.axes=axes)
+    par('cex'=bak)
+  })
+dev.off()
+
+
+
+#for(fastq in fastqs){
+  #message(fastq)
+  #outFiles<-sprintf(c('%s.otu','%s.otuSeq','%s.taxa'),sprintf('work/%s',sub('.fastq.gz$','',basename(fastq))))
+  #seqs<-read.fastq(fastq)
+  #out<-runQiime(seqs$seq)
+  #writeLines(out[['otus']],outFiles[1])
+#}
