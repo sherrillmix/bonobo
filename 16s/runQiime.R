@@ -77,27 +77,39 @@ areaCols<-colorBrew[1:nArea]
 names(areaCols)<-unique(samples$area)
 areaPch<-sapply(names(areaCols),function(x)mostAbundant(samples$Species[samples$area==x]))
 malariaCols<-c('#00000022','#000000CC')
-names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
+malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
+names(malariaCols2)<-names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
 speciesPch<-20+1:length(unique(samples$Species))
-names(speciesPch)<-unique(samples$Species)
-pdf('out/pcoa.pdf',height=10,width=10)
+speciesCols<-rainbow.lab(length(unique(samples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+names(speciesCols)<-names(speciesPch)<-unique(samples$Species)
+pdf('out/pcoa.pdf',height=9,width=9)
   sapply(list(1:2,3:4,5:6),function(axes){
-    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[samples$Species],bg=areaCols[samples$area],col=malariaCols[samples$malaria+1],cex=1.8,lwd=2.5)
-    points(pos[samples$SIV=='Pos',],col='#FF000099',cex=2.5,lwd=2)
-    legend('bottomright',c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),inset=.01,pt.lwd=3,pt.cex=2)
-    bak<-par('cex')
-    par('cex'=.65)
-    biplot.pcoa(uniPca,predictors,plot.axes=axes)
-    par('cex'=bak)
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[samples$Species],bg=areaCols[samples$area],col=malariaCols[samples$malaria+1],cex=2.2,lwd=2.5)
+    points(pos[samples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    legend(
+      'bottomright',
+      c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),
+      col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),
+      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),
+      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),
+      inset=.01,pt.lwd=3,pt.cex=2.5)
+    title(main=sprintf('All variables PC %d and %d',axes[1],axes[2]))
+    #species
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[samples$Species],col="#00000077",cex=1.8,lwd=2.5)
+    legend('bottomright',names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=.01,pt.lwd=3,pt.cex=2)
+    title(main=sprintf('Species PC %d and %d',axes[1],axes[2]))
+    #malaria
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[samples$malaria+1],col="#00000077",cex=1.8,lwd=2.5)
+    legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
+    title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[samples$Species],col=malariaCols[samples$malaria+1],cex=2.25,lwd=4)
+    legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
+    title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
+    #show sample name text
+    #bak<-par('cex')
+    #par('cex'=.65)
+    #biplot.pcoa(uniPca,predictors,plot.axes=axes)
+    #title(main='Sample names')
+    #par('cex'=bak)
   })
 dev.off()
-
-
-
-#for(fastq in fastqs){
-  #message(fastq)
-  #outFiles<-sprintf(c('%s.otu','%s.otuSeq','%s.taxa'),sprintf('work/%s',sub('.fastq.gz$','',basename(fastq))))
-  #seqs<-read.fastq(fastq)
-  #out<-runQiime(seqs$seq)
-  #writeLines(out[['otus']],outFiles[1])
-#}
