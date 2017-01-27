@@ -1,8 +1,14 @@
 
-if(!exists('taxas'))source('parseBlast.R')
+if(!exists('chimpFilter')){
+  source('parseBlast.R')
+  chimpFilter<-lapply(taxas,function(x)x[x[,'class']!='Mammalia'|is.na(x[,'class']),])
+  nChimpReads<-sapply(taxas,nrow)-sapply(chimpFilter,nrow)
+  #dont need currently
+  rm(taxas)
+  rm(taxonomy)
+}
 
-chimpFilter<-lapply(taxas,function(x)x[x[,'class']!='Mammalia'|is.na(x[,'class']),])
-nChimpReads<-sapply(taxas,nrow)-sapply(chimpFilter,nrow)
+
 #shortNames<-sub('_S[0-9]+_L[0-9]+_R([0-9]).*$','_R\\1',sub('blast_trim_','',names(chimpFilter)))
 shortNames<-sub('_S[0-9]+_L[0-9]+_R([0-9]).*$','',sub('blast_trim_','',names(chimpFilter)))
 taxaTab<-table(unlist(lapply(chimpFilter,function(x)x$best)),rep(shortNames,sapply(chimpFilter,nrow)))
@@ -65,7 +71,8 @@ dev.off()
 
 table(sub('^(.*[0-9]+).*','\\1',shortNames),sub('^.*[0-9]+','',shortNames))
 length(chimpFilter)
-unifracMat<-cleanMclapply(1:length(chimpFilter),function(ii,chimpFilter){
-  library(dnar)
-  return(sapply(1:length(chimpFilter),function(jj){cat('.');unifracMatrix(chimpFilter[[ii]],chimpFilter[[jj]])}))
-},chimpFilter,mc.cores=4)
+taxaColumns<-c("superkingdom","phylum","class","order","family","genus","species")
+condenseChimpFilter<-cacheOperation('work/condenseChimp.Rdat',cleanMclapply,chimpFilter,function(xx,taxaColumns)t(apply(xx[,taxaColumns],1,cumpaste,sep='_|_')),taxaColumns,mc.cores=50,extraCode='library(dnar)',EXCLUDE='chimpFilter')
+gc()
+
+unifracDists<-cacheOperation('work/unifrac.Rdat',unifracMatrix,condenseChimpFilter,vocal=TRUE,weighted=TRUE,checkUpstream=FALSE,mc.cores=1,EXCLUDE='condenseChimpFilter')
