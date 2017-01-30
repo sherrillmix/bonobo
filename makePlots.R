@@ -76,3 +76,12 @@ condenseChimpFilter<-cacheOperation('work/condenseChimp.Rdat',cleanMclapply,chim
 gc()
 
 unifracDists<-cacheOperation('work/unifrac.Rdat',unifracMatrix,condenseChimpFilter,vocal=TRUE,weighted=TRUE,checkUpstream=FALSE,mc.cores=1,EXCLUDE='condenseChimpFilter')
+
+library(ape)
+source('readSamples.R')
+uniPca<-pcoa(unifracDists)
+predictors<-model.matrix(~0+Species+malaria+SIV+area,samples)
+colnames(predictors)<-sub('^Species','',colnames(predictors))
+colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+
+
