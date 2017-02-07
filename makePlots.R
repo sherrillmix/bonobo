@@ -75,13 +75,84 @@ taxaColumns<-c("superkingdom","phylum","class","order","family","genus","species
 condenseChimpFilter<-cacheOperation('work/condenseChimp.Rdat',cleanMclapply,chimpFilter,function(xx,taxaColumns)t(apply(xx[,taxaColumns],1,cumpaste,sep='_|_')),taxaColumns,mc.cores=50,extraCode='library(dnar)',EXCLUDE='chimpFilter')
 gc()
 
-unifracDists<-cacheOperation('work/unifrac.Rdat',unifracMatrix,condenseChimpFilter,vocal=TRUE,weighted=TRUE,checkUpstream=FALSE,mc.cores=1,EXCLUDE='condenseChimpFilter')
+print(unifracMatrix(condenseChimpFilter[[4]],condenseChimpFilter[[5]],checkUpstream=FALSE))
+print(unifracMatrix(condenseChimpFilter[[5]],condenseChimpFilter[[4]],checkUpstream=FALSE))
+
+#abusing cleanMclapply to get smaller enviro
+unifracDists<-cleanMclapply(1,function(xx,condenseChimpFilter)cacheOperation('work/unifrac.Rdat',unifracMatrix,condenseChimpFilter,vocal=TRUE,weighted=TRUE,checkUpstream=FALSE,mc.cores=1,EXCLUDE='condenseChimpFilter'),condenseChimpFilter,extraCode='library(dnar)')[[1]]
+
+source('readSamples.R')
+sampleNames<-sub('(matK|rbcL).*','',names(condenseChimpFilter))
+primers<-sub('.*(matK|rbcL).*_R([0-9]+)_.*','\\1\\2',names(condenseChimpFilter))
+if(any(!sampleNames %in% samples$Code & !grepl('monkey[0-9]+',sampleNames)))stop('Problem assigning samples')
+rownames(samples)<-samples$Code
+metaData<-samples[sampleNames,]
+rownames(metaData)<-names(condenseChimpFilter)
+metaData$primer<-primers
+metaData$primerBase<-sub('[0-9]+$','',metaData$primer)
+metaData<-metaData[!grepl('monkey[0-9]+',sampleNames),]
+
 
 library(ape)
-source('readSamples.R')
-uniPca<-pcoa(unifracDists)
-predictors<-model.matrix(~0+Species+malaria+SIV+area,samples)
-colnames(predictors)<-sub('^Species','',colnames(predictors))
-colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+source('16s/myBiplot.R')
+
+colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB')
+nArea<-length(unique(metaData$area))
+if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
+areaCols<-colorBrew[1:nArea]
+names(areaCols)<-unique(metaData$area)
+areaPch<-sapply(names(areaCols),function(x)mostAbundant(metaData$Species[metaData$area==x]))
+malariaCols<-c('#00000022','#000000CC')
+malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
+primerCols<-rainbow.lab(length(unique(metaData$primer)))
+names(primerCols)<-unique(metaData$primer)
+names(malariaCols2)<-names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
+speciesPch<-20+1:length(unique(metaData$Species))
+speciesCols<-rainbow.lab(length(unique(metaData$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+names(speciesCols)<-names(speciesPch)<-unique(metaData$Species)
+
+for(ii in unique(metaData$primerBase)){
+  thisMetaData<-metaData[metaData$primerBase==ii,]
+  uniPca<-pcoa(unifracDists[names(condenseChimpFilter) %in% rownames(thisMetaData),names(condenseChimpFilter) %in% rownames(thisMetaData)])
+  predictors<-model.matrix(~0+Species+malaria+SIV+area+primer,thisMetaData)
+  colnames(predictors)<-sub('^Species','',colnames(predictors))
+  colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+  pdf(sprintf('out/%s_Pcoa.pdf',ii),height=9,width=11)
+    mar<-c(4, 4, 1,9.5)
+    sapply(list(1:2,3:4,5:6),function(axes){
+      pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[thisMetaData$Species],bg=areaCols[thisMetaData$area],col=malariaCols[thisMetaData$malaria+1],cex=2.2,lwd=2.5,mar=mar)
+      points(pos[thisMetaData$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+      legend(
+        par('usr')[4]+.01*diff(par('usr')[3:4]),
+        mean(par('usr')[3:4]),
+        c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),
+        col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),
+        pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),
+        pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),
+        inset=.01,pt.lwd=3,pt.cex=2.5,xjust=0,xpd=NA)
+      title(main=sprintf('All variables PC %d and %d',axes[1],axes[2]))
+      #species
+      pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[thisMetaData$Species],col="#00000077",cex=1.8,lwd=2.5,mar=mar)
+      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=c(-.01,.01),pt.lwd=3,pt.cex=2,xjust=0,xpd=NA)
+      title(main=sprintf('Species PC %d and %d',axes[1],axes[2]))
+      #malaria
+      pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[thisMetaData$malaria+1],col="#00000077",cex=1.8,lwd=2.5,mar=mar)
+      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2,xjust=0,xpd=NA)
+      title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
+      pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[thisMetaData$Species],col=malariaCols[thisMetaData$malaria+1],cex=2.25,lwd=4,mar=mar)
+      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,xjust=0,xpd=NA)
+      title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
+      pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=primerCols[thisMetaData$primer],col=primerCols[thisMetaData$primer],cex=2.25,lwd=4,mar=mar)
+      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),names(primerCols),col=primerCols,pch=21,pt.bg=primerCols,inset=c(.01,-.01),pt.lwd=4,pt.cex=2.5,xjust=0,xpd=NA)
+      title(main=sprintf('Primers PC %d and %d',axes[1],axes[2]))
+      #show sample name text
+      #bak<-par('cex')
+      #par('cex'=.65)
+      #biplot.pcoa(uniPca,predictors,plot.axes=axes)
+      #title(main='Sample names')
+      #par('cex'=bak)
+    })
+  dev.off()
+}
 
 
