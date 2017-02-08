@@ -119,7 +119,7 @@ for(ii in unique(metaData$primerBase)){
   colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
   pdf(sprintf('out/%s_Pcoa.pdf',ii),height=9,width=11)
     mar<-c(4, 4, 1,9.5)
-    sapply(list(1:2,3:4,5:6),function(axes){
+    for (axes in list(1:2,3:4,5:6)){
       pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[thisMetaData$Species],bg=areaCols[thisMetaData$area],col=malariaCols[thisMetaData$malaria+1],cex=2.2,lwd=2.5,mar=mar)
       points(pos[thisMetaData$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
       legend(
@@ -139,8 +139,9 @@ for(ii in unique(metaData$primerBase)){
       pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[thisMetaData$malaria+1],col="#00000077",cex=1.8,lwd=2.5,mar=mar)
       legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2,xjust=0,xpd=NA)
       title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
+      text(pos[,1],pos[,2],thisMetaData$Code,cex=.25)
       pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[thisMetaData$Species],col=malariaCols[thisMetaData$malaria+1],cex=2.25,lwd=4,mar=mar)
-      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,xjust=0,xpd=NA)
+      legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),as.vector(outer(sub(' schweinfurthii','s.',sub('Pan paniscus','P.p.',names(speciesCols))),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,xjust=0,xpd=NA)
       title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
       pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=primerCols[thisMetaData$primer],col=primerCols[thisMetaData$primer],cex=2.25,lwd=4,mar=mar)
       legend(par('usr')[4]+.01*diff(par('usr')[3:4]), mean(par('usr')[3:4]),names(primerCols),col=primerCols,pch=21,pt.bg=primerCols,inset=c(.01,-.01),pt.lwd=4,pt.cex=2.5,xjust=0,xpd=NA)
@@ -151,7 +152,7 @@ for(ii in unique(metaData$primerBase)){
       #biplot.pcoa(uniPca,predictors,plot.axes=axes)
       #title(main='Sample names')
       #par('cex'=bak)
-    })
+    }
   dev.off()
 }
 
