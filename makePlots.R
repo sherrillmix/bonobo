@@ -1,4 +1,3 @@
-
 if(!exists('chimpFilter')){
   source('parseBlast.R')
   chimpFilter<-lapply(taxas,function(x)x[x[,'class']!='Mammalia'|is.na(x[,'class']),])
@@ -15,6 +14,10 @@ taxaTab<-table(unlist(lapply(chimpFilter,function(x)x$best)),rep(shortNames,sapp
 propTab<-apply(taxaTab,2,function(x)x/sum(x))
 cutTab<-propTab[apply(propTab,1,max)>.01,]
 print(apply(taxaTab,2,sum))
+
+if(!exists('nReads'))source('countReads.R')
+zz<-apply(taxaTab,2,sum)
+summary(zz/nReads[names(zz)])
 
 breaks<-c(0,seq(min(cutTab)*.999,max(cutTab)*1.001,length.out=501))
 cols<-c('white',tail(rev(heat.colors(520)),500))
