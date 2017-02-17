@@ -40,6 +40,20 @@ runQiime<-function(seqs,storeDir=NULL){
   }
   return(list('otus'=out,'seqs'=seqs,'taxa'=taxa))
 }
+parseQiimeTaxa<-function(taxas,desiredTaxa=c('k','p','c','o','f','g','s'),concatLastTwo=TRUE){
+  taxa<-strsplit(taxaRaw$taxa,'[;] ?')
+  taxa<-do.call(rbind,lapply(taxa,function(xx){
+    y<-xx[grep('^[a-z]__',xx)]
+    names(y)<-sub('^([a-z])__.*','\\1',y)
+    y<-sub('^[a-z]__','',y)
+    y[y=='']<-NA
+    out<-y[desiredTaxa]
+    if(!is.na(out[length(desiredTaxa)]))out[length(desiredTaxa)]<-paste(out[length(desiredTaxa)-1:0],collapse=' ')
+    return(out)
+  }))
+  return(as.data.frame(taxa,stringsAsFactors=FALSE))
+}
+
 
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
 #just get sequence to reduce memory
@@ -53,10 +67,20 @@ if(!file.exists('work/qiime')){
 otus<-read.csv('work/qiimeOtuIds.csv.gz',stringsAsFactors=FALSE)
 otuTab<-as.data.frame.matrix(table(otus$otu,otus$file))
 otuTab<-otuTab[apply(otuTab,1,sum)>3,]
+taxaRaw<-read.csv('work/qiimeOtus.taxa',stringsAsFactors=FALSE)
+taxa<-parseQiimeTaxa(taxaRaw$taxa)
+rownames(taxa)<-taxaRaw$name
+taxa$best<-apply(taxa,1,function(x)x[max(c(1,which(!is.na(x))))])
+#filter chloroplast reads
+isChloro<-taxa[rownames(otuTab),'c']=='Chloroplast'&!is.na(taxa[rownames(otuTab),'c'])
+otuTab<-otuTab[!isChloro,]
 
 samples$name<-sapply(samples$Code,function(x)colnames(otuTab)[grep(sprintf('_%s$',x),colnames(otuTab))])
 rownames(samples)<-samples$name
 #make sure same order as otu table
 if(any(!samples$name %in% colnames(otuTab)))stop('Sample missing from OTUs')
 samples<-samples[colnames(otuTab)[colnames(otuTab) %in% samples$name],]
+samples$isEnough<-apply(otuTab[,samples$name],2,sum)>15000
+head(sort(apply(otuTab[,samples$name],2,sum)))
 
+otuProp<-apply(otuTab,2,function(x)x/sum(x))
