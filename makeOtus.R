@@ -32,7 +32,7 @@ for(ii in unique(primers)){
   reads<-cleanMclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)$seq},mc.cores=5)
   reads<-lapply(reads,function(xx)xx[!grepl('[^ACTG]',xx)])
   samples<-rep(basename(thisFiles),sapply(reads,length))
-  otus<-runSwarm(unlist(reads),'~/installs/swarm/swarm')
+  otus<-runSwarm(unlist(reads),'~/installs/swarm/swarm',swarmArgs='-f -t 30')
   browser()
   #write.csv(cbind(samples,'otu'=otus[['otus']]),sprintf('work/swarm_%s.csv',ii))
   #write.csv(cbind(samples,otus[['otus']]),sprintf('work/swarm_%s.fa'))
