@@ -9,4 +9,4 @@ samples$rDate<-mdy(samples$Date)
 samples$month<-month(samples$rDate)
 #arbitrary seasons
 samples$season<-as.character(ceiling(samples$month/3))
-
+rownames(samples)<-samples$Code
