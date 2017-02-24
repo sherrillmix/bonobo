@@ -8,6 +8,7 @@ phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name
 qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
 #make sure tree is bifurcating or breaks UniFrac without error
 uniDist<-UniFrac(qiimeData,weighted=FALSE)
+uniDistW<-UniFrac(qiimeData,weighted=TRUE)
 uniPca<-pcoa(uniDist)
 predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
 colnames(predictors)<-sub('^Species','',colnames(predictors))
@@ -76,10 +77,12 @@ phyOtu2<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples2$na
 qiimeData2<-phyloseq(otu_table=phyOtu2,phy_tree=tree)
 #make sure tree is bifurcating or breaks UniFrac without error
 uniDist2<-UniFrac(qiimeData2,weighted=FALSE)
+uniDistW2<-UniFrac(qiimeData2,weighted=TRUE)
 selectSamples3<-samples[!samples$bonobo&samples$isEnough,]
 phyOtu3<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples3$name],taxa_are_rows=TRUE)
 qiimeData3<-phyloseq(otu_table=phyOtu3,phy_tree=tree)
 uniDist3<-UniFrac(qiimeData3,weighted=FALSE)
+uniDistW3<-UniFrac(qiimeData3,weighted=TRUE)
 library(ape)
 uniPca2<-pcoa(uniDist2)
 predictors2<-model.matrix(~malaria+area+season,selectSamples2[selectSamples2$bonobo,])
