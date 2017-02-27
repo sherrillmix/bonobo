@@ -2,10 +2,40 @@ library(dnar)
 library(dnaplotr)
 library(levenR)
 
+fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
+allQs<-cleanMclapply(fastqs,function(xx){
+  library(dnar)
+  seqs<-read.fastq(xx)
+  quals<-do.call(rbind,qualToInts(seqs$qual))
+  return(apply(quals,2,mean))
+},mc.cores=10)
+names(allQs)<-fastqs
+
+fastqs16s<-list.files('16s/data/','_[12]\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
+allQs16s<-cleanMclapply(fastqs16s,function(xx){
+  library(dnar)
+  seqs<-read.fastq(xx)
+  quals<-do.call(rbind,qualToInts(seqs$qual))
+  return(apply(quals,2,mean))
+},mc.cores=10)
+names(allQs16s)<-fastqs16s
+
+
+pdf('quals.pdf')
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Read 1',xlab='Position',ylab='Quality')
+  lapply(allQs[grep('_R1_',names(allQs))],function(xx)lines(1:length(xx),xx,col='#00000044'))
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Read 2',xlab='Position',ylab='Quality')
+  lapply(allQs[grep('_R2_',names(allQs))],function(xx)lines(1:length(xx),xx,col='#00000044'))
+dev.off()
+
 r1<-read.fastq('data/Weimin_10_13_16_2/PA1044matK-bd_S51_L001_R1_001.fastq.gz')
 r2<-read.fastq('data/Weimin_10_13_16_2/PA1044matK-bd_S51_L001_R2_001.fastq.gz')
 quals1<-do.call(rbind,qualToInts(r1$qual))
 quals2<-do.call(rbind,qualToInts(r2$qual))
+pdf('test.pdf')
+plot(apply(quals1,2,mean),type='l',col='red')
+lines(apply(quals2,2,mean),col='blue')
+dev.off()
 
 align1<-levenAlign(r1$seq,mostAbundant(r1$seq),nThreads=40)
 align2<-levenAlign(r1$seq,mostAbundant(r1$seq),nThreads=40)
