@@ -15,17 +15,33 @@ fastqs16s<-list.files('16s/data/','_[12]\\.fastq\\.gz$',recursive=TRUE,full.name
 allQs16s<-cleanMclapply(fastqs16s,function(xx){
   library(dnar)
   seqs<-read.fastq(xx)
+  if(nrow(seqs)<500)return(NULL)
   quals<-do.call(rbind,qualToInts(seqs$qual))
   return(apply(quals,2,mean))
 },mc.cores=10)
 names(allQs16s)<-fastqs16s
 
+r1s<-allQs[grep('_R1_',names(allQs))]
+r2s<-allQs[grep('_R2_',names(allQs))]
+r1s16s<-allQs16s[!grepl('/joined/',names(allQs16s))&grepl('_1\\.fastq',names(allQs16s))]
+r2s16s<-allQs16s[!grepl('/joined/',names(allQs16s))&grepl('_2\\.fastq',names(allQs16s))]
 
-pdf('quals.pdf')
-  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Read 1',xlab='Position',ylab='Quality')
-  lapply(allQs[grep('_R1_',names(allQs))],function(xx)lines(1:length(xx),xx,col='#00000044'))
-  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Read 2',xlab='Position',ylab='Quality')
-  lapply(allQs[grep('_R2_',names(allQs))],function(xx)lines(1:length(xx),xx,col='#00000044'))
+pdf('out/quals.pdf')
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='All',xlab='Position',ylab='Quality')
+  lines(apply(do.call(rbind,r1s),2,mean),col='red',lwd=2)
+  lines(apply(do.call(rbind,r2s),2,mean),col='orange',lwd=2)
+  lines(apply(do.call(rbind,r1s16s),2,mean),col='purple',lwd=2)
+  lines(apply(do.call(rbind,r2s16s),2,mean),col='blue',lwd=2)
+  abline(h=30,lty=2)
+  legend('bottomleft',c('Chloro 1','Chloro 2','16S 1','16S 2'),col=c('red','orange','purple','blue'),lty=1,inset=.01,lwd=2)
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Chloro Read 1',xlab='Position',ylab='Quality')
+  lapply(r1s,function(xx)lines(1:length(xx),xx,col='#00000044'))
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='Chloro Read 2',xlab='Position',ylab='Quality')
+  lapply(r2s,function(xx)lines(1:length(xx),xx,col='#00000044'))
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='16S Read 1',xlab='Position',ylab='Quality')
+  lapply(r1s16s,function(xx)lines(1:length(xx),xx,col='#00000044'))
+  plot(1,1,type='n',ylim=c(0,40),xlim=c(1,length(allQs[[1]])),main='16S Read 2',xlab='Position',ylab='Quality')
+  lapply(r2s16s,function(xx)lines(1:length(xx),xx,col='#00000044'))
 dev.off()
 
 r1<-read.fastq('data/Weimin_10_13_16_2/PA1044matK-bd_S51_L001_R1_001.fastq.gz')
