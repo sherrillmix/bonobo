@@ -2,13 +2,15 @@ library(dnar)
 library(dnaplotr)
 library(levenR)
 
+
 fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
 allQs<-cleanMclapply(fastqs,function(xx){
   library(dnar)
   seqs<-read.fastq(xx)
+  if(nrow(seqs)<500)return(NULL)
   quals<-do.call(rbind,qualToInts(seqs$qual))
   return(apply(quals,2,mean))
-},mc.cores=10)
+},mc.cores=20)
 names(allQs)<-fastqs
 
 fastqs16s<-list.files('16s/data/','_[12]\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
