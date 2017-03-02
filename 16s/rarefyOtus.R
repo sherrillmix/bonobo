@@ -1,14 +1,12 @@
 if(!exists('otuTab'))source('runQiime.R')
 
-samples$isEnough<-apply(otuTab[,samples$name],2,sum)>20000
-tail(sort(apply(otuTab[,samples$name],2,sum)))
 
 medianCI<-function(xx,na.rm=TRUE){
   if(na.rm)xx<-xx[!is.na(xx)]
   return(sort(xx)[qbinom(c(.025,.975), length(xx), 0.5)])
 }
 
-rareSteps<-seq(100,20000,100)
+rareSteps<-seq(100,15000,100)
 rareCurves<-apply(otuTab[,samples$name[samples$isEnough]],2,rareEquation,rareSteps)
 groupings<-paste(samples$Species[samples$isEnough],ifelse(samples$malaria[samples$isEnough],'Plasmodium positive','Plasmodium negative'))
 groupCurves<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
@@ -28,4 +26,17 @@ pdf('out/rare.pdf',width=6,height=6)
     lines(rareSteps,groupCurves[[ii]][,'50%'],col=groupCols[ii],lwd=3)
   }
   legend('topleft',names(groupCols),lwd=2,col=groupCols,inset=.01)
+dev.off()
+
+
+
+moreThanProp<-apply(otuProp[,samples$name[samples$isEnough]],1,max,na.rm=TRUE)>.02
+cols<-c('white',tail(rev(heat.colors(110)),99)) 
+plotProp<-t(otuProp[moreThanProp,samples$name[samples$isEnough]])
+breaks<-c(-1e-6,seq(min(plotProp[plotProp>0])-1e-10,max(plotProp)+1e-10,length.out=100))
+rownames(plotProp)<-sub("EasternChimpanzee","Chimp",rownames(plotProp))
+colnames(plotProp)<-taxa[colnames(plotProp),'best']
+pdf('out/heat.pdf',height=20,width=20)
+  heatmap(plotProp,col=cols,breaks=breaks,scale='none',margin=c(8,5),Rowv=NA)
+  insetScale(round(breaks,6),cols,c(.955,.75,.97,.99),label='Proportion')
 dev.off()
