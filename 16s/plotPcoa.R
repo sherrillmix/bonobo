@@ -144,10 +144,16 @@ tsne<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
 tsne2<-Rtsne(uniDist2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 tsne3<-Rtsne(uniDist3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 #tsne<-Rtsne(t(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name]),verbose=TRUE,perplexity=10)
+tsneW<-Rtsne(uniDistW,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
+tsneW2<-Rtsne(uniDistW2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
+tsneW3<-Rtsne(uniDistW3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 pdf('out/tsne.pdf',height=8,width=10)
+  inputs<-list('Unweighted'=list(tsne,tsne2,tsne3),'Weighted'=list(tsneW,tsneW2,tsneW3))
+  for(tsneType in names(inputs)){
+    tsnes<-inputs[[tsneType]]
     par(mar=c(4,4,1.5,9))
-    plot(tsne$Y,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Chimp and bonobo')
-    points(tsne$Y[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    plot(tsnes[[1]]$Y,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('Chimp and bonobo %s',tsneType))
+    points(tsnes[[1]]$Y[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
       mean(par('usr')[3:4]),
@@ -158,10 +164,10 @@ pdf('out/tsne.pdf',height=8,width=10)
       inset=.01,pt.lwd=3,pt.cex=2.5,
       xjust=0,xpd=NA
     )
-    text(tsne$Y,selectSamples2$Code,cex=.25)
+    text(tsnes[[1]]$Y,selectSamples2$Code,cex=.25)
     #bonobo only
-    plot(tsne2$Y,pch=speciesPch[selectSamples2$Species],bg=areaCols[selectSamples2$area],col=malariaCols[selectSamples2$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Bonobo')
-    points(tsne2$Y[selectSamples2$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    plot(tsnes[[2]]$Y,pch=speciesPch[selectSamples2$Species],bg=areaCols[selectSamples2$area],col=malariaCols[selectSamples2$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Bonobo')
+    points(tsnes[[2]]$Y[selectSamples2$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
       mean(par('usr')[3:4]),
@@ -172,10 +178,10 @@ pdf('out/tsne.pdf',height=8,width=10)
       inset=.01,pt.lwd=3,pt.cex=2.5,
       xjust=0,xpd=NA
     )
-    text(tsne2$Y,selectSamples2$Code,cex=.25)
+    text(tsnes[[3]]$Y,selectSamples2$Code,cex=.25)
     #bonobo only
-    plot(tsne3$Y,pch=speciesPch[selectSamples3$Species],bg=areaCols[selectSamples3$area],col=malariaCols[selectSamples3$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Chimp')
-    points(tsne3$Y[selectSamples3$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    plot(tsnes[[3]]$Y,pch=speciesPch[selectSamples3$Species],bg=areaCols[selectSamples3$area],col=malariaCols[selectSamples3$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Chimp')
+    points(tsnes[[3]]$Y[selectSamples3$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
       mean(par('usr')[3:4]),
@@ -186,7 +192,8 @@ pdf('out/tsne.pdf',height=8,width=10)
       inset=.01,pt.lwd=3,pt.cex=2.5,
       xjust=0,xpd=NA
     )
-    text(tsne3$Y,selectSamples3$Code,cex=.25)
+    text(tsnes[[3]]$Y,selectSamples3$Code,cex=.25)
+  }
 dev.off()
 
 
