@@ -10,3 +10,5 @@ samples$month<-month(samples$rDate)
 #arbitrary seasons
 samples$season<-as.character(ceiling(samples$month/3))
 rownames(samples)<-samples$Code
+
+primerSeqs<-list('rbcl'=c('rbcL634F'='ATGCGTTGGAGAGACCGTTTC','rbcLbR'='TCGGTYAGAGCRGGCATRTGCCA'),'matk'=c('matK472F'='CCCRTYCATCTGGAAATCTTGGTTC','matK1248R'='GCTRTRATAATGAGAAAGATTTCTGC'))
