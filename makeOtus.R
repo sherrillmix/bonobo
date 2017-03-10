@@ -2,7 +2,7 @@ library(dnar)
 library(parallel)
 source('functions.R')
 
-fastqs<-list.files('data/Weimin_Plants_3_6_17/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
+fastqs<-list.files('data','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
 fastqs<-fastqs[!grepl('Undetermined',fastqs)]
 primers<-sub('.*(matK|rbcL).*_R([0-9]+)_.*','\\1\\2',basename(fastqs))
 
