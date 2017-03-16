@@ -17,12 +17,13 @@ colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
 
 #areaCols<-rainbow.lab(length(unique(samples$area)),alpha=.8)
 source('myBiplot.R')
-colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB')
-nArea<-length(unique(selectSamples$area))
+#last color made up
+colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
+nArea<-length(unique(selectSamples$area2))
 if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
 areaCols<-colorBrew[1:nArea]
-names(areaCols)<-unique(selectSamples$area)
-areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$Species[selectSamples$area==x]))
+names(areaCols)<-unique(selectSamples$area2)
+areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$Species[selectSamples$area2==x]))
 malariaCols<-c('#00000022','#000000CC')
 malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
 names(malariaCols2)<-names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
@@ -30,12 +31,12 @@ speciesPch<-20+1:length(unique(selectSamples$Species))
 speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
 names(speciesCols)<-names(speciesPch)<-unique(selectSamples$Species)
 #split out TL2-E and -W, bonobos and KR and chimps
-splitAreas<-ifelse(selectSamples$area %in% c('TL-E','TL-W','KR'),selectSamples$area,selectSamples$Species)
+splitAreas<-ifelse(selectSamples$area2 %in% c('TL-E','TL-W','KR','TL-NE'),selectSamples$area2,selectSamples$Species)
 splitAreaCols<-rainbow.lab(length(unique(splitAreas)))
 names(splitAreaCols)<-unique(splitAreas)[order(unique(splitAreas) %in% c('P.t. schweinfurthii'))]
 pdf('out/pcoa.pdf',height=9,width=9)
   sapply(list(1:2,3:4,5:6),function(axes){
-    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
     points(pos[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       'bottomright',
@@ -152,21 +153,21 @@ pdf('out/tsne.pdf',height=8,width=10)
   for(tsneType in names(inputs)){
     tsnes<-inputs[[tsneType]]
     par(mar=c(4,4,1.5,9))
-    plot(tsnes[[1]]$Y,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('Chimp and bonobo %s',tsneType))
-    points(tsnes[[1]]$Y[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    plot(tsnes[[1]]$Y,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('Chimp and bonobo %s',tsneType))
+    #points(tsnes[[1]]$Y[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
       mean(par('usr')[3:4]),
-      c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),
-      col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),
-      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),
-      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),
+      c(names(malariaCols),names(areaCols),names(speciesPch)),
+      col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch)))),
+      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
+      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
       inset=.01,pt.lwd=3,pt.cex=2.5,
       xjust=0,xpd=NA
     )
-    text(tsnes[[1]]$Y,selectSamples2$Code,cex=.25)
+    text(tsnes[[1]]$Y,selectSamples$Code,cex=.25)
     #bonobo only
-    plot(tsnes[[2]]$Y,pch=speciesPch[selectSamples2$Species],bg=areaCols[selectSamples2$area],col=malariaCols[selectSamples2$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Bonobo')
+    plot(tsnes[[2]]$Y,pch=speciesPch[selectSamples2$Species],bg=areaCols[selectSamples2$area2],col=malariaCols[selectSamples2$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Bonobo')
     points(tsnes[[2]]$Y[selectSamples2$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
@@ -178,9 +179,9 @@ pdf('out/tsne.pdf',height=8,width=10)
       inset=.01,pt.lwd=3,pt.cex=2.5,
       xjust=0,xpd=NA
     )
-    text(tsnes[[3]]$Y,selectSamples2$Code,cex=.25)
+    text(tsnes[[2]]$Y,selectSamples2$Code,cex=.25)
     #bonobo only
-    plot(tsnes[[3]]$Y,pch=speciesPch[selectSamples3$Species],bg=areaCols[selectSamples3$area],col=malariaCols[selectSamples3$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Chimp')
+    plot(tsnes[[3]]$Y,pch=speciesPch[selectSamples3$Species],bg=areaCols[selectSamples3$area2],col=malariaCols[selectSamples3$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='Chimp')
     points(tsnes[[3]]$Y[selectSamples3$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
