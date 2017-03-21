@@ -71,24 +71,27 @@ pdf('out/dists.pdf',width=6,height=6)
   par(mar=c(2.5,10.7,.1,.1),lheight=.9)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,names)))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
+  betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
   pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
   names(pos)<-levels(compareFactor)
   pVals$top<-pos[pVals$x]
   pVals$bottom<-pos[pVals$y]
   pVals$row<-stackRegions(pVals$bottom,pVals$top)
   pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
-  pVals$xPos<-1.02+.025*(pVals$row-1)
+  pVals$xPos<-1.02+.04*(pVals$row-1)
   plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1.1),yaxt='n',ylab='',xlab='Bray-Curtis dissimilarity',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
   for(ii in ncol(stats$stats):1){
     rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
     #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
-    xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
+    thisCI<-betaCI[[stats$names[ii]]]
+    #xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
+    xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
     yCoords<-c(.4,.4,.1,.4,.4)
     segments(stats$stats[1,ii],pos[ii],stats$stats[5,ii],pos[ii],lwd=3,col=cols[groupId[ii]])
     polygon(c(xCoords,rev(xCoords)),c(yCoords,-rev(yCoords))+pos[ii],col=cols[groupId[ii]])
     segments(xCoords[3],pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3])
   }
-  text(pVals$xPos+.003,pVals$middle,pVals$sig,srt=90,adj=c(0.5,1))
+  text(pVals$xPos+.005,pVals$middle,pVals$sig,srt=90,adj=c(0.5,1))
   segments(pVals$xPos,pVals$bottom,pVals$xPos,pVals$top)
   breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
   #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
