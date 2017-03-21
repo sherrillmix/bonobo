@@ -32,7 +32,7 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
   ),list(
     'Within plasmodium\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
     'Within plasmodium\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
-    'Between plasmodium negative\nand positive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
+    'Between plasmodium negative\n and positive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
   )
 ))
 # list(
@@ -67,8 +67,8 @@ pVals<-pVals[pVals$p<.01,]
 cols<-rainbow.lab(length(distList),start=1,end=-2)
 groupId<-rep(1:length(distList),sapply(distList,length))
 spacer<-.5
-pdf('out/dists_slant.pdf',width=9,height=6)
-  par(mar=c(9,2.75,.1,3),lheight=.8)
+pdf('out/dists.pdf',width=6,height=7)
+  par(mar=c(2.5,12.1,.1,.1),lheight=.8)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,names)))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
   betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
@@ -79,7 +79,7 @@ pdf('out/dists_slant.pdf',width=9,height=6)
   pVals$row<-stackRegions(pVals$bottom,pVals$top)
   pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
   pVals$xPos<-1.02+.04*(pVals$row-1)
-  plot(1,1,type='n',xlim=range(pos)+c(-.5,.5),ylim=c(min(unlist(distList)),1.1),xaxt='n',xlab='',ylab='Bray-Curtis dissimilarity',mgp=c(1.75,.4,0),tcl=-.3,xaxs='i',las=1)
+  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1.1),yaxt='n',ylab='',xlab='Bray-Curtis dissimilarity',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
   for(ii in ncol(stats$stats):1){
     rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
     #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
@@ -87,15 +87,15 @@ pdf('out/dists_slant.pdf',width=9,height=6)
     #xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
     xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
     yCoords<-c(.4,.4,.1,.4,.4)
-    segments(pos[ii],stats$stats[1,ii],pos[ii],stats$stats[5,ii],lwd=3,col=cols[groupId[ii]])
-    polygon(c(yCoords,-rev(yCoords))+pos[ii],c(xCoords,rev(xCoords)),col=cols[groupId[ii]])
-    segments(pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3],xCoords[3])
+    segments(stats$stats[1,ii],pos[ii],stats$stats[5,ii],pos[ii],lwd=3,col=cols[groupId[ii]])
+    polygon(c(xCoords,rev(xCoords)),c(yCoords,-rev(yCoords))+pos[ii],col=cols[groupId[ii]])
+    segments(xCoords[3],pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3])
   }
-  text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5))
-  segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
+  text(pVals$xPos+.005,pVals$middle,pVals$sig,srt=90,adj=c(0.5,1))
+  segments(pVals$xPos,pVals$bottom,pVals$xPos,pVals$top)
   breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
   #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
-  slantAxis(1,pos,names(pos),srt=-40)
+  axis(2,pos,names(pos),las=1,mgp=c(3,.7,0))
 dev.off()
 
 
