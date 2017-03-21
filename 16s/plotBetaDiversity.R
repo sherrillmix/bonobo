@@ -67,8 +67,8 @@ pVals<-pVals[pVals$p<.01,]
 cols<-rainbow.lab(length(distList),start=1,end=-2)
 groupId<-rep(1:length(distList),sapply(distList,length))
 spacer<-.5
-pdf('out/dists.pdf',width=6,height=8)
-  par(mar=c(2.5,10.7,.1,.1),lheight=.82)
+pdf('out/dists.pdf',width=6,height=6)
+  par(mar=c(2.5,10.7,.1,.1),lheight=.9)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,names)))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
   pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
