@@ -1,15 +1,33 @@
 if(!exists('otuTab'))source('runQiime.R')
 
+expandedHull<-function(xys,magnification=1,type=c('convex','ellipse')){
+  library(cluster)
+  type<-match.arg(type)
+  centroid<-apply(xys,2,mean)
+  magnified<-t(apply(xys,1,function(xy)(xy-centroid)*magnification+centroid))
+  if(type=='convex')return(magnified[chull(magnified),])
+  else if(type=='ellipse')return(predict(ellipsoidhull(magnified)))
+  else stop("Unknown type")
+}
+
 library(phyloseq)
 library(ape)
+library(vipor)
+
 selectSamples<-samples[samples$isEnough,]
 tree<-multi2di(read_tree('work/qiime/rep_set.tre'))
+subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
 phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
 qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
 #make sure tree is bifurcating or breaks UniFrac without error
 uniDist<-UniFrac(qiimeData,weighted=FALSE)
-uniDistW<-UniFrac(qiimeData,weighted=TRUE)
+phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
+qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
+uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
+brayDist<-distance(qiimeDataW,'bray')
 uniPca<-pcoa(uniDist)
+uniPcaW<-pcoa(uniDistW)
+brayPca<-pcoa(brayDist)
 predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
 colnames(predictors)<-sub('^Species','',colnames(predictors))
 colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
@@ -55,13 +73,18 @@ pdf('out/pcoa.pdf',height=9,width=9)
     pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[selectSamples$malaria+1],col="#00000077",cex=1.8,lwd=2.5)
     legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
     title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
-    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4)
+    #malaria/species
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
     legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
     title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
+    for(ii in unique(selectSamples$Species)){ 
+      hull<-expandedHull(pos[selectSamples$Species==ii,],1.02,'ellipse')
+      polygon(hull,border=speciesCols[ii],col=NA,lwd=2.4)
+    }
+    #labelled
     pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=splitAreaCols[splitAreas],col=malariaCols[1],cex=2.25,lwd=4)
     legend('bottomright',names(splitAreaCols),col=malariaCols[1],pch=21,pt.bg=splitAreaCols,inset=.01,pt.lwd=4,pt.cex=2.5)
     title(main=sprintf('TL and KR PC %d and %d',axes[1],axes[2]))
-    #show sample name text
     #show sample name text
     #bak<-par('cex')
     #par('cex'=.65)
@@ -71,23 +94,68 @@ pdf('out/pcoa.pdf',height=9,width=9)
   })
 dev.off()
 
+pdf('out/pcoa_bray.pdf',height=9,width=9)
+  sapply(list(1:2,3:4,5:6),function(axes){
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
+    points(pos[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
+    legend(
+      'bottomright',
+      c(names(malariaCols),names(areaCols),names(speciesPch),'SIVPos'),
+      col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch))),'#FF000099'),
+      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch,1),
+      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch)),NA),
+      inset=.01,pt.lwd=3,pt.cex=2.5)
+    title(main=sprintf('All variables PC %d and %d',axes[1],axes[2]))
+    text(pos,selectSamples$Code,cex=.25)
+    #species
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col="#00000077",cex=1.8,lwd=2.5)
+    legend('bottomright',names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=.01,pt.lwd=3,pt.cex=2)
+    title(main=sprintf('Species PC %d and %d',axes[1],axes[2]))
+    #malaria
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[selectSamples$malaria+1],col="#00000077",cex=1.8,lwd=2.5)
+    legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
+    title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
+    #malaria/species
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
+    legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
+    title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
+    #for(ii in unique(selectSamples$Species)){ 
+      #hull<-expandedHull(pos[selectSamples$Species==ii,],1.02,'ellipse')
+      #polygon(hull,border=speciesCols[ii],col=NA,lwd=2.4)
+    #}
+    #labelled
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=axes,pch=21,bg=splitAreaCols[splitAreas],col=malariaCols[1],cex=2.25,lwd=4)
+    legend('bottomright',names(splitAreaCols),col=malariaCols[1],pch=21,pt.bg=splitAreaCols,inset=.01,pt.lwd=4,pt.cex=2.5)
+    title(main=sprintf('TL and KR PC %d and %d',axes[1],axes[2]))
+  })
+dev.off()
+system('pdftk out/pcoa_bray.pdf cat 4 output out/pcoa_bray_select.pdf')
+
 
 #just bonobos
 selectSamples2<-samples[samples$bonobo&samples$isEnough,]
-phyOtu2<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples2$name],taxa_are_rows=TRUE)
+phyOtu2<-otu_table(apply(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples2$name],2,rarefyCounts,nRequiredReads),taxa_are_rows=TRUE)
 qiimeData2<-phyloseq(otu_table=phyOtu2,phy_tree=tree)
 #make sure tree is bifurcating or breaks UniFrac without error
+phyOtuW2<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples2$name],taxa_are_rows=TRUE)
+qiimeDataW2<-phyloseq(otu_table=phyOtuW2,phy_tree=tree)
 uniDist2<-UniFrac(qiimeData2,weighted=FALSE)
-uniDistW2<-UniFrac(qiimeData2,weighted=TRUE)
-selectSamples3<-samples[!samples$bonobo&samples$isEnough,]
-phyOtu3<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples3$name],taxa_are_rows=TRUE)
-qiimeData3<-phyloseq(otu_table=phyOtu3,phy_tree=tree)
-uniDist3<-UniFrac(qiimeData3,weighted=FALSE)
-uniDistW3<-UniFrac(qiimeData3,weighted=TRUE)
-library(ape)
+uniDistW2<-UniFrac(qiimeDataW2,weighted=TRUE)
+brayDist2<-distance(qiimeDataW2,'bray')
 uniPca2<-pcoa(uniDist2)
+brayPca2<-pcoa(brayDist2)
+
+selectSamples3<-samples[!samples$bonobo&samples$isEnough,]
+phyOtu3<-otu_table(apply(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples3$name],2,rarefyCounts,nRequiredReads),taxa_are_rows=TRUE)
+qiimeData3<-phyloseq(otu_table=phyOtu3,phy_tree=tree)
+phyOtuW3<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples3$name],taxa_are_rows=TRUE)
+qiimeDataW3<-phyloseq(otu_table=phyOtuW3,phy_tree=tree)
+uniDist3<-UniFrac(qiimeData3,weighted=FALSE)
+uniDistW3<-UniFrac(qiimeDataW3,weighted=TRUE)
+brayDist3<-distance(qiimeDataW3,'bray')
 predictors2<-model.matrix(~malaria+area+season,selectSamples2[selectSamples2$bonobo,])
 colnames(predictors2)[colnames(predictors2)=='malariaTRUE']<-'malariaPos'
+brayPca3<-pcoa(brayDist3)
 
 splitAreas<-withAs(selectSamples2=selectSamples2[selectSamples2$bonobo,],ifelse(selectSamples2$area %in% c('TL-E','TL-W'),selectSamples2$area,selectSamples2$Species))
 splitAreaCols<-rainbow.lab(length(unique(splitAreas)))
@@ -125,31 +193,50 @@ splitDist<-function(dists,splits){
   return(out)
 }
 
-library(vipor)
-speciesOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,],taxa_are_rows=TRUE)
+allEnough<-apply(otuTab,2,sum)>15000
+speciesOtu<-otu_table(apply(otuTab[rownames(otuTab) %in% tree$tip.label,allEnough],2,rarefyCounts,nRequiredReads),taxa_are_rows=TRUE)
 speciesQiimeData<-phyloseq(otu_table=speciesOtu,phy_tree=tree)
+speciesProp<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,allEnough],taxa_are_rows=TRUE)
+speciesQiimeDataW<-phyloseq(otu_table=speciesProp,phy_tree=tree)
 #make sure tree is bifurcating or breaks UniFrac without error
 speciesUniDist<-UniFrac(speciesQiimeData,weighted=TRUE)
-uniDistMat<-as.matrix(speciesUniDist)
+speciesBray<-distance(speciesQiimeDataW,'bray')
+#uniDistMat<-as.matrix(speciesUniDist)
+uniDistMat<-as.matrix(speciesBray)
 species<-sub('(Toddler)?_.*$','',rownames(uniDistMat))
 splits<-splitDist(uniDistMat,species)
 meanDists<-withAs(splits=splits[splits$x=="Bonobo"&splits$y!='Primate',],tapply(splits$dist,paste(splits$x,splits$y,sep='\n'),mean))
-pdf('out/species.pdf',width=10)
+speciesCols<-rainbow.lab(length(unique(species)))
+speciesPch<-21+rep(0:2,length.out=length(unique(species)))
+names(speciesPch)<-names(speciesCols)<-unique(species)
+speciesTsne<-Rtsne(speciesBray,is_distance=TRUE,verbose=TRUE,perplexity=20,max_iter=3000)
+speciesPca<-pcoa(speciesBray)
+pdf('out/species.pdf',width=10,height=10)
   par(lheight=.7,mar=c(9,4,.1,.1))
   withAs(splits=splits[splits$x=="Bonobo"&splits$y!='Primate',],vpPlot(factor(paste(splits$x,splits$y,sep='\n'),levels=names(sort(meanDists))),splits$dist,las=2,ylab='Pairwise UniFrac distance',las=2))
   heatmap(tapply(splits$dist,list(splits$x,splits$y),mean),scale='none',col=rev(heat.colors(100)))
+  plot(speciesTsne$Y,pch=speciesPch[species],bg=speciesCols[species],col='#00000033',cex=2.2,ylab='t-SNE 2',xlab='t-SNE 1')
+  legend('topright',names(speciesCols),pch=speciesPch,pt.bg=speciesCols,col='#00000033',cex=.8)
+  pos<-my.biplot.pcoa(speciesPca,matrix(1,nrow=nrow(as.matrix(speciesBray))),plot.axes=1:2,pch=speciesPch[species],bg=speciesCols[species],col='#00000033',cex=2.25,arrowsFilter=Inf)
+  pos<-my.biplot.pcoa(speciesPca,matrix(1,nrow=nrow(as.matrix(speciesBray))),plot.axes=3:4,pch=speciesPch[species],bg=speciesCols[species],col='#00000033',cex=2.25,arrowsFilter=Inf)
 dev.off()
 
 library(Rtsne)
+#uw unifrac
 tsne<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
 tsne2<-Rtsne(uniDist2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 tsne3<-Rtsne(uniDist3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 #tsne<-Rtsne(t(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name]),verbose=TRUE,perplexity=10)
+#w unifrac
 tsneW<-Rtsne(uniDistW,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
 tsneW2<-Rtsne(uniDistW2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 tsneW3<-Rtsne(uniDistW3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
+#bray
+tsneBray<-Rtsne(brayDist,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
+tsneBray2<-Rtsne(brayDist2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
+tsneBray3<-Rtsne(brayDist3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 pdf('out/tsne.pdf',height=8,width=10)
-  inputs<-list('Unweighted'=list(tsne,tsne2,tsne3),'Weighted'=list(tsneW,tsneW2,tsneW3))
+  inputs<-list('Unweighted'=list(tsne,tsne2,tsne3),'Weighted'=list(tsneW,tsneW2,tsneW3),'Bray'=list(tsneBray,tsneBray2,tsneBray3))
   for(tsneType in names(inputs)){
     tsnes<-inputs[[tsneType]]
     par(mar=c(4,4,1.5,9))
@@ -196,5 +283,5 @@ pdf('out/tsne.pdf',height=8,width=10)
     text(tsnes[[3]]$Y,selectSamples3$Code,cex=.25)
   }
 dev.off()
-
+system('pdftk out/tsne.pdf cat 7 output out/tsne_select.pdf')
 
