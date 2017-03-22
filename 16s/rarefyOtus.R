@@ -11,19 +11,20 @@ rareSteps<-seq(100,15000,100)
 rareCurves<-apply(otuTab[,samples$name[samples$isEnough]],2,rareEquation,rareSteps)
 
 groupings<-paste(samples$Species[samples$isEnough],ifelse(samples$malaria[samples$isEnough],'Plasmodium positive','Plasmodium negative'))
-groupCurves<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
-groupCI<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,medianCI)))
-names(groupCurves)<-names(groupCI)<-unique(groupings)
-groupCols<-rainbow.lab(length(groupCurves),alpha=.9)
-groupCols2<-rainbow.lab(length(groupCurves),alpha=.25)
-names(groupCols)<-names(groupCols2)<-unique(groupings)
-
 groupings2<-paste(ifelse(grepl('^TL',samples$area[samples$isEnough]),'TL2 ',ifelse(samples$bonobo[samples$isEnough],'Non-endemic ','')),samples$Species[samples$isEnough],sep='')
+groupCurves<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
 group2Curves<-lapply(unique(groupings2),function(xx)t(apply(rareCurves[,groupings2==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
+groupCI<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,medianCI)))
 group2CI<-lapply(unique(groupings2),function(xx)t(apply(rareCurves[,groupings2==xx],1,medianCI)))
+names(groupCurves)<-names(groupCI)<-unique(groupings)
 names(group2Curves)<-names(group2CI)<-unique(groupings2)
-group2Cols<-rainbow.lab(length(group2Curves),alpha=.9,start=1,end=-2)
-group2Cols2<-rainbow.lab(length(group2Curves),alpha=.25,start=1,end=-2)
+
+#mildly magic number throwing out 3rd color to leave gap in coloring between two groups
+groupCols<-rainbow.lab(length(groupCurves)+length(group2Curves)+1,alpha=.9)[1:(length(groupCurves)+1)][-3]
+groupCols2<-rainbow.lab(length(groupCurves)+length(group2Curves)+1,alpha=.25)[1:(length(groupCurves)+1)][-3]
+names(groupCols)<-names(groupCols2)<-unique(groupings)
+group2Cols<-rainbow.lab(length(groupCurves)+length(group2Curves)+1,alpha=.9)[1+length(groupCurves)+1:length(group2Curves)]
+group2Cols2<-rainbow.lab(length(groupCurves)+length(group2Curves)+1,alpha=.25)[1+length(groupCurves)+1:length(group2Curves)]
 names(group2Cols)<-names(group2Cols2)<-unique(groupings2)
 
 
@@ -59,10 +60,11 @@ outer(split(shannons,groupings),split(shannons,groupings),function(xx,yy)mapply(
 outer(split(shannons,groupings2),split(shannons,groupings2),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmodi.*','',groupings)),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 
-library(beeswarm)
-pdf('out/shannon.pdf',width=6,height=6)
-  par(mar=c(6.6,4,.1,4.2),lheight=.85)
-  plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(groupings))+.5),ylim=range(shannons),xaxt='n',xlab='',bty='l')
+#library(beeswarm)
+pdf('out/shannon.pdf',width=8,height=6)
+  spacer<-.5
+  par(mar=c(6.6,4,.1,3),lheight=.85)
+  plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(c(groupings,groupings2)))+.5+spacer),ylim=range(shannons),xaxt='n',xlab='',bty='l')
   groupFac<-factor(sub(' Plas','\nPlas',groupings))
   #xPos<-as.numeric(groupFac)+ave(shannons,groupFac,FUN=function(xx)swarmx(0,xx,cex=1.9)$x)
   xPos<-as.numeric(groupFac)+offsetX(shannons,groupFac,width=.3)
@@ -74,15 +76,16 @@ pdf('out/shannon.pdf',width=6,height=6)
     #,shannons,,pch=21,bg=groupCols[groupings],cex=1.5
   #vpPlot(factor(groupings2,levels=unique(groupings2)),shannons,ylab='Shannon diversity',las=2,pch=21,bg=group2Cols[groupings2],cex=1.5)
   slantAxis(1,1:length(levels(groupFac)),levels(groupFac),srt=-30)
-  plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(groupings2))+.5),ylim=range(shannons),xaxt='n',xlab='',bty='l')
   groupFac2<-factor(groupings2,levels=unique(groupings2))
   #xPos<-as.numeric(groupFac2)+ave(shannons,groupFac2,FUN=function(xx)swarmx(0,xx,cex=1.9)$x)
-  xPos<-as.numeric(groupFac2)+offsetX(shannons,groupFac2,width=.3)
+  offset<-max(as.numeric(groupFac))+spacer
+  abline(v=offset+.5-spacer/2,lty=2)
+  xPos<-offset+as.numeric(groupFac2)+offsetX(shannons,groupFac2,width=.3)
   width<-.45
-  segments(1:length(levels(groupFac2))-width,group2Shannon[sub('\n',' ',levels(groupFac2))],1:length(levels(groupFac2))+width,group2Shannon[sub('\n',' ',levels(groupFac2))],lwd=3,col=group2Cols[sub('\n',' ',levels(groupFac2))])
-  rect(1:length(levels(groupFac2))-width,shannon2CI[1,sub('\n',' ',levels(groupFac2))],1:length(levels(groupFac2))+width,shannon2CI[2,sub('\n',' ',levels(groupFac2))],lwd=2,border=NA,col=group2Cols2[sub('\n',' ',levels(groupFac2))])
+  segments(offset+1:length(levels(groupFac2))-width,group2Shannon[sub('\n',' ',levels(groupFac2))],offset+1:length(levels(groupFac2))+width,group2Shannon[sub('\n',' ',levels(groupFac2))],lwd=3,col=group2Cols[sub('\n',' ',levels(groupFac2))])
+  rect(offset+1:length(levels(groupFac2))-width,shannon2CI[1,sub('\n',' ',levels(groupFac2))],offset+1:length(levels(groupFac2))+width,shannon2CI[2,sub('\n',' ',levels(groupFac2))],lwd=2,border=NA,col=group2Cols2[sub('\n',' ',levels(groupFac2))])
   points(xPos,shannons,pch=21,bg=group2Cols[groupings2],cex=1.7)
-  slantAxis(1,1:length(levels(groupFac2)),levels(groupFac2),srt=-30)
+  slantAxis(1,offset+1:length(levels(groupFac2)),levels(groupFac2),srt=-30)
 dev.off()
 
 
