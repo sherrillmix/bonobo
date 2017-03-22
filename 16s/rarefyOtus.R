@@ -55,6 +55,10 @@ shannonCI<-sapply(unique(groupings),function(xx)medianCI(shannons[groupings==xx]
 group2Shannon<-sapply(unique(groupings2),function(xx)median(shannons[groupings2==xx]))
 shannon2CI<-sapply(unique(groupings2),function(xx)medianCI(shannons[groupings2==xx]))
 
+outer(split(shannons,groupings),split(shannons,groupings),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
+outer(split(shannons,groupings2),split(shannons,groupings2),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
+outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmodi.*','',groupings)),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
+
 library(beeswarm)
 pdf('out/shannon.pdf',width=6,height=6)
   par(mar=c(6.6,4,.1,4.2),lheight=.85)
