@@ -3,6 +3,7 @@ library(dnar)
 
 source('../readSamples.R',chdir=TRUE)
 source('../functions.R')
+nRequiredReads<-15000
 
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
 #just get sequence to reduce memory
@@ -29,7 +30,7 @@ rownames(samples)<-samples$name
 #make sure same order as otu table
 if(any(!samples$name %in% colnames(otuTab)))stop('Sample missing from OTUs')
 samples<-samples[colnames(otuTab)[colnames(otuTab) %in% samples$name],]
-samples$isEnough<-apply(otuTab[,samples$name],2,sum)>15000
+samples$isEnough<-apply(otuTab[,samples$name],2,sum)>nRequiredReads
 head(sort(apply(otuTab[,samples$name],2,sum)))
 
 otuProp<-apply(otuTab,2,function(x)x/sum(x))
