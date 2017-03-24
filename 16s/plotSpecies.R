@@ -1,3 +1,4 @@
+if(!exists('otuTab'))source('plotPcoa.R')
 splitDist<-function(dists,splits){
   uniqSplits<-unique(splits)
   names(uniqSplits)<-uniqSplits
