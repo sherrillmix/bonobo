@@ -1,6 +1,6 @@
 library(vipor)
 library(dnar)
-if(!exists('brayDist'))source('plotPcoa.R')
+if(!exists('uniDist'))source('plotPcoa.R')
 
 # TL-E vs TL-W
 # TL vs TL
@@ -44,9 +44,9 @@ nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
 names(nonTL)<-nonTL
 allCombo<-unique(t(apply(expand.grid(nonTL,nonTL),1,sort)))
 allCombo<-allCombo[allCombo[,1]!=allCombo[,2],]
-betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx[1],'name'],samples[samples$isEnough&samples$area==xx[2],'name']),distMat),as.matrix(brayDist))
-withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx,'name'],samples[samples$isEnough&samples$area==xx,'name']),distMat),as.matrix(brayDist))
-distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(brayDist)))
+betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx[1],'name'],samples[samples$isEnough&samples$area==xx[2],'name']),distMat),as.matrix(uniDist))
+withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx,'name'],samples[samples$isEnough&samples$area==xx,'name']),distMat),as.matrix(uniDist))
+distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(uniDist)))
 distList<-lapply(distList,function(xx){
   names(xx)<-ifelse(nchar(names(xx))>20,sub(' vs ',' vs\n',names(xx)),names(xx))
   if(any(names(xx)=='Between non-\nendemic field sites'))xx[['Between non-\nendemic field sites']]<-unlist(betweenSites)
@@ -78,8 +78,8 @@ pdf('out/dists.pdf',width=6,height=7)
   pVals$bottom<-pos[pVals$y]
   pVals$row<-stackRegions(pVals$bottom,pVals$top)
   pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
-  pVals$xPos<-1.02+.04*(pVals$row-1)
-  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1.1),yaxt='n',ylab='',xlab='Bray-Curtis dissimilarity',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
+  pVals$xPos<-.93+.035*(pVals$row-1)
+  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1),yaxt='n',ylab='',xlab='UniFrac distance',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
   for(ii in ncol(stats$stats):1){
     rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
     #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
@@ -98,6 +98,38 @@ pdf('out/dists.pdf',width=6,height=7)
   axis(2,pos,names(pos),las=1,mgp=c(3,.7,0))
 dev.off()
 
+
+spacer<-.6
+pdf('out/dists_slant.pdf',width=9,height=6)
+  par(mar=c(9,2.75,.1,4),lheight=.8)
+  compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
+  stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
+  betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
+  pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
+  names(pos)<-levels(compareFactor)
+  pVals$top<-pos[pVals$x]
+  pVals$bottom<-pos[pVals$y]
+  pVals$row<-stackRegions(pVals$top,pVals$bottom)
+  pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
+  pVals$xPos<-.95+.03*(pVals$row-1)
+  plot(1,1,type='n',xlim=range(pos)+c(-.5-spacer,.5+spacer),ylim=c(min(unlist(distList)),1),xaxt='n',xlab='',ylab='UniFrac distance',mgp=c(1.75,.4,0),tcl=-.3,xaxs='i',las=1,bty='l')
+  for(ii in ncol(stats$stats):1){
+    rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
+    #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
+    thisCI<-betaCI[[stats$names[ii]]]
+    #xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
+    xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
+    yCoords<-c(.4,.4,.1,.4,.4)
+    segments(pos[ii],stats$stats[1,ii],pos[ii],stats$stats[5,ii],lwd=3,col=cols[groupId[ii]])
+    polygon(c(yCoords,-rev(yCoords))+pos[ii],c(xCoords,rev(xCoords)),col=cols[groupId[ii]])
+    segments(pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3],xCoords[3])
+  }
+  text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5))
+  segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
+  breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
+  #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
+  slantAxis(1,pos,names(pos),srt=-40)
+dev.off()
 
 
 #looks like mostly bonobo_lg4300
