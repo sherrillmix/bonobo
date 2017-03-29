@@ -24,6 +24,9 @@ taxa$best<-apply(taxa,1,function(x)x[max(c(1,which(!is.na(x))))])
 #filter chloroplast reads
 isChloro<-taxa[rownames(otuTab),'c']=='Chloroplast'&!is.na(taxa[rownames(otuTab),'c'])
 otuTab<-otuTab[!isChloro,]
+otuSeq<-read.fa('work/qiimeOtus.fa.gz')
+rownames(otuSeq)<-otuSeq$name
+taxa$seq<-otuSeq[rownames(taxa),'seq']
 
 samples$name<-sapply(samples$Code,function(x)colnames(otuTab)[grep(sprintf('_%s$',x),colnames(otuTab))])
 rownames(samples)<-samples$name
