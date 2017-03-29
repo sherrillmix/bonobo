@@ -22,13 +22,21 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
     'Within chimpanzee'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
     'Between bonobo\nand chimpanzee'=list(s[s$bonobo,'name'],s[!s$bonobo,'name'])
   ),list(
-    'Within TL2'=list(s[s$isTL,'name'],s[s$isTL,'name']),
-    'Between TL2-E\nand TL2-W'=list(s[s$area=='TL-E','name'],s[s$area=='TL-W','name']),
-    'Between TL2 plasmodium\npositive and negative'=list(s[s$malaria&s$isTL,'name'],s[s$isTL&!s$malaria,'name'])
-  ),list(
     'Within non-\nendemic field sites'=list(0,0),
     'Between non-\nendemic field sites'=list(0,0),
     'Between TL2 and\nnon-endemic field sites'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
+  ),list(
+    'Within TL2 plasmodium negative'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
+    'Within TL2 plasmodium positive'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
+    'Between TL2 plasmodium\npositive and negative'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
+  #),list(
+  #  'Within BI plasmodium negative'=list(s[s$area=='BI'&!s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name']),
+  #  'Within BI plasmodium positive'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&s$malaria,'name']),
+  #  'Between BI plasmodium\npositive and negative'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name'])
+  #),list(
+  #  'Within UB plasmodium negative'=list(s[s$area=='UB'&!s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name']),
+  #  'Within UB plasmodium positive'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&s$malaria,'name']),
+  #  'Between UB plasmodium\npositive and negative'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name'])
   ),list(
     'Within plasmodium\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
     'Within plasmodium\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
@@ -101,7 +109,7 @@ dev.off()
 
 spacer<-.6
 pdf('out/dists_slant.pdf',width=9,height=6)
-  par(mar=c(9,2.75,.1,4),lheight=.8)
+  par(mar=c(9.2,2.75,.1,4),lheight=.8)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
   betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
