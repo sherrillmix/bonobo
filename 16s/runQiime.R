@@ -20,7 +20,8 @@ otuTab<-otuTab[apply(otuTab,1,sum)>3,]
 taxaRaw<-read.csv('work/qiimeOtus.taxa',stringsAsFactors=FALSE)
 taxa<-parseQiimeTaxa(taxaRaw$taxa)
 rownames(taxa)<-taxaRaw$name
-taxa$best<-apply(taxa,1,function(x)x[max(c(1,which(!is.na(x))))])
+taxa$best<-apply(taxa,1,function(x)ifelse(is.na(x),x,sprintf('%s_%s',names(x),x))[max(c(1,which(!is.na(x))))])
+taxa$bestId<-ave(taxa$best,naReplace(taxa$best,'__NAFILLER__'),FUN=function(x){sprintf('%s #%d',ifelse(is.na(x),'Unknown',x),1:length(x))})
 #filter chloroplast reads
 isChloro<-taxa[rownames(otuTab),'c']=='Chloroplast'&!is.na(taxa[rownames(otuTab),'c'])
 otuTab<-otuTab[!isChloro,]
