@@ -88,16 +88,78 @@ pdf('out/shannon.pdf',width=8,height=6)
   slantAxis(1,offset+1:length(levels(groupFac2)),levels(groupFac2),srt=-30)
 dev.off()
 
+naReplace<-function(x,replace){x[is.na(x)]<-replace;return(x)}
 
+samples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
 moreThanProp<-apply(otuProp[,samples$name[samples$isEnough]],1,max,na.rm=TRUE)>.02
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
 plotProp<-t(otuProp[moreThanProp,samples$name[samples$isEnough]])
+maxProp<-apply(otuProp[moreThanProp,samples$name[samples$isEnough]],1,function(x)x/max(x))
+rownames(plotProp)<-rownames(maxProp)<-sprintf('%s%s',ifelse(samples[rownames(plotProp),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(plotProp)))
+colnames(plotProp)<-colnames(maxProp)<-taxa[colnames(plotProp),'bestId']
+#plotTree<-hclust(dist(t(plotProp[,])))
+#plotProp<-plotProp[,plotTree$labels[plotTree$order]]
+plotProp<-plotProp[,order(apply(plotProp,2,mean),decreasing=TRUE)]
+maxTree<-hclust(dist(t(maxProp[,])))
+maxProp<-maxProp[,rev(maxTree$labels[maxTree$order])]
 breaks<-c(-1e-6,seq(min(plotProp[plotProp>0])-1e-10,max(plotProp)+1e-10,length.out=100))
-rownames(plotProp)<-sub("EasternChimpanzee","Chimp",rownames(plotProp))
-colnames(plotProp)<-taxa[colnames(plotProp),'best']
-pdf('out/heat.pdf',height=20,width=20)
-  heatmap(plotProp,col=cols,breaks=breaks,scale='none',margin=c(8,5),Rowv=NA)
-  insetScale(round(breaks,6),cols,c(.955,.75,.97,.99),label='Proportion')
+breaks2<-c(-1e-6,seq(min(maxProp[maxProp>0])-1e-10,max(maxProp)+1e-10,length.out=100))
+#plotProp<-plotProp[,order(apply(plotProp,2,mean))]
+pdf('out/heat.pdf',height=30,width=20)
+  par(mfrow=c(2,1),mar=c(12,5,3.5,.1))
+  image(1:ncol(plotProp),1:nrow(plotProp),t(plotProp),col=cols,breaks=breaks,xlab='',ylab='',xaxt='n',yaxt='n')
+  text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'A)',xpd=NA,cex=3,adj=0:1)
+  box()
+  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of sample')
+  axis(1,1:ncol(plotProp),colnames(plotProp),cex.axis=.7,las=2,tcl=-.1,mgp=c(0,.3,0))
+  #slantAxis(1,1:ncol(plotProp),colnames(plotProp),cex=.7)
+  axis(2,1:nrow(plotProp),rownames(plotProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.65)
+  abline(h=1:nrow(plotProp)-.5,v=1:ncol(plotProp)+.5,col='#00000011')
+  image(1:ncol(maxProp),1:nrow(maxProp),t(maxProp),col=cols,breaks=breaks2,xlab='',ylab='',xaxt='n',yaxt='n')
+  text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'B)',xpd=NA,cex=3,adj=0:1)
+  box()
+  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU maximum')
+  axis(1,1:ncol(maxProp),colnames(maxProp),cex.axis=.7,las=2,tcl=-.1,mgp=c(0,.3,0))
+  axis(2,1:nrow(maxProp),rownames(maxProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.65)
+  abline(h=1:nrow(maxProp)-.5,v=1:ncol(maxProp)+.5,col='#00000011')
+  #heatmap(maxProp,col=cols,breaks=breaks2,scale='none',margin=c(8,5),Rowv=NA)
+dev.off()
+
+
+tlPos<-samples$name[samples$isEnough&samples$isTL&samples$malaria]
+tlNeg<-samples$name[samples$isEnough&samples$isTL&!samples$malaria]
+inTl<-otuProp[apply(otuProp[,c(tlPos,tlNeg)],1,max)>.001,]
+pVals<-p.adjust(apply(inTl,1,function(xx)wilcox.test(xx[tlPos],xx[tlNeg])$p.value),'fdr')
+effect<-p.adjust(apply(inTl,1,function(xx)wilcox.test(xx[tlPos],xx[tlNeg])$p.value),'fdr')
+pVals[is.na(pVals)]<-1
+pCut<-.1
+selectProp<-apply(inTl[pVals<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+hTree<-hclust(dist(t(selectProp[c(tlPos,tlNeg),])))
+selectProp<-selectProp[,hTree$labels[hTree$order]]
+colnames(selectProp)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectProp),'bestId'],pVals[pVals<pCut])
+rownames(selectProp)<-sprintf('%s%s',ifelse(samples[rownames(selectProp),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectProp)))
+#colnames(selectProp)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectProp),naReplace(taxa[colnames(selectProp),'best'],'Unknown'),pVals[pVals<pCut])
+
+allPos<-samples$name[samples$isEnough&samples$malaria]
+allNeg<-samples$name[samples$isEnough&!samples$malaria]
+inAll<-otuProp[apply(otuProp[,c(allPos,allPos)],1,max)>.001,]
+pValsAll<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[allPos],xx[allNeg])$p.value),'fdr')
+pValsAll[is.na(pValsAll)]<-1
+selectPropAll<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
+colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],pValsAll[pValsAll<pCut])
+
+
+pdf('out/splitOtus.pdf',height=13,width=12)
+  par(mar=c(11.5,.1,3,8.5),lheight=.7)
+  image(1:ncol(selectProp),1:nrow(selectProp),t(selectProp),col=cols,breaks=breaks2,xaxt='n',yaxt='n',xlab='',ylab='')
+  box()
+  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU maximum')
+  slantAxis(1,1:ncol(selectProp),colnames(selectProp))
+  axis(4,1:nrow(selectProp),rownames(selectProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.7)
+  abline(h=1:nrow(selectProp)-.5,v=1:ncol(selectProp)+.5,col='#00000011')
+  #heatmap(selectPropAll,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
+  #insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
 dev.off()
 
 
