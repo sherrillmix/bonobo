@@ -26,6 +26,7 @@ phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$na
 qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
 uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
 brayDist<-distance(qiimeDataW,'bray')
+jacDist<-distance(qiimeDataW,'jaccard')
 uniPca<-pcoa(uniDist)
 uniPcaW<-pcoa(uniDistW)
 brayPca<-pcoa(brayDist)
