@@ -110,7 +110,7 @@ pdf('out/heat.pdf',height=30,width=20)
   image(1:ncol(plotProp),1:nrow(plotProp),t(plotProp),col=cols,breaks=breaks,xlab='',ylab='',xaxt='n',yaxt='n')
   text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'A)',xpd=NA,cex=3,adj=0:1)
   box()
-  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of sample')
+  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU within each sample')
   axis(1,1:ncol(plotProp),colnames(plotProp),cex.axis=.7,las=2,tcl=-.1,mgp=c(0,.3,0))
   #slantAxis(1,1:ncol(plotProp),colnames(plotProp),cex=.7)
   axis(2,1:nrow(plotProp),rownames(plotProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.65)
@@ -136,7 +136,7 @@ pCut<-.1
 selectProp<-apply(inTl[pVals<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
 hTree<-hclust(dist(t(selectProp[c(tlPos,tlNeg),])))
 selectProp<-selectProp[,hTree$labels[hTree$order]]
-colnames(selectProp)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectProp),'bestId'],pVals[pVals<pCut])
+colnames(selectProp)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectProp),'bestId'],pVals[colnames(selectProp)])
 rownames(selectProp)<-sprintf('%s%s',ifelse(samples[rownames(selectProp),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectProp)))
 #colnames(selectProp)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectProp),naReplace(taxa[colnames(selectProp),'best'],'Unknown'),pVals[pVals<pCut])
 
@@ -147,7 +147,16 @@ pValsAll<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[allPos],xx[allNeg])$
 pValsAll[is.na(pValsAll)]<-1
 selectPropAll<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
 rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
-colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],pValsAll[pValsAll<pCut])
+colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],pValsAll[colnames(selectPropAll)])
+
+tls<-samples$name[samples$isEnough&samples$isTL]
+nonTls<-samples$name[samples$isEnough&!samples$isTL]
+pValsTl<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[tls],xx[nonTls])$p.value),'fdr')
+pValsTl[is.na(pValsTl)]<-1
+selectPropTl<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+rownames(selectPropTl)<-sprintf('%s%s',ifelse(samples[rownames(selectPropTl),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropTl)))
+colnames(selectPropTl)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropTl),taxa[colnames(selectPropTl),'bestId'],pValsTl[colnames(selectPropTl)])
+
 
 
 pdf('out/splitOtus.pdf',height=13,width=12)
@@ -158,8 +167,8 @@ pdf('out/splitOtus.pdf',height=13,width=12)
   slantAxis(1,1:ncol(selectProp),colnames(selectProp))
   axis(4,1:nrow(selectProp),rownames(selectProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.7)
   abline(h=1:nrow(selectProp)-.5,v=1:ncol(selectProp)+.5,col='#00000011')
-  #heatmap(selectPropAll,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
-  #insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
+  heatmap(selectPropTl,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
+  insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
 dev.off()
 
 
