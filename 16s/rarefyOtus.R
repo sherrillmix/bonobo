@@ -149,26 +149,50 @@ selectPropAll<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,funct
 rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
 colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],pValsAll[colnames(selectPropAll)])
 
-tls<-samples$name[samples$isEnough&samples$isTL]
-nonTls<-samples$name[samples$isEnough&!samples$isTL]
+pCutTl<-.01
+tls<-samples$name[samples$isEnough&samples$isTL&samples$bonobo]
+nonTls<-samples$name[samples$isEnough&!samples$isTL&samples$bonobo]
 pValsTl<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[tls],xx[nonTls])$p.value),'fdr')
 pValsTl[is.na(pValsTl)]<-1
-selectPropTl<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+selectPropTl<-apply(inAll[pValsTl<pCutTl,samples$name[samples$isEnough]],1,function(x)x/max(x))
+hTree<-hclust(dist(t(selectPropTl[c(tls,nonTls),]^.25)))
+selectPropTl<-selectPropTl[,hTree$labels[hTree$order]]
 rownames(selectPropTl)<-sprintf('%s%s',ifelse(samples[rownames(selectPropTl),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropTl)))
-colnames(selectPropTl)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropTl),taxa[colnames(selectPropTl),'bestId'],pValsTl[colnames(selectPropTl)])
+colnames(selectPropTl)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectPropTl),'bestId'],pValsTl[colnames(selectPropTl)])
 
+iks<-samples$name[samples$isEnough&samples$area=='IK'&samples$bonobo]
+nonIks<-samples$name[samples$isEnough&samples$area!='IK'&samples$bonobo]
+pValsIk<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[iks],xx[nonIks])$p.value),'fdr')
+pValsIk[is.na(pValsIk)]<-1
+selectPropIk<-apply(inAll[pValsIk<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+hTree<-hclust(dist(t(selectPropIk[c(iks,nonIks),]^.25)))
+selectPropIk<-selectPropIk[,hTree$labels[hTree$order]]
+rownames(selectPropIk)<-sprintf('%s%s',ifelse(samples[rownames(selectPropIk),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropIk)))
+colnames(selectPropIk)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectPropIk),'bestId'],pValsIk[colnames(selectPropIk)])
+
+
+plotHeat<-function(selectProp,breaks,cols,xaxt=''){
+  image(1:ncol(selectProp),1:nrow(selectProp),t(selectProp),col=cols,breaks=breaks,xaxt='n',yaxt='n',xlab='',ylab='')
+  box()
+  insetScale(round(breaks,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU maximum')
+  if(xaxt!='n')slantAxis(1,1:ncol(selectProp),colnames(selectProp))
+  axis(4,1:nrow(selectProp),rownames(selectProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.7)
+  abline(h=1:nrow(selectProp)-.5,v=1:ncol(selectProp)+.5,col='#00000011')
+}
 
 
 pdf('out/splitOtus.pdf',height=13,width=12)
   par(mar=c(11.5,.1,3,8.5),lheight=.7)
-  image(1:ncol(selectProp),1:nrow(selectProp),t(selectProp),col=cols,breaks=breaks2,xaxt='n',yaxt='n',xlab='',ylab='')
-  box()
-  insetScale(round(breaks2,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU maximum')
-  slantAxis(1,1:ncol(selectProp),colnames(selectProp))
-  axis(4,1:nrow(selectProp),rownames(selectProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.7)
-  abline(h=1:nrow(selectProp)-.5,v=1:ncol(selectProp)+.5,col='#00000011')
-  heatmap(selectPropTl,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
-  insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
+  plotHeat(selectProp,breaks2,cols)
+  title(main='TL + vs TL - (q<.1)')
+  plotHeat(selectPropTl,breaks2,cols,xaxt='n')
+  axis(1,1:ncol(selectPropTl),colnames(selectPropTl),cex.axis=.7,las=2)
+  title(main='TL vs nonTL (q<.01)')
+  plotHeat(selectPropIk,breaks2,cols,xaxt='n')
+  axis(1,1:ncol(selectPropIk),colnames(selectPropIk),cex.axis=.7,las=2)
+  title(main='IK vs nonIK (q<.1)')
+  #heatmap(selectPropTl,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
+  #insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
 dev.off()
 
 
