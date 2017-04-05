@@ -1,7 +1,7 @@
 library(dnar)
+source('plotHeat.R')
 if(!exists('otuTab'))source('runQiime.R')
 
-naReplace<-function(x,replace){x[is.na(x)]<-replace;return(x)}
 
 samples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
 moreThanProp<-apply(otuProp[,samples$name[samples$isEnough]],1,max,na.rm=TRUE)>.02
@@ -83,15 +83,6 @@ selectPropIk<-selectPropIk[,hTree$labels[hTree$order]]
 rownames(selectPropIk)<-sprintf('%s%s',ifelse(samples[rownames(selectPropIk),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropIk)))
 colnames(selectPropIk)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectPropIk),'bestId'],pValsIk[colnames(selectPropIk)])
 
-
-plotHeat<-function(selectProp,breaks,cols,xaxt=''){
-  image(1:ncol(selectProp),1:nrow(selectProp),t(selectProp),col=cols,breaks=breaks,xaxt='n',yaxt='n',xlab='',ylab='')
-  box()
-  insetScale(round(breaks,6),cols,c(.97,.75,.98,.99),label='Proportion of OTU maximum')
-  if(xaxt!='n')slantAxis(1,1:ncol(selectProp),colnames(selectProp))
-  axis(4,1:nrow(selectProp),rownames(selectProp),las=1,tcl=0,mgp=c(0,.2,0),cex.axis=.7)
-  abline(h=1:nrow(selectProp)-.5,v=1:ncol(selectProp)+.5,col='#00000011')
-}
 
 
 pdf('out/splitOtus.pdf',height=13,width=12)
