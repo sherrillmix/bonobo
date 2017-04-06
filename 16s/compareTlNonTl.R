@@ -16,14 +16,18 @@ condenseP<-p.adjust(apply(ninePs,2,fishers,correct=3),'bonferroni')
 
 pCut<-.01
 selectPropAll<-apply(inBonobo[condenseP<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
-rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
-colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],condenseP[colnames(selectPropAll)])
+#rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
+selectPropAll<-selectPropAll[,order(condenseP[condenseP<pCut])]
+colnames(selectPropAll)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAll),'bestId'],condenseP[colnames(selectPropAll)])
 breaks<-c(-1e-6,seq(min(selectPropAll[selectPropAll>0])-1e-10,max(selectPropAll)+1e-10,length.out=100))
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
 
 pdf('out/nineCompare.pdf',height=13,width=12)
-  par(mar=c(11.5,.1,3,8.5),lheight=.7)
-  plotHeat(selectPropAll,breaks,cols)
+  par(mar=c(11.5,.1,3,14.5),lheight=.7)
+  metadata<-samples[rownames(selectPropAll),c('chimpBonobo','area2','plasmoPM','Code')]
+  colnames(metadata)<-c('Species','Area','Laverania','Sample')
+  plotHeat(selectPropAll,breaks,cols,yaxt='n')
+  addMetaData(metadata,cex=.75)
 dev.off()
 
 
