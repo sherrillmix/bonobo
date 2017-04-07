@@ -38,3 +38,5 @@ samples$isEnough<-apply(otuTab[,samples$name],2,sum)>nRequiredReads
 head(sort(apply(otuTab[,samples$name],2,sum)))
 
 otuProp<-apply(otuTab,2,function(x)x/sum(x))
+
+mean(readCounts[samples[samples$isEnough,'name']])
