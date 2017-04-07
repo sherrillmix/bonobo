@@ -26,27 +26,27 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
     'Between non-\nendemic field sites'=list(0,0),
     'Between TL2 and\nnon-endemic field sites'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
   ),list(
-    'Within TL2 plasmodium negative'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
-    'Within TL2 plasmodium positive'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
-    'Between TL2 plasmodium\npositive and negative'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
+    'Within TL2 Laverania negative'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
+    'Within TL2 Laverania positive'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
+    'Between TL2 Laverania\npositive and negative'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
   #),list(
-  #  'Within BI plasmodium negative'=list(s[s$area=='BI'&!s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name']),
-  #  'Within BI plasmodium positive'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&s$malaria,'name']),
-  #  'Between BI plasmodium\npositive and negative'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name'])
+  #  'Within BI Laverania negative'=list(s[s$area=='BI'&!s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name']),
+  #  'Within BI Laverania positive'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&s$malaria,'name']),
+  #  'Between BI Laverania\npositive and negative'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name'])
   #),list(
-  #  'Within UB plasmodium negative'=list(s[s$area=='UB'&!s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name']),
-  #  'Within UB plasmodium positive'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&s$malaria,'name']),
-  #  'Between UB plasmodium\npositive and negative'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name'])
+  #  'Within UB Laverania negative'=list(s[s$area=='UB'&!s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name']),
+  #  'Within UB Laverania positive'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&s$malaria,'name']),
+  #  'Between UB Laverania\npositive and negative'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name'])
   ),list(
-    'Within plasmodium\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
-    'Within plasmodium\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
-    'Between plasmodium negative\n and positive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
+    'Within Laverania\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
+    'Within Laverania\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
+    'Between Laverania negative\n and positive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
   )
 ))
 # list(
-#   'Within plasmodium\nnegative bonobos'=list(s[s$bonobo&!s$malaria,'name'],s[s$bonobo&!s$malaria,'name']),
-#   'Within plasmodium\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&s$malaria,'name']),
-#   'Between plasmodium\nnegative and\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&!s$malaria,'name'])
+#   'Within Laverania\nnegative bonobos'=list(s[s$bonobo&!s$malaria,'name'],s[s$bonobo&!s$malaria,'name']),
+#   'Within Laverania\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&s$malaria,'name']),
+#   'Between Laverania\nnegative and\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&!s$malaria,'name'])
 # )
 nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
 names(nonTL)<-nonTL
@@ -145,3 +145,5 @@ zz<-which(as.matrix(uniDist)>.85,arr.ind=TRUE)
 zzz<-cbind(labels(uniDist)[zz[,1]],labels(uniDist)[zz[,2]])
 zzz[apply(zzz,1,function(xx)!any(grepl('LG4300',xx))),]
 
+library(vegan)
+adonis(uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e5)
