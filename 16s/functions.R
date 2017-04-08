@@ -13,7 +13,7 @@ addMetaData<-function(metadata,cex=1,...){
   widths<-apply(metadata,2,function(x)max(strwidth(x,cex=cex)))
   headerWidths<-strwidth(colnames(metadata),cex=par('cex.axis'))
   widths<-apply(rbind(headerWidths,widths),2,max)
-  spacer<-diff(par('usr')[3:4])*.005
+  spacer<-diff(par('usr')[1:2])*.005
   labX<-cumsum(c(0,widths[-length(widths)])+spacer)
   for(ii in 1:ncol(metadata)){
     text(par('usr')[2]+labX[ii],1:nrow(metadata),metadata[,ii],adj=c(0,.5),xpd=NA,cex=cex,...)
@@ -27,3 +27,20 @@ fishers<-function(ps,correct=1){
   out<-1-pchisq(chi2/correct,2*length(ps)/correct)
   return(out)
 }
+
+setupHeat<-function(pos,neg,otuProp,taxa,minProp=.001,pCut=.1,treeScale=1/3){
+  inSample<-otuProp[apply(otuProp[,c(pos,neg)],1,max)>minProp,]
+  pVals<-p.adjust(apply(inSample,1,function(xx)suppressWarnings(wilcox.test(xx[pos],xx[neg]))$p.value),'fdr')
+  effect<-apply(inSample,1,function(xx)median(xx[pos])-median(xx[neg]))
+  pVals[is.na(pVals)]<-1
+  selectProp<-apply(inSample[pVals<pCut,,drop=FALSE],1,function(x)x/max(x))
+  hTree<-hclust(dist(t(selectProp[c(pos,neg),]^treeScale)))
+  #selectProp<-selectProp[,hTree$labels[hTree$order]]
+  effectP<-((effect>0)*2-1)*(1-pVals)
+  selectProp<-selectProp[,order(effect[pVals<pCut]>0,order(orderIn(colnames(selectProp),hTree$labels[hTree$order]))),drop=FALSE]
+  #selectProp<-selectProp[,order(effectP[pVals<pCut]),drop=FALSE]
+  effectSplit<-min(which(effectP[colnames(selectProp)]>0))
+  colnames(selectProp)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectProp),'bestId'],pVals[colnames(selectProp)])
+  return(list(selectProp,effectSplit))
+}
+

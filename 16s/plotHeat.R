@@ -39,62 +39,54 @@ pdf('out/heat.pdf',height=30,width=20)
 dev.off()
 
 
+sampleOrder<-withAs(s=samples[samples$isEnough,],s$name[order(!s$bonobo,ifelse(s$area=='KR',FALSE,s$malaria),s$area2,s$malaria)])
+sampleOrder2<-withAs(s=samples[samples$isEnough,],s$name[order(!s$bonobo,s$area2,s$malaria)])
+
 tlPos<-samples$name[samples$isEnough&samples$isTL&samples$malaria]
 tlNeg<-samples$name[samples$isEnough&samples$isTL&!samples$malaria]
-inTl<-otuProp[apply(otuProp[,c(tlPos,tlNeg)],1,max)>.001,]
-pVals<-p.adjust(apply(inTl,1,function(xx)wilcox.test(xx[tlPos],xx[tlNeg])$p.value),'fdr')
-effect<-p.adjust(apply(inTl,1,function(xx)wilcox.test(xx[tlPos],xx[tlNeg])$p.value),'fdr')
-pVals[is.na(pVals)]<-1
-pCut<-.1
-selectProp<-apply(inTl[pVals<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
-hTree<-hclust(dist(t(selectProp[c(tlPos,tlNeg),])))
-selectProp<-selectProp[,hTree$labels[hTree$order]]
-colnames(selectProp)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectProp),'bestId'],pVals[colnames(selectProp)])
-rownames(selectProp)<-sprintf('%s%s',ifelse(samples[rownames(selectProp),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectProp)))
-#colnames(selectProp)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectProp),naReplace(taxa[colnames(selectProp),'best'],'Unknown'),pVals[pVals<pCut])
-
+tmp<-setupHeat(tlPos,tlNeg,otuProp[,sampleOrder],taxa)
+selectProp<-tmp[[1]]
+effectSplit<-tmp[[2]]
+#
 allPos<-samples$name[samples$isEnough&samples$malaria]
 allNeg<-samples$name[samples$isEnough&!samples$malaria]
-inAll<-otuProp[apply(otuProp[,c(allPos,allPos)],1,max)>.001,]
-pValsAll<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[allPos],xx[allNeg])$p.value),'fdr')
-pValsAll[is.na(pValsAll)]<-1
-selectPropAll<-apply(inAll[pValsAll<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
-rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
-colnames(selectPropAll)<-sprintf('%s (%s)\nq=%0.3f',colnames(selectPropAll),taxa[colnames(selectPropAll),'bestId'],pValsAll[colnames(selectPropAll)])
-
+tmp<-setupHeat(allPos,allNeg,otuProp[,sampleOrder],taxa)
+selectPropAll<-tmp[[1]]
+effectSplitAll<-tmp[[2]]
+#
 pCutTl<-.01
 tls<-samples$name[samples$isEnough&samples$isTL&samples$bonobo]
 nonTls<-samples$name[samples$isEnough&!samples$isTL&samples$bonobo]
-pValsTl<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[tls],xx[nonTls])$p.value),'fdr')
-pValsTl[is.na(pValsTl)]<-1
-selectPropTl<-apply(inAll[pValsTl<pCutTl,samples$name[samples$isEnough]],1,function(x)x/max(x))
-hTree<-hclust(dist(t(selectPropTl[c(tls,nonTls),]^.25)))
-selectPropTl<-selectPropTl[,hTree$labels[hTree$order]]
-rownames(selectPropTl)<-sprintf('%s%s',ifelse(samples[rownames(selectPropTl),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropTl)))
-colnames(selectPropTl)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectPropTl),'bestId'],pValsTl[colnames(selectPropTl)])
-
+tmp<-setupHeat(tls,nonTls,otuProp[,sampleOrder2],taxa,pCut=pCutTl)
+selectPropTl<-tmp[[1]]
+effectSplitTl<-tmp[[2]]
+#
 iks<-samples$name[samples$isEnough&samples$area=='IK'&samples$bonobo]
 nonIks<-samples$name[samples$isEnough&samples$area!='IK'&samples$bonobo]
-pValsIk<-p.adjust(apply(inAll,1,function(xx)wilcox.test(xx[iks],xx[nonIks])$p.value),'fdr')
-pValsIk[is.na(pValsIk)]<-1
-selectPropIk<-apply(inAll[pValsIk<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
-hTree<-hclust(dist(t(selectPropIk[c(iks,nonIks),]^.25)))
-selectPropIk<-selectPropIk[,hTree$labels[hTree$order]]
-rownames(selectPropIk)<-sprintf('%s%s',ifelse(samples[rownames(selectPropIk),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropIk)))
-colnames(selectPropIk)<-sprintf('%s (q=%0.3f)',taxa[colnames(selectPropIk),'bestId'],pValsIk[colnames(selectPropIk)])
-
-
-
-pdf('out/splitOtus.pdf',height=13,width=12)
-  par(mar=c(11.5,.1,3,8.5),lheight=.7)
-  plotHeat(selectProp,breaks2,cols)
+tmp<-setupHeat(iks,nonIks,otuProp[,sampleOrder2],taxa)
+selectPropIk<-tmp[[1]]
+effectSplitIk<-tmp[[2]]
+#
+pdf('out/splitOtus.pdf',height=13,width=15)
+  par(mar=c(11.5,.1,3,13.5),lheight=.7)
+  plotHeat(selectProp,breaks2,cols,yaxt='n')
   title(main='TL + vs TL - (q<.1)')
-  plotHeat(selectPropTl,breaks2,cols,xaxt='n')
+  abline(v=effectSplit-.5)
+  metadata<-samples[rownames(selectProp),c('chimpBonobo','area2','plasmoPM','Code')]
+  colnames(metadata)<-c('Species','Area','Laverania','Sample')
+  addMetaData(metadata,cex=.75)
+  plotHeat(selectPropTl,breaks2,cols,xaxt='n',yaxt='n')
   axis(1,1:ncol(selectPropTl),colnames(selectPropTl),cex.axis=.7,las=2)
   title(main='TL vs nonTL (q<.01)')
-  plotHeat(selectPropIk,breaks2,cols,xaxt='n')
+  abline(v=effectSplitTl-.5)
+  metadata<-samples[rownames(selectPropTl),c('chimpBonobo','area2','plasmoPM','Code')]
+  colnames(metadata)<-c('Species','Area','Laverania','Sample')
+  addMetaData(metadata,cex=.75)
+  plotHeat(selectPropIk,breaks2,cols,xaxt='n',yaxt='n')
   axis(1,1:ncol(selectPropIk),colnames(selectPropIk),cex.axis=.7,las=2)
   title(main='IK vs nonIK (q<.1)')
+  addMetaData(metadata,cex=.75)
+  abline(v=effectSplitIk-.5)
   #heatmap(selectPropTl,col=cols,breaks=breaks2,scale='none',margin=c(16,6),Rowv=NA)
   #insetScale(round(breaks2,6),cols,c(.955,.75,.97,.99),label='Proportion of OTU maximum')
 dev.off()
