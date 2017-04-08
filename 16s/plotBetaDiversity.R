@@ -146,4 +146,9 @@ zzz<-cbind(labels(uniDist)[zz[,1]],labels(uniDist)[zz[,2]])
 zzz[apply(zzz,1,function(xx)!any(grepl('LG4300',xx))),]
 
 library(vegan)
-adonis(uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e5)
+allAdonis<-cacheOperation('work/allAdonis.Rdat',adonis,uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=20)
+tlDist<-as.dist(as.matrix(uniDist)[samples[labels(uniDist),'isTL'],samples[labels(uniDist),'isTL']])
+tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=20)
+chimpDist<-as.dist(as.matrix(uniDist)[!samples[labels(uniDist),'bonobo'],!samples[labels(uniDist),'bonobo']])
+chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=20)
+
