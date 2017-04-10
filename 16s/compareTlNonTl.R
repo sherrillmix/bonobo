@@ -10,15 +10,24 @@ nonTlGroups<-nonTlGroups[sapply(nonTlGroups,length)>5]
 comparisons<-expand.grid('tl'=names(tlGroups),'nontl'=names(nonTlGroups))
 
 inBonobo<-otuProp[apply(otuProp[,c(unlist(tlGroups),unlist(nonTlGroups))],1,max)>.001,]
-ninePs<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]],alternative='less')$p.value))
+ninePs<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppressWarnings(wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]],alternative='less'))$p.value))
+
+ninePsGt<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppressWarnings(wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]],alternative='greater')$p.value)))
 
 condenseP<-p.adjust(apply(ninePs,2,fishers,correct=3),'bonferroni')
+condensePGt<-p.adjust(apply(ninePsGt,2,fishers,correct=3),'bonferroni')
 
 pCut<-.01
 selectPropAll<-apply(inBonobo[condenseP<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
 #rownames(selectPropAll)<-sprintf('%s%s',ifelse(samples[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
 selectPropAll<-selectPropAll[,order(condenseP[condenseP<pCut])]
 colnames(selectPropAll)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAll),'bestId'],condenseP[colnames(selectPropAll)])
+
+selectPropAllGt<-apply(inBonobo[condensePGt<pCut,samples$name[samples$isEnough]],1,function(x)x/max(x))
+selectPropAllGt<-selectPropAllGt[,order(condensePGt[condensePGt<pCut])]
+colnames(selectPropAllGt)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAllGt),'bestId'],condenseP[colnames(selectPropAllGt)])
+
+
 breaks<-c(-1e-6,seq(min(selectPropAll[selectPropAll>0])-1e-10,max(selectPropAll)+1e-10,length.out=100))
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
 
@@ -27,6 +36,10 @@ pdf('out/nineCompare.pdf',height=13,width=12)
   metadata<-samples[rownames(selectPropAll),c('chimpBonobo','area2','plasmoPM','Code')]
   colnames(metadata)<-c('Species','Area','Laverania','Sample')
   plotHeat(selectPropAll,breaks,cols,yaxt='n')
+  title(main='Depleted')
+  addMetaData(metadata,cex=.75)
+  plotHeat(selectPropAllGt,breaks,cols,yaxt='n')
+  title(main='Enriched')
   addMetaData(metadata,cex=.75)
 dev.off()
 
