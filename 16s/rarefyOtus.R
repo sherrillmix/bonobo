@@ -10,7 +10,7 @@ medianCI<-function(xx,na.rm=TRUE){
 rareSteps<-seq(100,15000,100)
 rareCurves<-apply(otuTab[,samples$name[samples$isEnough]],2,rareEquation,rareSteps)
 
-groupings<-paste(samples$Species[samples$isEnough],ifelse(samples$malaria[samples$isEnough],'Plasmodium positive','Plasmodium negative'))
+groupings<-paste(samples$Species[samples$isEnough],ifelse(samples$malaria[samples$isEnough],'Laverania positive','Laverania negative'))
 groupings2<-paste(ifelse(grepl('^TL',samples$area[samples$isEnough]),'TL2 ',ifelse(samples$bonobo[samples$isEnough],'Non-endemic ','')),samples$Species[samples$isEnough],sep='')
 groupCurves<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
 group2Curves<-lapply(unique(groupings2),function(xx)t(apply(rareCurves[,groupings2==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
