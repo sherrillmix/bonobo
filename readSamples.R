@@ -13,8 +13,13 @@ samples$lat[samples$isTL]<-as.numeric(gsub('[^0-9.]','',samples$Lat[samples$isTL
 samples$tlNorth<-samples$isTL&samples$lat<2.55
 samples$area2<-samples$area
 samples$area2[samples$tlNorth]<-'TL-NE'
+samples$area2<-sub('TL-','TL2-',samples$area2)
+samples$plasmoPM<-ifelse(samples$malaria,'+','-')
+samples$chimpBonobo<-ifelse(samples$bonobo,'Bonobo','Chimp')
 #arbitrary seasons
 samples$season<-as.character(ceiling(samples$month/3))
 rownames(samples)<-samples$Code
+#only infected with p vivax so not clearly negative or positive
+samples<-samples[samples$Code!='UB2041',]
 
 primerSeqs<-list('rbcl'=c('rbcL634F'='ATGCGTTGGAGAGACCGTTTC','rbcLbR'='TCGGTYAGAGCRGGCATRTGCCA'),'matk'=c('matK472F'='CCCRTYCATCTGGAAATCTTGGTTC','matK1248R'='GCTRTRATAATGAGAAAGATTTCTGC'))
