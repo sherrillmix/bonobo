@@ -44,3 +44,8 @@ setupHeat<-function(pos,neg,otuProp,taxa,minProp=.001,pCut=.1,treeScale=1/3){
   return(list(selectProp,effectSplit))
 }
 
+medianCI<-function(xx,na.rm=TRUE){
+  if(na.rm)xx<-xx[!is.na(xx)]
+  return(unname(sort(xx)[qbinom(c(.025,.975), length(xx), 0.5)]))
+}
+

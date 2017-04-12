@@ -2,11 +2,6 @@ library(dnar)
 if(!exists('otuTab'))source('runQiime.R')
 
 
-medianCI<-function(xx,na.rm=TRUE){
-  if(na.rm)xx<-xx[!is.na(xx)]
-  return(unname(sort(xx)[qbinom(c(.025,.975), length(xx), 0.5)]))
-}
-
 rareSteps<-seq(100,15000,100)
 rareCurves<-apply(otuTab[,samples$name[samples$isEnough]],2,rareEquation,rareSteps)
 
