@@ -15,20 +15,27 @@ ninePs<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppres
 
 ninePsGt<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppressWarnings(wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]],alternative='greater')$p.value)))
 
-condenseP<-p.adjust(apply(ninePs,2,fishers,correct=3),'bonferroni')
-condensePGt<-p.adjust(apply(ninePsGt,2,fishers,correct=3),'bonferroni')
+ninePsBoth<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppressWarnings(wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]]))$p.value))
+ninePsBoth[is.na(ninePsBoth)]<-1
+
+condenseP<-p.adjust(apply(ninePs,2,fishers,correct=3),'fdr')
+condensePGt<-p.adjust(apply(ninePsGt,2,fishers,correct=3),'fdr')
+condensePBoth<-p.adjust(apply(ninePsBoth,2,fishers,correct=3),'fdr')
 
 
-pCut<-.01
+pCut<-.025
 selectPropAll<-apply(inBonobo[condenseP<pCut,ss$name[ss$isEnough]],1,function(x)x/max(x))
 #rownames(selectPropAll)<-sprintf('%s%s',ifelse(ss[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
 selectPropAll<-selectPropAll[,order(condenseP[condenseP<pCut])]
 colnames(selectPropAll)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAll),'bestId'],condenseP[colnames(selectPropAll)])
-
+#
 selectPropAllGt<-apply(inBonobo[condensePGt<pCut,ss$name[ss$isEnough]],1,function(x)x/max(x))
 selectPropAllGt<-selectPropAllGt[,order(condensePGt[condensePGt<pCut])]
 colnames(selectPropAllGt)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAllGt),'bestId'],condensePGt[colnames(selectPropAllGt)])
-
+#
+selectPropAllBoth<-apply(inBonobo[condensePBoth<pCut,ss$name[ss$isEnough]],1,function(x)x/max(x))
+selectPropAllBoth<-selectPropAllBoth[,order(condensePBoth[condensePBoth<pCut])]
+colnames(selectPropAllBoth)<-sprintf('%s q=%0.3f',taxa[colnames(selectPropAllBoth),'bestId'],condensePBoth[colnames(selectPropAllBoth)])
 
 breaks<-c(-1e-6,seq(min(selectPropAll[selectPropAll>0])-1e-10,max(selectPropAll)+1e-10,length.out=100))
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
@@ -43,11 +50,14 @@ pdf('out/nineCompare.pdf',height=13,width=12)
   plotHeat(selectPropAllGt,breaks,cols,yaxt='n')
   title(main='Enriched')
   addMetaData(metadata,cex=.75)
+  #plotHeat(selectPropAllBoth,breaks,cols,yaxt='n')
+  #title(main='Both')
+  #addMetaData(metadata,cex=.75)
 dev.off()
 
-sigTaxa<-names(condenseP)[condenseP<pCut]
+sigTaxa<-names(condensePBoth)[condensePBoth<pCut]
 seqDists<-outer(strsplit(taxa[sigTaxa,'seq'],''),strsplit(taxa[sigTaxa,'seq'],''),function(xx,yy)mapply(function(x,y)sum(x!=y),xx,yy))
-seqDists2<-leven(taxa[sigTaxa,'seq'])
+#seqDists2<-leven(taxa[sigTaxa,'seq'])
 rownames(seqDists)<-colnames(seqDists)<-taxa[sigTaxa,'bestId']
 breaks<-seq(min(seqDists),max(seqDists),length.out=100)
 rownames(seqDists2)<-colnames(seqDists2)<-taxa[sigTaxa,'bestId']
