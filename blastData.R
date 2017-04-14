@@ -24,3 +24,17 @@ check<-mclapply(fastqs,function(fastq){
   }
 },mc.cores=14)
 
+contigFa<-list.files('work/swarm','.fa.gz$',full.names=TRUE)
+for(fasta in contigFa){
+  outFile<-sub('fa.gz$','blast',fasta)
+  if(grepl('rbcL',fasta))gene<-'rbcl'
+  else if(grepl('matK',fasta))gene<-'matk'
+  else stop('Unknown gene')
+  cmd<-sprintf("zcat %s|blastn -db work/%s -num_threads 4 -culling_limit 10 -outfmt 6|gzip > %s",fasta,gene,outFile)
+  if(!file.exists(outFile)){
+    message(cmd)
+    system(cmd)
+  }else{
+    message("ALREADY DONE: ",cmd)
+  }
+}
