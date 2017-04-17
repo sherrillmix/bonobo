@@ -3,6 +3,7 @@ library(dnar)
 
 source('../readSamples.R',chdir=TRUE)
 source('../functions.R')
+source('functions.R')
 nRequiredReads<-15000
 
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
@@ -39,4 +40,5 @@ head(sort(apply(otuTab[,samples$name],2,sum)))
 
 otuProp<-apply(otuTab,2,function(x)x/sum(x))
 
+readCounts<-apply(otuTab,2,sum)
 mean(readCounts[samples[samples$isEnough,'name']])
