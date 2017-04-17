@@ -1,5 +1,6 @@
 library(vipor)
 library(dnar)
+source('functions.R')
 if(!exists('uniDist'))source('plotPcoa.R')
 
 # TL-E vs TL-W
@@ -108,7 +109,7 @@ dev.off()
 
 
 spacer<-.6
-pdf('out/dists_slant.pdf',width=9,height=6)
+pdf('out/Fig.S6B.pdf',width=9,height=6)
   par(mar=c(9.2,2.75,.1,4),lheight=.8)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
@@ -146,9 +147,9 @@ zzz<-cbind(labels(uniDist)[zz[,1]],labels(uniDist)[zz[,2]])
 zzz[apply(zzz,1,function(xx)!any(grepl('LG4300',xx))),]
 
 library(vegan)
-allAdonis<-cacheOperation('work/allAdonis.Rdat',adonis,uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=20)
+allAdonis<-cacheOperation('work/allAdonis.Rdat',adonis,uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
 tlDist<-as.dist(as.matrix(uniDist)[samples[labels(uniDist),'isTL'],samples[labels(uniDist),'isTL']])
-tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=20)
+tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=10)
 chimpDist<-as.dist(as.matrix(uniDist)[!samples[labels(uniDist),'bonobo'],!samples[labels(uniDist),'bonobo']])
-chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=20)
+chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=10)
 

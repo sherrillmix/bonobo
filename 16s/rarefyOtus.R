@@ -5,8 +5,8 @@ if(!exists('otuTab'))source('runQiime.R')
 rareSteps<-seq(100,15000,100)
 rareCurves<-apply(otuTab[,samples$name[samples$isEnough]],2,rareEquation,rareSteps)
 
-groupings<-paste(samples$Species[samples$isEnough],ifelse(samples$malaria[samples$isEnough],'Laverania positive','Laverania negative'))
-groupings2<-paste(ifelse(grepl('^TL',samples$area[samples$isEnough]),'TL2 ',ifelse(samples$bonobo[samples$isEnough],'Non-endemic ','')),samples$Species[samples$isEnough],sep='')
+groupings<-paste(ifelse(samples$bonobo[samples$isEnough],'Bonobo','Chimpanzee'),ifelse(samples$malaria[samples$isEnough],'Laverania positive','Laverania negative'))
+groupings2<-paste(ifelse(samples$bonobo[samples$isEnough],'Bonobo ','Chimpanzee '),ifelse(grepl('^TL',samples$area[samples$isEnough]),'TL2 site',ifelse(samples$bonobo[samples$isEnough],'non-endemic sites','all sites')),sep='')
 groupCurves<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
 group2Curves<-lapply(unique(groupings2),function(xx)t(apply(rareCurves[,groupings2==xx],1,quantile,c(.975,.5,.025),na.rm=TRUE)))
 groupCI<-lapply(unique(groupings),function(xx)t(apply(rareCurves[,groupings==xx],1,medianCI)))
@@ -56,7 +56,7 @@ outer(split(shannons,groupings2),split(shannons,groupings2),function(xx,yy)mappl
 outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmodi.*','',groupings)),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 
 #library(beeswarm)
-pdf('out/shannon.pdf',width=8,height=6)
+pdf('out/Fig.S6A.pdf',width=8,height=6)
   spacer<-.5
   par(mar=c(6.6,4,.1,3),lheight=.85)
   plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(c(groupings,groupings2)))+.5+spacer),ylim=range(shannons),xaxt='n',xlab='',bty='l')
@@ -70,7 +70,7 @@ pdf('out/shannon.pdf',width=8,height=6)
   points(xPos,shannons,pch=21,bg=groupCols[groupings],cex=1.7)
     #,shannons,,pch=21,bg=groupCols[groupings],cex=1.5
   #vpPlot(factor(groupings2,levels=unique(groupings2)),shannons,ylab='Shannon diversity',las=2,pch=21,bg=group2Cols[groupings2],cex=1.5)
-  slantAxis(1,1:length(levels(groupFac)),levels(groupFac),srt=-30)
+  slantAxis(1,1:length(levels(groupFac)),sub(' Laverania','\nLaverania',levels(groupFac)),srt=-30)
   groupFac2<-factor(groupings2,levels=unique(groupings2))
   #xPos<-as.numeric(groupFac2)+ave(shannons,groupFac2,FUN=function(xx)swarmx(0,xx,cex=1.9)$x)
   offset<-max(as.numeric(groupFac))+spacer
@@ -80,6 +80,7 @@ pdf('out/shannon.pdf',width=8,height=6)
   segments(offset+1:length(levels(groupFac2))-width,group2Shannon[sub('\n',' ',levels(groupFac2))],offset+1:length(levels(groupFac2))+width,group2Shannon[sub('\n',' ',levels(groupFac2))],lwd=3,col=group2Cols[sub('\n',' ',levels(groupFac2))])
   rect(offset+1:length(levels(groupFac2))-width,shannon2CI[1,sub('\n',' ',levels(groupFac2))],offset+1:length(levels(groupFac2))+width,shannon2CI[2,sub('\n',' ',levels(groupFac2))],lwd=2,border=NA,col=group2Cols2[sub('\n',' ',levels(groupFac2))])
   points(xPos,shannons,pch=21,bg=group2Cols[groupings2],cex=1.7)
-  slantAxis(1,offset+1:length(levels(groupFac2)),levels(groupFac2),srt=-30)
+  #replacing first space with \n
+  slantAxis(1,offset+1:length(levels(groupFac2)),sub(' ','\n',levels(groupFac2)),srt=-30)
 dev.off()
 

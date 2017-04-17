@@ -26,10 +26,13 @@ phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$na
 qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
 uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
 brayDist<-distance(qiimeDataW,'bray')
-jacDist<-distance(qiimeDataW,'jaccard')
+brayDistUW<-distance(qiimeDataW,'bray',binary=TRUE)
+jacDist<-distance(qiimeData,'jaccard')
 uniPca<-pcoa(uniDist)
 uniPcaW<-pcoa(uniDistW)
 brayPca<-pcoa(brayDist)
+brayPcaUW<-pcoa(brayDistUW)
+jacPca<-pcoa(jacDist)
 predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
 colnames(predictors)<-sub('^Species','',colnames(predictors))
 colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
@@ -37,8 +40,7 @@ colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
 
 #areaCols<-rainbow.lab(length(unique(samples$area)),alpha=.8)
 source('myBiplot.R')
-#last color made up
-colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
+#last color made up colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
 nArea<-length(unique(selectSamples$area2))
 if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
 areaCols<-colorBrew[1:nArea]
@@ -46,20 +48,20 @@ names(areaCols)<-unique(selectSamples$area2)
 areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$Species[selectSamples$area2==x]))
 malariaCols<-c('#00000022','#000000CC')
 malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
-names(malariaCols2)<-names(malariaCols)<-c('PlasmoNeg','PlasmoPos')
+names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
 speciesPch<-20+1:length(unique(selectSamples$Species))
 speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
-names(speciesCols)<-names(speciesPch)<-unique(selectSamples$Species)
+names(speciesCols)<-names(speciesPch)<-unique(selectSamples$chimpBonobo)
 #split out TL2-E and -W, bonobos and KR and chimps
 splitAreas<-ifelse(selectSamples$area2 %in% c('TL-E','TL-W','KR','TL-NE'),selectSamples$area2,selectSamples$Species)
 splitAreaCols<-rainbow.lab(length(unique(splitAreas)))
 names(splitAreaCols)<-unique(splitAreas)[order(unique(splitAreas) %in% c('P.t. schweinfurthii'))]
 targetPca<-uniPca
 importance<-targetPca$values$Relative_eig
-colnames(targetPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:ncol(targetPca$vectors),round(importance*100))
-pdf('out/pcoa.pdf',height=9,width=9)
+colnames(targetPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
+pdf('out/pcoa.pdf',height=6,width=6)
   sapply(list(1:2,3:4,5:6),function(axes){
-    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$Species],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
+    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
     points(pos[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
     legend(
       'bottomright',
@@ -71,7 +73,7 @@ pdf('out/pcoa.pdf',height=9,width=9)
     title(main=sprintf('All variables PC %d and %d',axes[1],axes[2]))
     text(pos,selectSamples$Code,cex=.25)
     #species
-    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col="#00000077",cex=1.8,lwd=2.5)
+    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col="#00000077",cex=1.8,lwd=2.5)
     legend('bottomright',names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=.01,pt.lwd=3,pt.cex=2)
     title(main=sprintf('Species PC %d and %d',axes[1],axes[2]))
     #malaria
@@ -79,11 +81,11 @@ pdf('out/pcoa.pdf',height=9,width=9)
     legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
     title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
     #malaria/species
-    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$Species],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
+    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
     legend('bottomleft',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
     title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
-    for(ii in unique(selectSamples$Species)){ 
-      hull<-expandedHull(pos[selectSamples$Species==ii,],1.02,'ellipse')
+    for(ii in unique(selectSamples$chimpBonobo)){ 
+      hull<-expandedHull(pos[selectSamples$chimpBonobo==ii,],1.02,'ellipse')
       #polygon(hull,border=speciesCols[ii],col=NA,lwd=2.4)
     }
     #labelled
@@ -98,7 +100,7 @@ pdf('out/pcoa.pdf',height=9,width=9)
     #par('cex'=bak)
   })
 dev.off()
-system('pdftk out/pcoa.pdf cat 4 output out/pcoa_unifrac_select.pdf')
+system('pdftk out/pcoa.pdf cat 4 output out/Fig.5B.pdf')
 
 pdf('out/pcoa_bray.pdf',height=9,width=9)
   sapply(list(1:2,3:4,5:6),function(axes){
@@ -182,7 +184,7 @@ sampleNs<-apply(otuTab[,samples$name],2,sum)
 
 library(Rtsne)
 #uw unifrac
-tsne<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
+tsne<-cacheOperation('work/tsne.Rdat',Rtsne,uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
 #save(tsne,file='work/tnse.Rdat')
 tsne2<-Rtsne(uniDist2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 tsne3<-Rtsne(uniDist3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
@@ -243,5 +245,5 @@ pdf('out/tsne.pdf',height=8,width=10)
     text(tsnes[[3]]$Y,selectSamples3$Code,cex=.25)
   }
 dev.off()
-system('pdftk out/tsne.pdf cat 1 output out/tsne_select.pdf')
+system('pdftk out/tsne.pdf cat 1 output out/Fig.S6C.pdf')
 
