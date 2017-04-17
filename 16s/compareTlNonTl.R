@@ -23,7 +23,7 @@ condensePGt<-p.adjust(apply(ninePsGt,2,fishers,correct=3),'fdr')
 condensePBoth<-p.adjust(apply(ninePsBoth,2,fishers,correct=3),'fdr')
 
 
-pCut<-.025
+pCut<-.05
 selectPropAll<-apply(inBonobo[condenseP<pCut,ss$name[ss$isEnough]],1,function(x)x/max(x))
 #rownames(selectPropAll)<-sprintf('%s%s',ifelse(ss[rownames(selectPropAll),'malaria'],'+','-'),sub("EasternChimpanzee","Chimp",rownames(selectPropAll)))
 selectPropAll<-selectPropAll[,order(condenseP[condenseP<pCut])]
