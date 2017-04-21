@@ -26,7 +26,7 @@ check<-mclapply(fastqs,function(fastq){
 
 contigFa<-list.files('work/swarm','.fa.gz$',full.names=TRUE)
 for(fasta in contigFa){
-  outFile<-sub('fa.gz$','blast',fasta)
+  outFile<-sub('fa.gz$','blast.gz',fasta)
   if(grepl('rbcL',fasta))gene<-'rbcl'
   else if(grepl('matK',fasta))gene<-'matk'
   else stop('Unknown gene')
