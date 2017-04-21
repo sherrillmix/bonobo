@@ -14,9 +14,9 @@ if(!file.exists(sqlFile)){
   file.remove(list.files(tmp,'accession2taxid.gz$',full.names=TRUE))
 }
 
-blastFiles<-list.files('work/blast','.blast.gz$',full.names=TRUE)
+blastFiles<-list.files('work/swarm/','\\.blast\\.gz$',full.names=TRUE)
 
-taxas<-cleanMclapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile){
+taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
   message(ii)
   outFile<-sub('.blast.gz$','_taxa.csv',ii)
   outFile2<-sub('.blast.gz$','_allHits.csv',ii)
