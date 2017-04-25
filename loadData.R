@@ -23,10 +23,11 @@ swarmData<-lapply(unique(primers),function(ii){
   rownames(swarmSeqs)<-swarmSeqs$name
   swarmTaxa<-read.csv(outTaxa,row.names=1)
   swarmTaxa$seq<-swarmSeqs[rownames(swarmTaxa),'seq']
-  return(list('otus'=swarmOtus,'taxa'=swarmTaxa))
+  props<-apply(swarmOtus,1,function(xx)xx/sum(xx))
+  return(list('otus'=swarmOtus,'props'=props,'taxa'=swarmTaxa))
 })
 names(swarmData)<-unique(primers)
 
 nReads<-lapply(swarmData,function(xx)apply(xx[['otus']],1,sum))
-isEnough<-sapply(nReads,function(xx)xx>5000)
+isEnough<-lapply(nReads,function(xx)xx>5000)
 
