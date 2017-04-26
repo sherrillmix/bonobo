@@ -52,10 +52,11 @@ taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
 },taxaNodes,taxaNames,sqlFile,extraCode='library(dnar);library(taxonomizr);library(parallel)',mc.cores=4,nSplits=40)
 
 
-taxonomy<-lapply(taxas,'[[','taxonomy')
-taxas<-lapply(taxas,'[[','taxa')
-names(taxas)<-names(taxonomy)<-basename(blastFiles)
+#taxonomy<-lapply(taxas,'[[','taxonomy')
+#taxas<-lapply(taxas,'[[','taxa')
+#names(taxas)<-names(taxonomy)<-basename(blastFiles)
 
+rm(taxas)
 rm(taxaNames)
 rm(taxaNodes)
 
