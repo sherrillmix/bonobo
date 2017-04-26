@@ -69,5 +69,10 @@ runSwarm<-function(seqs,swarmBin='swarm',swarmArgs='-f'){
   names(otus)<-unlist(otuSplit)  
   out<-otus[seqNames]
   seedSeqs<-read.fa(seqFile)
+  if(nrow(seedSeqs)!=length(otuSplit))stop('Seqs and OTU assigns not same length')
+  if(any(!mapply(function(xx,yy)sub('_[0-9]+$','',xx) %in% sub('_[0-9]+$','',yy),seedSeqs$name,otuSplit)))stop('Mismatch between sequence and OTU names')
+  if(any(!mapply(function(xx,yy)as.numeric(sub('^[^_]*_','',xx)) == sum(as.numeric(sub('^[^_]*_','',yy))),seedSeqs$name,otuSplit)))stop('Mismatch between sequence and OTU counts')
+  seedSeqs$bak<-seedSeqs$name
+  seedSeqs$name<-1:nrow(seedSeqs)
   return(list('otus'=out,'seqs'=seedSeqs))
 }
