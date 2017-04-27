@@ -30,7 +30,7 @@ for(fasta in contigFa){
   if(grepl('rbcL',fasta))gene<-'rbcl'
   else if(grepl('matK',fasta))gene<-'matk'
   else stop('Unknown gene')
-  cmd<-sprintf("zcat %s|blastn -db work/%s -num_threads 4 -culling_limit 10 -outfmt 6|gzip > %s",fasta,gene,outFile)
+  cmd<-sprintf("zcat %s|blastn -db work/%s -num_threads 30 -culling_limit 10 -outfmt 6|gzip > %s",fasta,gene,outFile)
   if(!file.exists(outFile)){
     message(cmd)
     system(cmd)
