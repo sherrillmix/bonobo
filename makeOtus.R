@@ -20,7 +20,7 @@ for(ii in unique(primers)){
   thisFiles<-fastqs[primers==ii]
   reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)$seq},mc.cores=6,mc.preschedule=FALSE)
   #WARNING cutting reads 
-  trimReads<-lapply(reads,function(xx)substring(xx[!grepl('[^ACTG]',xx)],nchar(thisPrimer)+1,200))
+  trimReads<-lapply(reads,function(xx)substring(xx[!grepl('[^ACTG]',xx)],nchar(thisPrimer)+1))
   samples<-rep(basename(thisFiles),sapply(trimReads,length))
   otus<-runSwarm(unlist(trimReads),'~/installs/swarm/swarm',swarmArgs='-f -t 30')
   swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
