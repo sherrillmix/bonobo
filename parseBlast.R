@@ -33,7 +33,7 @@ taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
     message('  Accession to taxonomy')
     x$taxa<-accessionToTaxa(x$accession,sqlFile)
     x$maxBit<-ave(x$score,x$qName,FUN=max)
-    x<-x[x$score==x$maxBit&!is.na(x$taxa),]
+    x<-x[x$score>x$maxBit*.98&!is.na(x$taxa),]
     gc()
     message('  Getting upstream taxonomy')
     taxonomy<-getTaxonomy(x$taxa,taxaNodes,taxaNames,mc.cores=5)
