@@ -20,6 +20,7 @@ swarmData<-lapply(unique(primers),function(ii){
   tmp<-environment()
   load(outMat,tmp)
   swarmOtus<-get('swarmOtus',tmp)
+  rownames(swarmOtus)<-sub('^([A-Z]+[0-9]+).*','\\1',rownames(swarmOtus))
   rm(tmp)
   swarmSeqs<-read.fa(outFa)
   rownames(swarmSeqs)<-swarmSeqs$name
