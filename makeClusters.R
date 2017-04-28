@@ -5,13 +5,9 @@ library(vipor)
 library(Rtsne)
 source('16s/myBiplot.R')
 
-primerSet<-sub('^([^0-9]+)[0-9].*','\\1',names(swarmData))
-
 pdf('out/pcoa.pdf',width=10,height=8)
-for(ii in unique(primerSet)){
-  thisPrimers<-names(swarmData)[primerSet==ii]
-  isEnough<-apply(do.call(cbind,lapply(thisPrimers,function(primer)swarmData[[primer]][['isEnough']])),1,all)
-  plotProp<-do.call(cbind,lapply(thisPrimers,function(primer)swarmData[[primer]][['props']][isEnough&rownames(swarmData[[primer]][['props']]) %in% rownames(samples),]))
+for(ii in names(swarmData)){
+  plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
   phyOtuW<-otu_table(plotProp,taxa_are_rows=FALSE)
   qiimeDataW<-phyloseq(otu_table=phyOtuW)
   brayDist<-distance(qiimeDataW,'bray')
