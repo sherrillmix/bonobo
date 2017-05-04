@@ -14,7 +14,7 @@ if(!file.exists(sqlFile)){
   file.remove(list.files(tmp,'accession2taxid.gz$',full.names=TRUE))
 }
 
-blastFiles<-list.files('work/swarm/','\\.blast\\.gz$',full.names=TRUE)
+blastFiles<-list.files('work/swarmPair','\\.blast\\.gz$',full.names=TRUE)
 
 taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
   message(ii)
