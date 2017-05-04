@@ -38,3 +38,18 @@ for(fasta in contigFa){
     message("ALREADY DONE: ",cmd)
   }
 }
+
+contigFa<-list.files('work/swarmPair','.fa.gz$',full.names=TRUE)
+for(fasta in contigFa){
+  outFile<-sub('fa.gz$','blast.gz',fasta)
+  if(grepl('rbcL',fasta))gene<-'rbcl'
+  else if(grepl('matK',fasta))gene<-'matk'
+  else stop('Unknown gene')
+  cmd<-sprintf("zcat %s|blastn -db work/%s -num_threads 30 -culling_limit 10 -outfmt 6|gzip > %s",fasta,gene,outFile)
+  if(!file.exists(outFile)){
+    message(cmd)
+    system(cmd)
+  }else{
+    message("ALREADY DONE: ",cmd)
+  }
+}
