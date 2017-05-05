@@ -5,7 +5,6 @@ library(vipor)
 library(Rtsne)
 source('16s/myBiplot.R')
 
-pdf('out/pcoa.pdf',width=10,height=8)
 for(ii in names(swarmData)){
   plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
   phyOtuW<-otu_table(plotProp,taxa_are_rows=FALSE)
@@ -24,12 +23,13 @@ for(ii in names(swarmData)){
   areaCols<-colorBrew[1:nArea]
   names(areaCols)<-unique(selectSamples$area2)
   areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$chimpBonobo[selectSamples$area2==x]))
+  malariaCols3<-c(NA,'#000000CC')
   malariaCols<-c('#00000022','#000000CC')
   malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
-  names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
+  names(malariaCols3)<-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
   speciesPch<-20+1:length(unique(selectSamples$Species))
-  speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
-  names(speciesCols)<-names(speciesPch)<-unique(selectSamples$chimpBonobo)
+  speciesCols<-c('#FF0000CC','#0000FFCC')#rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+  names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
   #pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=Inf)
@@ -44,21 +44,25 @@ for(ii in names(swarmData)){
     #xjust=0,xpd=NA
   #)
 
-    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
-    legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
-  title(main=sprintf('%s PCoA PC %d and %d',ii,1,2))
+  pdf(sprintf('out/pcoa_%s.pdf',ii),width=7,height=7)
+    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0))
+    legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols3),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
+    title(main=sprintf('%s',ii,1,2))
+  dev.off()
 
-  par(mar=c(4,4,1.5,10))
-  plot(tsneBray$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s t-SNE',ii))
-  legend(
-    par('usr')[2]+.01*diff(par('usr')[1:2]), 
-    mean(par('usr')[3:4]),
-    c(names(malariaCols),names(areaCols),names(speciesPch)),
-    col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch)))),
-    pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
-    pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
-    inset=.01,pt.lwd=3,pt.cex=2.5,
-    xjust=0,xpd=NA
-  )
+  pdf(sprintf('out/tsne_%s.pdf',ii),width=9,height=7)
+    par(mar=c(4,4,1.5,10))
+    plot(tsneBray$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s t-SNE',ii))
+    legend(
+      par('usr')[2]+.01*diff(par('usr')[1:2]), 
+      mean(par('usr')[3:4]),
+      c(names(malariaCols),names(areaCols),names(speciesPch)),
+      col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch)))),
+      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
+      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
+      inset=.01,pt.lwd=3,pt.cex=2.5,
+      xjust=0,xpd=NA
+    )
+  dev.off()
+
 }
-dev.off()

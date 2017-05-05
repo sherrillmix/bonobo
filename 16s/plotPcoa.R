@@ -49,10 +49,12 @@ names(areaCols)<-unique(selectSamples$area2)
 areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$Species[selectSamples$area2==x]))
 malariaCols<-c('#00000022','#000000CC')
 malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
+malariaCols3<-c(NA,'#000000CC')
+names(malariaCols3)<-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
 speciesPch<-20+1:length(unique(selectSamples$Species))
-speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
-names(speciesCols)<-names(speciesPch)<-unique(selectSamples$chimpBonobo)
+speciesCols<-c('#FF0000CC','#0000FFCC')
+#speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 #split out TL2-E and -W, bonobos and KR and chimps
 splitAreas<-ifelse(selectSamples$area2 %in% c('TL-E','TL-W','KR','TL-NE'),selectSamples$area2,selectSamples$Species)
 splitAreaCols<-rainbow.lab(length(unique(splitAreas)))
@@ -60,7 +62,7 @@ names(splitAreaCols)<-unique(splitAreas)[order(unique(splitAreas) %in% c('P.t. s
 targetPca<-uniPca
 importance<-targetPca$values$Relative_eig
 colnames(targetPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
-pdf('out/pcoa.pdf',height=6,width=6)
+pdf('out/pcoa.pdf',height=7,width=7)
   sapply(list(1:2,3:4,5:6),function(axes){
     pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
     points(pos[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
@@ -75,16 +77,16 @@ pdf('out/pcoa.pdf',height=6,width=6)
     text(pos,selectSamples$Code,cex=.25)
     #species
     pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col="#00000077",cex=1.8,lwd=2.5)
-    legend('bottomright',names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=.01,pt.lwd=3,pt.cex=2)
+    legend('bottomright',names(speciesCols),col='#00000077',pch=21,pt.bg=speciesCols,inset=.01,pt.lwd=3,pt.cex=2,bty='n')
     title(main=sprintf('Species PC %d and %d',axes[1],axes[2]))
     #malaria
     pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=malariaCols2[selectSamples$malaria+1],col="#00000077",cex=1.8,lwd=2.5)
     legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
     title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
     #malaria/species
-    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf)
-    legend('bottomleft',as.vector(outer(names(speciesCols),names(malariaCols),paste,sep=' ')),col=as.vector(malariaCols[outer(names(speciesCols),names(malariaCols),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5)
-    title(main=sprintf('Species/malaria PC %d and %d',axes[1],axes[2]))
+    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0))
+    legend('bottomleft',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
+    title(main=sprintf('16S',axes[1],axes[2]))
     for(ii in unique(selectSamples$chimpBonobo)){ 
       hull<-expandedHull(pos[selectSamples$chimpBonobo==ii,],1.02,'ellipse')
       #polygon(hull,border=speciesCols[ii],col=NA,lwd=2.4)
