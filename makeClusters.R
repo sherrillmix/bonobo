@@ -23,12 +23,14 @@ for(ii in names(swarmData)){
   areaCols<-colorBrew[1:nArea]
   names(areaCols)<-unique(selectSamples$area2)
   areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$chimpBonobo[selectSamples$area2==x]))
-  malariaCols3<-c(NA,'#000000CC')
+  #malariaCols3<-c(NA,'#000000CC')
+  malariaCols3<-c('#00000022','#000000CC')
   malariaCols<-c('#00000022','#000000CC')
   malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
   names(malariaCols3)<-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
   speciesPch<-20+1:length(unique(selectSamples$Species))
-  speciesCols<-c('#FF0000CC','#0000FFCC')#rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+  #speciesCols<-c('#FF0000CC','#0000FFCC')
+  speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
   names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
