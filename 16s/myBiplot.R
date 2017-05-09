@@ -1,4 +1,4 @@
-my.biplot.pcoa<-function (x, Y = NULL, plot.axes = c(1, 2), dir.axis1 = 1, dir.axis2 = 1, rn = NULL,mar= c(4, 4, 1, 0.2), ...) {
+my.biplot.pcoa<-function (x, Y = NULL, plot.axes = c(1, 2), dir.axis1 = 1, dir.axis2 = 1, rn = NULL,mar= c(4, 4, 1, 0.2), sameAxis=TRUE, ...) {
   k <- ncol(x$vectors)
   if (k < 2) 
     stop("There is a single eigenvalue. No plot can be produced.")
@@ -34,23 +34,29 @@ my.biplot.pcoa<-function (x, Y = NULL, plot.axes = c(1, 2), dir.axis1 = 1, dir.a
           1))^(-0.5))
     colnames(U) <- colnames(x$vectors[, plot.axes])
     par(mar = mar)
-    myBiplot(x$vectors[, plot.axes], U, xlab = labels[1], ylab = labels[2],...)
+    myBiplot(x$vectors[, plot.axes], U, xlab = labels[1], ylab = labels[2],sameAxis=sameAxis,...)
   }
   invisible(x$vectors[, plot.axes])
 }
 
-myBiplot.pca<-myBiplot<-function(pcaPoints,pcaArrows,choice=c(1,2),cor=FALSE,prcomp=FALSE,arrowsFilter=NULL,limScale=1,...){
-	limits<-range(pcaPoints) #find limits for x and y directions
-	arrowScale<-max(range(pcaArrows[,1])/limits,range(pcaArrows[,2])/limits)*limScale #find a scaling for the arrows limits
+myBiplot.pca<-myBiplot<-function(pcaPoints,pcaArrows,choice=c(1,2),cor=FALSE,prcomp=FALSE,arrowsFilter=NULL,limScale=1,sameAxis=TRUE,...){
+  if(sameAxis){
+    xlim<-range(pcaPoints) #find limits for x and y directions
+    ylim<-xlim
+  }else{
+    xlim<-range(pcaPoints[,1])
+    ylim<-range(pcaPoints[,2])
+  }
+	arrowScale<-max(range(pcaArrows[,1])/xlim,range(pcaArrows[,2])/ylim)*limScale #find a scaling for the arrows limits
 	if(!is.null(arrowsFilter)){pcaArrows<-pcaArrows[sqrt(pcaArrows[,1]^2+pcaArrows[,2]^2)>arrowsFilter,,drop=FALSE]}
   if(nrow(pcaArrows)>0){
-    plot(pcaArrows,type="n",xaxt='n',yaxt='n',xlab='',ylab='',xlim=arrowScale*limits,ylim=arrowScale*limits) #set the axes for easy arrow drawing (messes up any additional plotting on score axes)
+    plot(pcaArrows,type="n",xaxt='n',yaxt='n',xlab='',ylab='',xlim=arrowScale*xlim,ylim=arrowScale*ylim) #set the axes for easy arrow drawing (messes up any additional plotting on score axes)
     arrows(0,0,pcaArrows[,1]*.8,pcaArrows[,2]*.8,length=.1) #draw arrows
     arrowText<-dimnames(pcaArrows)[[1]] #get rownames of loadings for labels
     if(is.null(arrowText)) arrowText<-paste('Var',1:nrow(pcaArrows)) #if no rownames just label with "Var X"
     text(pcaArrows,arrowText,cex=.9) #label the arrows
     par(new=TRUE) #plot the next plot directly on top of the current one
   }
-	plot(pcaPoints,xlim=limits,ylim=limits,...)
+	plot(pcaPoints,xlim=xlim,ylim=ylim,...)
 }
 
