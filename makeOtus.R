@@ -45,6 +45,8 @@ for(primerBase in unique(primerBases)){
     return(trimReads)
   })
   if(any(names(trimReads[[1]])!=sub('_R2_','_R1_',names(trimReads[[2]]))))stop('Read 1 vs reads 2 file name mismatch')
+  readCounts<-as.data.frame(sapply(trimReads,function(xx)sapply(xx,nrow)))
+  colnames(readCounts)<-c('raw1','raw2')
   #concatenate high quality reads
   trimReads<-mcmapply(function(left,right,...){
     cat('.')
@@ -56,7 +58,9 @@ for(primerBase in unique(primerBases)){
     selector<-q1<1&q2<1 & !grepl('[^ACTG]',left$seq)&!grepl('[^ACTG]',right$seq)
     seqs<-paste(left[selector,'seq'],revComp(right[selector,'seq']),sep='')
     return(seqs)
-  },trimReads[[1]],trimReads[[2]],mc.cores=10,SIMPLIFY=FALSE)
+  },trimReads[[1]],trimReads[[2]],mc.cores=5,SIMPLIFY=FALSE)
+  readCounts$filter<-sapply(trimReads,length)
+  write.csv(readCounts,'work/swarmPair/%s_counts.csv')
   samples<-rep(basename(names(trimReads)),sapply(trimReads,length))
   otus<-runSwarm(unlist(trimReads),'~/installs/swarm/swarm',swarmArgs='-f -t 40')
   swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
