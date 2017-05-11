@@ -41,4 +41,10 @@ head(sort(apply(otuTab[,samples$name],2,sum)))
 otuProp<-apply(otuTab,2,function(x)x/sum(x))
 
 readCounts<-apply(otuTab,2,sum)
+readCounts<-readCounts[samples$name]
+names(readCounts)<-samples$Code
+tableOrder<-readLines('../tableOrder.csv')
+if(any(!tableOrder %in% names(readCounts)))stop('Problem with table order')
+write.csv(data.frame('16s'=readCounts[tableOrder]),'out/16s_readCounts.csv')
 mean(readCounts[samples[samples$isEnough,'name']])
+mean(readCounts[samples[,'name']])
