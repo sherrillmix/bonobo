@@ -2,14 +2,14 @@ library(dnar)
 library(taxonomizr)
 library(parallel)
 
-getNamesAndNodes('~/db/taxo/')
-taxaNodes<-read.nodes('~/db/taxo/nodes.dmp')
-taxaNames<-read.names('~/db/taxo/names.dmp')
 sqlFile<-'~/db/taxo/accessionTaxa.sql'
 if(!file.exists(sqlFile)){
   tmp<-tempdir()
   #this is a big download
+  getNamesAndNodes('~/db/taxo/')
   getAccession2taxid(tmp)
+  read.nodes2('~/db/taxo/nodes.dmp',sqlFile)
+  read.names2('~/db/taxo/names.dmp',sqlFile)
   read.accession2taxid(list.files(tmp,'accession2taxid.gz$',full.names=TRUE),sqlFile)
   file.remove(list.files(tmp,'accession2taxid.gz$',full.names=TRUE))
 }
@@ -32,20 +32,25 @@ taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
     x$accession<-sapply(strsplit(x$tName,'\\|'),'[[',3)
     message('  Accession to taxonomy')
     x$taxa<-accessionToTaxa(x$accession,sqlFile)
-    x$maxBit<-ave(x$score,x$qName,FUN=max)
-    x<-x[x$score>x$maxBit*.98&!is.na(x$taxa),]
+    x$sumScore<-ave(x$bit,paste(x$tName,x$qName,sep='_-_'),FUN=sum)
+    x$maxScore<-ave(x$sumScore,x$qName,FUN=max)
+    x<-x[x$sumScore>x$maxScore*.98&!is.na(x$taxa),]
     gc()
     message('  Getting upstream taxonomy')
-    taxonomy<-getTaxonomy(x$taxa,taxaNodes,taxaNames,mc.cores=5)
+    taxonomy<-getTaxonomy2(x$taxa,sqlFile)
     taxonomy<-as.data.frame(taxonomy,stringsAsFactors=FALSE)
     message('  Condensing taxonomy')
-    taxaAssigns<-do.call(rbind,by(taxonomy,x$qName,FUN=condenseTaxa))
+    taxaAssigns<-condenseTaxa2(taxonomy,x$qName)
+    taxaAssigns<-as.data.frame(taxaAssigns,stringsAsFactors=FALSE)
+    rownames(taxaAssigns)<-taxaAssigns$id
+    taxaAssigns<-taxaAssigns[,colnames(taxaAssigns)!='id']
     taxonomy$qName<-x$qName
     write.csv(taxonomy,outFile2)
     taxaAssigns$best<-apply(taxaAssigns,1,lastNotNa)
-    bestScore<-x[!duplicated(x$qName),c('qName','alignLength','percID')]
+    bestScore<-x[x$sumScore==x$maxScore,c('qName','alignLength','percID','sumScore')]
+    bestScore<-bestScore[!duplicated(bestScore$qName),]
     rownames(bestScore)<-bestScore$qName
-    taxaAssigns<-cbind(taxaAssigns,bestScore[rownames(taxaAssigns),c('alignLength','percID')])
+    taxaAssigns<-cbind(taxaAssigns,'bestScore'=bestScore[rownames(taxaAssigns),c('sumScore')])
     write.csv(taxaAssigns,outFile)
   }
   return(list('taxa'=taxaAssigns,'taxonomy'=taxonomy))
@@ -57,7 +62,7 @@ taxas<-lapply(blastFiles,function(ii,taxaNodes,taxaNames,sqlFile,...){
 #names(taxas)<-names(taxonomy)<-basename(blastFiles)
 
 rm(taxas)
-rm(taxaNames)
-rm(taxaNodes)
+#rm(taxaNames)
+#rm(taxaNodes)
 
 
