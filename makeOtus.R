@@ -1,5 +1,6 @@
 library(dnar)
 library(parallel)
+library(dnaplotr)
 source('functions.R')
 source('readSamples.R')
 
@@ -31,7 +32,8 @@ for(primerBase in unique(primerBases)){
   message(primerBase)
   outMat<-sprintf('work/swarmPair/%s.Rdat',primerBase)
   outFa<-sprintf('work/swarmPair/%s.fa.gz',primerBase)
-  if(all(file.exists(outMat,outFa))){
+  outAlign<-sprintf('work/swarmPair/%s_align.fa.gz',primerBase)
+  if(all(file.exists(outMat,outFa,outAlign))){
     message('Already processed. Skipping')
     next()
   }
@@ -66,4 +68,17 @@ for(primerBase in unique(primerBases)){
   swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
   write.fa(otus[['seqs']]$name,otus[['seqs']]$seq,outFa)
   save(swarmOtus,file=outMat)
+  load(outMat)
+  tmpFile<-tempfile()
+  otus<-list('seqs'=read.fa(outFa))
+  #throwing out singletons for aligning
+  swarmOtus<-swarmOtus[,apply(swarmOtus,2,sum)>1]
+  seqs<-otus[['seqs']]
+  rownames(seqs)<-seqs$name
+  write.fa(colnames(swarmOtus),seqs[colnames(swarmOtus),'seq'],tmpFile)
+  cmd<-sprintf('~/installs/mafft/bin/mafft --thread 50 %s|gzip>%s',tmpFile,outAlign)
+  message(cmd)
+  system(cmd)
+  align<-read.fa(outAlign)
+  png(sprintf('out/align_%s.png',primerBase),width=4000,height=4000,res=250);plotDNA(align$seq);dev.off()
 }
