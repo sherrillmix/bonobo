@@ -33,6 +33,7 @@ for(primerBase in unique(primerBases)){
   outMat<-sprintf('work/swarmPair/%s.Rdat',primerBase)
   outFa<-sprintf('work/swarmPair/%s.fa.gz',primerBase)
   outAlign<-sprintf('work/swarmPair/%s_align.fa.gz',primerBase)
+  outTree<-sprintf('work/swarmPair/%s_align.tre',primerBase)
   if(all(file.exists(outMat,outFa,outAlign))){
     message('Already processed. Skipping')
     next()
@@ -70,7 +71,6 @@ for(primerBase in unique(primerBases)){
   save(swarmOtus,file=outMat)
   load(outMat)
   tmpFile<-tempfile()
-  otus<-list('seqs'=read.fa(outFa))
   #throwing out singletons for aligning
   swarmOtus<-swarmOtus[,apply(swarmOtus,2,sum)>1]
   seqs<-otus[['seqs']]
@@ -81,4 +81,22 @@ for(primerBase in unique(primerBases)){
   system(cmd)
   align<-read.fa(outAlign)
   png(sprintf('out/align_%s.png',primerBase),width=4000,height=4000,res=250);plotDNA(align$seq);dev.off()
+  png(sprintf('out/align2_%s.png',primerBase),width=4000,height=4000,res=400);plotDNA(removeGapCols(align$seq),main=primerBase);dev.off()
+  cmd<-sprintf('zcat %s|fasttree -gtr -nt>%s',outAlign,outTree)
+  message(cmd)
+  system(cmd)
+}
+
+if(FALSE){
+for(primerBase in unique(primerBases)){
+  tmpFile<-tempfile()
+  outFa<-sprintf('work/swarmPair/%s.fa.gz',primerBase)
+  outMat<-sprintf('work/swarmPair/%s.Rdat',primerBase)
+  outAlign<-sprintf('work/swarmPair/%s_align.fa.gz',primerBase)
+  outTree<-sprintf('work/swarmPair/%s_align.tre',primerBase)
+  cmd<-sprintf('zcat %s|fasttree -gtr -nt>%s',outAlign,outTree)
+  message(cmd)
+  system(cmd)
+}
+
 }
