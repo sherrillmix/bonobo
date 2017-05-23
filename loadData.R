@@ -17,6 +17,7 @@ swarmData<-lapply(unique(primers),function(ii){
   outTaxa<-sprintf('work/swarmPair/%s_taxa.csv',ii)
   outHits<-sprintf('work/swarmPair/%s_allHits.csv',ii)
   outAlign<-sprintf('work/swarmPair/%s_align.fa.gz',ii)
+  outTree<-sprintf('work/swarmPair/%s_align.tre',primerBase)
   if(!file.exists(outMat)|!file.exists(outFa))source('makeOtus.R')
   if(!file.exists(outTaxa)|!file.exists(outHits))source('parseBlast.R')
   tmp<-environment()
@@ -36,6 +37,8 @@ swarmData<-lapply(unique(primers),function(ii){
   nReads<-apply(swarmOtus,1,sum)
   isEnough<-nReads>nReadCut
   subsampledOtus<-cacheOperation(sprintf('work/%s_rarefyOtus.Rdat',ii),apply,swarmOtus,2,function(xx)if(sum(xx)<nReadCut)rep(NA,length(xx)) else rarefyCounts(xx,nReadCut))
-  return(list('otus'=swarmOtus,'props'=props,'rare'=subsampledOtus,'taxa'=swarmTaxa,'nReads'=nReads,'isEnough'=isEnough))
+  rownames(subsampledOtus)<-rownames(swarmOtus)
+  tree<-ape::multi2di(phyloseq::read_tree(outTree))
+  return(list('otus'=swarmOtus,'props'=props,'rare'=subsampledOtus,'taxa'=swarmTaxa,'nReads'=nReads,'isEnough'=isEnough,'tree'=tree))
 })
 names(swarmData)<-unique(primers)
