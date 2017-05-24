@@ -9,14 +9,22 @@ source('16s/myBiplot.R')
 interactAdonis<-plantAdonis<-chimpAdonis<-bonoboAdonis<-list()
 for(ii in names(swarmData)){
   plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
+  plotProp2<-swarmData[[ii]][['rare']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['rare']]) %in% rownames(samples),]
   phyOtuW<-otu_table(plotProp,taxa_are_rows=FALSE)
+  phyOtuU<-otu_table(plotProp2,taxa_are_rows=FALSE)
   qiimeDataW<-phyloseq(otu_table=phyOtuW)
+  qiimeDataU<-phyloseq(otu_table=phyOtuW,phy_tree=swarmData[[ii]][['tree']])
   brayDist<-distance(qiimeDataW,'bray',binary=TRUE)
+  uniDist<-UniFrac(qiimeDataU,weighted=FALSE)
   brayPca<-pcoa(brayDist)
+  uniPca<-pcoa(uniDist)
   tsneBray<-Rtsne(brayDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=3000)
+  tsneUni<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=3000)
+  selectPca<-uniPca
+  selectTsne<-tsneUni
 
-  importance<-brayPca$values$Relative_eig
-  colnames(brayPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(brayPca$vectors)]
+  importance<-selectPca$values$Relative_eig
+  colnames(selectPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(selectPca$vectors)]
   selectSamples<-samples[rownames(plotProp),]
   selectSamples<-selectSamples[order(selectSamples$bonobo,selectSamples$area2,selectSamples$malaria),]
   colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
@@ -38,7 +46,7 @@ for(ii in names(swarmData)){
   names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
-  #pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=Inf)
+  #pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=Inf)
   #legend(
     #par('usr')[2]+.01*diff(par('usr')[1:2]), 
     #mean(par('usr')[3:4]),
@@ -52,7 +60,7 @@ for(ii in names(swarmData)){
 
   print(table(selectSamples$malaria,selectSamples$chimpBonobo))
   pdf(sprintf('out/pcoa_%s.pdf',ii),width=6,height=6)
-    pos<-my.biplot.pcoa(brayPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
+    pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
     points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
     points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
     #legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols3),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
@@ -61,7 +69,7 @@ for(ii in names(swarmData)){
 
   pdf(sprintf('out/tsne_%s.pdf',ii),width=10,height=8)
     par(mar=c(4,4,1.5,10))
-    plot(tsneBray$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
+    plot(selectTsne$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
     legend(
       par('usr')[2]+.01*diff(par('usr')[1:2]), 
       mean(par('usr')[3:4]),
