@@ -17,7 +17,7 @@ if(!file.exists('work/qiime')){
 }
 otus<-read.csv('work/qiimeOtuIds.csv.gz',stringsAsFactors=FALSE)
 otuTab<-as.data.frame.matrix(table(otus$otu,otus$file))
-otuTab<-otuTab[apply(otuTab,1,sum)>3,]
+otuTab<-otuTab[apply(otuTab,1,sum)>1,]
 taxaRaw<-read.csv('work/qiimeOtus.taxa',stringsAsFactors=FALSE)
 taxa<-parseQiimeTaxa(taxaRaw$taxa)
 rownames(taxa)<-taxaRaw$name
