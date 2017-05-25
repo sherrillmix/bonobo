@@ -14,28 +14,30 @@ library(phyloseq)
 library(ape)
 library(vipor)
 
-selectSamples<-samples[samples$isEnough,]
-tree<-multi2di(read_tree('work/qiime/rep_set.tre'))
-subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
-#phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
-phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
-qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
-#make sure tree is bifurcating or breaks UniFrac without error
-uniDist<-UniFrac(qiimeData,weighted=FALSE)
-phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
-qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
-uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
-brayDist<-distance(qiimeDataW,'bray')
-brayDistUW<-distance(qiimeDataW,'bray',binary=TRUE)
-jacDist<-distance(qiimeData,'jaccard')
-uniPca<-pcoa(uniDist)
-uniPcaW<-pcoa(uniDistW)
-brayPca<-pcoa(brayDist)
-brayPcaUW<-pcoa(brayDistUW)
-jacPca<-pcoa(jacDist)
-predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
-colnames(predictors)<-sub('^Species','',colnames(predictors))
-colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+if(!exists('uniPca')){
+  selectSamples<-samples[samples$isEnough,]
+  tree<-multi2di(read_tree('work/qiime/rep_set.tre'))
+  subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
+  #phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
+  phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
+  qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
+  #make sure tree is bifurcating or breaks UniFrac without error
+  uniDist<-UniFrac(qiimeData,weighted=FALSE)
+  phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
+  qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
+  uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
+  brayDist<-distance(qiimeDataW,'bray')
+  brayDistUW<-distance(qiimeDataW,'bray',binary=TRUE)
+  jacDist<-distance(qiimeData,'jaccard')
+  uniPca<-pcoa(uniDist)
+  uniPcaW<-pcoa(uniDistW)
+  brayPca<-pcoa(brayDist)
+  brayPcaUW<-pcoa(brayDistUW)
+  jacPca<-pcoa(jacDist)
+  predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
+  colnames(predictors)<-sub('^Species','',colnames(predictors))
+  colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
+}
 
 
 #areaCols<-rainbow.lab(length(unique(samples$area)),alpha=.8)
@@ -54,7 +56,7 @@ malariaCols3<-c('#00000022','#000000CC')
 names(malariaCols3)<-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
 speciesPch<-20+1:length(unique(selectSamples$Species))
 #speciesCols<-c('#FF0000CC','#0000FFCC')
-speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
+speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=1,alpha=.8,lightMultiple=.8)
 names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 #split out TL2-E and -W, bonobos and KR and chimps
 splitAreas<-ifelse(selectSamples$area2 %in% c('TL-E','TL-W','KR','TL-NE'),selectSamples$area2,selectSamples$Species)
@@ -63,7 +65,7 @@ names(splitAreaCols)<-unique(splitAreas)[order(unique(splitAreas) %in% c('P.t. s
 targetPca<-uniPca
 importance<-targetPca$values$Relative_eig
 colnames(targetPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
-pdf('out/pcoa.pdf',height=7,width=7)
+pdf('out/pcoa.pdf',height=6,width=6)
   sapply(list(1:2,3:4,5:6),function(axes){
     pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5)
     points(pos[selectSamples$SIV=='Pos',],col='#FF000099',cex=2.7,lwd=2)
@@ -85,9 +87,12 @@ pdf('out/pcoa.pdf',height=7,width=7)
     legend('bottomright',names(malariaCols),col='#00000077',pch=21,pt.bg=malariaCols2,inset=.01,pt.lwd=3,pt.cex=2)
     title(main=sprintf('Malaria PC %d and %d',axes[1],axes[2]))
     #malaria/species
-    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0))
-    legend('bottomleft',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
-    title(main=sprintf('16S',axes[1],axes[2]))
+    pos<-my.biplot.pcoa(targetPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
+    #legend('bottomleft',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
+    points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
+    points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
+    print(table(selectSamples$malaria,selectSamples$chimpBonobo))
+    title(main=sprintf('16S rRNA',axes[1],axes[2]))
     for(ii in unique(selectSamples$chimpBonobo)){ 
       hull<-expandedHull(pos[selectSamples$chimpBonobo==ii,],1.02,'ellipse')
       #polygon(hull,border=speciesCols[ii],col=NA,lwd=2.4)
@@ -104,7 +109,7 @@ pdf('out/pcoa.pdf',height=7,width=7)
     #par('cex'=bak)
   })
 dev.off()
-system('pdftk out/pcoa.pdf cat 4 output out/Fig.5B.pdf')
+system('pdftk out/pcoa.pdf cat 4 output out/Fig.5C.pdf')
 
 pdf('out/pcoa_bray.pdf',height=9,width=9)
   sapply(list(1:2,3:4,5:6),function(axes){
