@@ -194,7 +194,6 @@ sampleNs<-apply(otuTab[,samples$name],2,sum)
 library(Rtsne)
 #uw unifrac
 tsne<-cacheOperation('work/tsne.Rdat',Rtsne,uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
-#save(tsne,file='work/tnse.Rdat')
 tsne2<-Rtsne(uniDist2,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 tsne3<-Rtsne(uniDist3,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
 #tsne<-Rtsne(t(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name]),verbose=TRUE,perplexity=10)
