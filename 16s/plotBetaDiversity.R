@@ -19,17 +19,17 @@ pullDists<-function(xx,distMat){
 
 comparisons<-withAs(s=samples[samples$isEnough,],list(
   list(
-    'Within bonobo'=list(s[s$bonobo,'name'],s[s$bonobo,'name']),
-    'Within chimpanzee'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
-    'Between bonobo\nand chimpanzee'=list(s[s$bonobo,'name'],s[!s$bonobo,'name'])
+    'Within bonobo samples'=list(s[s$bonobo,'name'],s[s$bonobo,'name']),
+    'Within chimpanzee samples'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
+    'Between bonobo and\nchimpanzee samples'=list(s[s$bonobo,'name'],s[!s$bonobo,'name'])
   ),list(
-    'Within non-\nendemic field sites'=list(0,0),
-    'Between non-\nendemic field sites'=list(0,0),
-    'Between TL2 and\nnon-endemic field sites'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
+    'Within non-endemic field site samples'=list(0,0),
+    'Between non-endemic field site samples'=list(0,0),
+    'Between TL2 and non-endemic\nfield site samples'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
   ),list(
-    'Within TL2 Laverania negative'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
-    'Within TL2 Laverania positive'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
-    'Between TL2 Laverania\npositive and negative'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
+    'Within TL2 Laverania negative samples'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
+    'Within TL2 Laverania positive samples'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
+    'Between TL2 Laverania\npositive and negative samples'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
   #),list(
   #  'Within BI Laverania negative'=list(s[s$area=='BI'&!s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name']),
   #  'Within BI Laverania positive'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&s$malaria,'name']),
@@ -39,9 +39,9 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
   #  'Within UB Laverania positive'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&s$malaria,'name']),
   #  'Between UB Laverania\npositive and negative'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name'])
   ),list(
-    'Within Laverania\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
-    'Within Laverania\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
-    'Between Laverania negative\n and positive chimpanzees'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
+    'Within Laverania negative\nchimpanzee samples'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
+    'Within Laverania positive\nchimpanzee samples'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
+    'Between Laverania negative\n and positive chimpanzee samples'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
   )
 ))
 # list(
@@ -58,18 +58,21 @@ withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[samples$isE
 distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(uniDist)))
 distList<-lapply(distList,function(xx){
   names(xx)<-ifelse(nchar(names(xx))>20,sub(' vs ',' vs\n',names(xx)),names(xx))
-  if(any(names(xx)=='Between non-\nendemic field sites'))xx[['Between non-\nendemic field sites']]<-unlist(betweenSites)
-  if(any(names(xx)=='Within non-\nendemic field sites'))xx[['Within non-\nendemic field sites']]<-unlist(withinSites)
+  if(any(names(xx)=='Between non-endemic field site samples'))xx[['Between non-endemic field site samples']]<-unlist(betweenSites)
+  if(any(names(xx)=='Within non-endemic field site samples'))xx[['Within non-endemic field site samples']]<-unlist(withinSites)
   return(xx)
 })
 pVals<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy)$p.value},xx,yy)))
-pVals<-do.call(rbind,lapply(pVals,function(xx){
+pVals2<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy,alternative='less')$p.value},xx,yy)))
+pVals<-do.call(rbind,mapply(function(xx,yy){
   n<-nrow(xx)
+  #use one sided for comparisons to between
+  xx[,ncol(xx)]<-yy[,ncol(xx)]
   cols<-colnames(xx)[matrix(1:n,nrow=n,ncol=n,byrow=TRUE)[upper.tri(xx)]]
   rows<-rownames(xx)[matrix(1:n,nrow=n,ncol=n,byrow=FALSE)[upper.tri(xx)]]
   ps<-xx[upper.tri(xx)]
   data.frame('x'=rows,'y'=cols,'p'=ps,stringsAsFactors=FALSE)
-}))
+},pVals,pVals2,SIMPLIFY=FALSE))
 pVals$sig<- symnum(pVals$p, corr = FALSE, na = FALSE, cutpoints = c(0, 1e-6, 1e-4, 1e-2,1), symbols = c("***", "**", "*",''))
 pVals<-pVals[pVals$p<.01,]
 
@@ -88,7 +91,7 @@ pdf('out/dists.pdf',width=6,height=7)
   pVals$row<-stackRegions(pVals$bottom,pVals$top)
   pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
   pVals$xPos<-.93+.035*(pVals$row-1)
-  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1),yaxt='n',ylab='',xlab='UniFrac distance',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
+  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1),yaxt='n',ylab='',xlab='Unweighted UniFrac distance',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
   for(ii in ncol(stats$stats):1){
     rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
     #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
@@ -109,8 +112,8 @@ dev.off()
 
 
 spacer<-.6
-pdf('out/Fig.S6B.pdf',width=9,height=6)
-  par(mar=c(9.2,2.75,.1,4),lheight=.8)
+pdf('out/Fig.S9B.pdf',width=10,height=6)
+  par(mar=c(12,2.75,.3,4),lheight=.8)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
   betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
@@ -133,7 +136,7 @@ pdf('out/Fig.S6B.pdf',width=9,height=6)
     polygon(c(yCoords,-rev(yCoords))+pos[ii],c(xCoords,rev(xCoords)),col=cols[groupId[ii]])
     segments(pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3],xCoords[3])
   }
-  text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5))
+  text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5),xpd=NA)
   segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
   breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
   #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
@@ -153,3 +156,5 @@ tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=s
 chimpDist<-as.dist(as.matrix(uniDist)[!samples[labels(uniDist),'bonobo'],!samples[labels(uniDist),'bonobo']])
 chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=10)
 
+allAdonisBray<-cacheOperation('work/allAdonisBray.Rdat',adonis,brayDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
+allAdonisWeighted<-cacheOperation('work/allAdonisWeighted.Rdat',adonis,uniDistW~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
