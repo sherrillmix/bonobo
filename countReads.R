@@ -8,6 +8,7 @@ if(!exists('swarmData'))source('loadData.R')
 readCounts<-sapply(swarmData,function(xx){
   readCounts<-apply(xx[['otus']],1,sum)
 })
+
 rawReadCounts<-do.call(rbind,cacheOperation('work/rawReadCounts.Rdat',mclapply,rownames(readCounts),function(xx){
   rbcl<-list.files('data',sprintf('%srbcL.*_R1_.*\\.fastq.gz',xx),recursive=TRUE,full.names=TRUE)
   matk<-list.files('data',sprintf('%smatK.*_R1_.*\\.fastq.gz',xx),recursive=TRUE,full.names=TRUE)
@@ -15,6 +16,7 @@ rawReadCounts<-do.call(rbind,cacheOperation('work/rawReadCounts.Rdat',mclapply,r
   matkN<-sum(sapply(matk,function(xx)as.numeric(system(sprintf('zcat %s|wc -l',xx),intern=TRUE))/4))
   return(c('rawMatk'=matkN,'rawRbcl'=rbclN))
 },mc.cores=5))
+
 readCounts<-cbind(readCounts,rawReadCounts)
 rbcl<-read.csv('work/swarmPair/rbcL_counts.csv',row.names=1)
 matk<-read.csv('work/swarmPair/matK_counts.csv',row.names=1)
