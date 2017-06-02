@@ -13,27 +13,35 @@ expandedHull<-function(xys,magnification=1,type=c('convex','ellipse')){
 library(phyloseq)
 library(ape)
 library(vipor)
+library(GUniFrac)
 
 if(!exists('uniPca')){
   selectSamples<-samples[samples$isEnough,]
+  #make sure tree is bifurcating or breaks UniFrac without error
   tree<-multi2di(read_tree('work/qiime/rep_set.tre'))
   subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
   #phyOtu<-otu_table(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
   qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
-  #make sure tree is bifurcating or breaks UniFrac without error
   uniDist<-UniFrac(qiimeData,weighted=FALSE)
   phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
   qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
   uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
   brayDist<-distance(qiimeDataW,'bray')
-  brayDistUW<-distance(qiimeDataW,'bray',binary=TRUE)
+  brayDistUW<-distance(qiimeData,'bray',binary=TRUE)
   jacDist<-distance(qiimeData,'jaccard')
+  uniDistG<-cacheOperation('work/gunifrac.Rdat',GUniFrac,t(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name]),tree)
   uniPca<-pcoa(uniDist)
   uniPcaW<-pcoa(uniDistW)
   brayPca<-pcoa(brayDist)
   brayPcaUW<-pcoa(brayDistUW)
+  mantels<-list(
+    'uniW'=ade4::mantel.rtest(uniDist,uniDistW,nrepet=1e4),
+    'brayW'=ade4::mantel.rtest(uniDist,brayDist,nrepet=1e4),
+    'brayUW'=ade4::mantel.rtest(uniDist,brayDistUW,nrepet=1e4)
+  )
   jacPca<-pcoa(jacDist)
+  uniGPca<-pcoa(uniDistG$unifracs[,,2])
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
   colnames(predictors)<-sub('^Species','',colnames(predictors))
   colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
