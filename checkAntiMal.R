@@ -85,7 +85,8 @@ for(ii in names(swarmData)){
   if(any(condenseP<pCut)){
     selectPropAll<-apply(inBonobo[ss$Code,condenseP<pCut&apply(inBonobo>0,2,sum)>1],2,function(x)x/max(x))
     colnames(selectPropAll)<-sprintf('%s p=%0.3f',sub('^[a-z]_','',swarmData[[ii]][['taxa']][colnames(selectPropAll),'bestId']),condenseP[colnames(selectPropAll)])
-    breaks<-c(-1e-6,seq(min(selectPropAll[selectPropAll>0])-1e-10,max(selectPropAll)+1e-10,length.out=100))
+    breaks<-c(-1e-6,seq(min(c(selectPropAll[selectPropAll>0],.01))-1e-10,max(selectPropAll)+1e-10,length.out=100))
+    print(breaks)
     cols<-c('white',tail(rev(heat.colors(110)),99)) 
     maxTree<-hclust(dist(t(selectPropAll[,])))
     selectPropAll<-selectPropAll[,rev(maxTree$labels[maxTree$order])]
@@ -101,7 +102,10 @@ for(ii in names(swarmData)){
     dev.off()
   }
 }
+system('cp out/nineCompare_matK.pdf out/Fig.S7A.pdf')
+system('cp out/nineCompare_rbcL.pdf out/Fig.S7B.pdf')
 
+#check chimp
 pCut<-.05
 for(ii in names(swarmData)){
   message(ii)
