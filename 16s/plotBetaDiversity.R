@@ -23,9 +23,9 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
     'Within chimpanzee samples'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
     'Between bonobo and\nchimpanzee samples'=list(s[s$bonobo,'name'],s[!s$bonobo,'name'])
   ),list(
-    'Within non-endemic field site samples'=list(0,0),
-    'Between non-endemic field site samples'=list(0,0),
-    'Between TL2 and non-endemic\nfield site samples'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
+    'Within non-endemic bonobo\nfield site samples'=list(0,0),
+    'Between non-endemic bonobo\nfield site samples'=list(0,0),
+    'Between TL2 and non-endemic\nbonobo field site samples'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
   ),list(
     'Within TL2 Laverania negative samples'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
     'Within TL2 Laverania positive samples'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
@@ -58,8 +58,8 @@ withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[samples$isE
 distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(uniDist)))
 distList<-lapply(distList,function(xx){
   names(xx)<-ifelse(nchar(names(xx))>20,sub(' vs ',' vs\n',names(xx)),names(xx))
-  if(any(names(xx)=='Between non-endemic field site samples'))xx[['Between non-endemic field site samples']]<-unlist(betweenSites)
-  if(any(names(xx)=='Within non-endemic field site samples'))xx[['Within non-endemic field site samples']]<-unlist(withinSites)
+  if(any(names(xx)=='Between non-endemic bonobo\nfield site samples'))xx[['Between non-endemic bonobo\nfield site samples']]<-unlist(betweenSites)
+  if(any(names(xx)=='Within non-endemic bonobo\nfield site samples'))xx[['Within non-endemic bonobo\nfield site samples']]<-unlist(withinSites)
   return(xx)
 })
 pVals<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy)$p.value},xx,yy)))
@@ -113,7 +113,7 @@ dev.off()
 
 spacer<-.6
 pdf('out/Fig.S9B.pdf',width=10,height=6)
-  par(mar=c(12,2.75,.3,4),lheight=.8)
+  par(mar=c(11,2.75,.3,4),lheight=.8)
   compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
   stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
   betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
