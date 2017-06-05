@@ -1,41 +1,6 @@
 if(!exists('swarmData'))source('loadData.R')
-pullDists<-function(xx,distMat){
-  isIdentical<-length(xx[[1]])==length(xx[[2]]) && all(xx[[1]]==xx[[2]])
-  select<-distMat[xx[[1]],xx[[2]]]
-  if(isIdentical)dists<-select[upper.tri(select)]
-  else dists<-as.vector(select)
-  return(dists)
-}
 
 for(ii in names(swarmData)){
-  isEnough<-swarmData[[ii]][['isEnough']][rownames(samples)]
-  comparisons<-withAs(s=samples[isEnough,],list(
-    list(
-      'Within bonobo'=list(s[s$bonobo,'Code'],s[s$bonobo,'Code']),
-      'Within chimpanzee'=list(s[!s$bonobo,'Code'],s[!s$bonobo,'Code']),
-      'Between bonobo\nand chimpanzee'=list(s[s$bonobo,'Code'],s[!s$bonobo,'Code'])
-    ),list(
-      'Within non-\nendemic field sites'=list(0,0),
-      'Between non-\nendemic field sites'=list(0,0),
-      'Between TL2 and\nnon-endemic field sites'=list(s[s$isTL&s$bonobo,'Code'],s[!s$isTL&s$bonobo,'Code'])
-    ),list(
-      'Within TL2 Laverania negative'=list(s[s$isTL&!s$malaria,'Code'],s[s$isTL&!s$malaria,'Code']),
-      'Within TL2 Laverania positive'=list(s[s$isTL&s$malaria,'Code'],s[s$isTL&s$malaria,'Code']),
-      'Between TL2 Laverania\npositive and negative'=list(s[s$isTL&s$malaria,'Code'],s[s$isTL&!s$malaria,'Code'])
-    #),list(
-    #  'Within BI Laverania negative'=list(s[s$area=='BI'&!s$malaria,'Code'],s[s$area=='BI'&!s$malaria,'Code']),
-    #  'Within BI Laverania positive'=list(s[s$area=='BI'&s$malaria,'Code'],s[s$area=='BI'&s$malaria,'Code']),
-    #  'Between BI Laverania\npositive and negative'=list(s[s$area=='BI'&s$malaria,'Code'],s[s$area=='BI'&!s$malaria,'Code'])
-    #),list(
-    #  'Within UB Laverania negative'=list(s[s$area=='UB'&!s$malaria,'Code'],s[s$area=='UB'&!s$malaria,'Code']),
-    #  'Within UB Laverania positive'=list(s[s$area=='UB'&s$malaria,'Code'],s[s$area=='UB'&s$malaria,'Code']),
-    #  'Between UB Laverania\npositive and negative'=list(s[s$area=='UB'&s$malaria,'Code'],s[s$area=='UB'&!s$malaria,'Code'])
-    ),list(
-      'Within Laverania\nnegative chimpanzees'=list(s[!s$bonobo&!s$malaria,'Code'],s[!s$bonobo&!s$malaria,'Code']),
-      'Within Laverania\npositive chimpanzees'=list(s[!s$bonobo&s$malaria,'Code'],s[!s$bonobo&s$malaria,'Code']),
-      'Between Laverania negative\n and positive chimpanzees'=list(s[!s$bonobo&s$malaria,'Code'],s[!s$bonobo&!s$malaria,'Code'])
-    )
-  ))
 
   nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
   names(nonTL)<-nonTL
@@ -43,9 +8,15 @@ for(ii in names(swarmData)){
   allCombo<-allCombo[allCombo[,1]!=allCombo[,2],]
 
   plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
+  plotProp2<-swarmData[[ii]][['rare']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['rare']]) %in% rownames(samples),]
   phyOtuW<-otu_table(plotProp,taxa_are_rows=FALSE)
-  qiimeDataW<-phyloseq(otu_table=phyOtuW)
-  brayDist<-distance(qiimeDataW,'bray',binary=TRUE)
+  qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=swarmData[[ii]][['tree']])
+  phyOtuU<-otu_table(plotProp2,taxa_are_rows=FALSE)
+  qiimeDataU<-phyloseq(otu_table=phyOtuU,phy_tree=swarmData[[ii]][['tree']])
+  uniDist<-UniFrac(qiimeDataU,weighted=FALSE)
+  brayDist<-distance(qiimeDataU,'bray',binary=TRUE)
+  brayDistW<-distance(qiimeDataW,'bray',binary=FALSE)
+  uniDistG<-cacheOperation(sprintf('work/gunifrac_%s.Rdat',ii),GUniFrac,plotProp,swarmData[[ii]][['tree']])$unifracs[,,2]
 
   betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[isEnough&samples$area==xx[1],'Code'],samples[isEnough&samples$area==xx[2],'Code']),distMat),as.matrix(brayDist))
   withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[isEnough&samples$area==xx,'Code'],samples[isEnough&samples$area==xx,'Code']),distMat),as.matrix(brayDist))
