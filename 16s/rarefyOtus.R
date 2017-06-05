@@ -56,9 +56,9 @@ outer(split(shannons,groupings2),split(shannons,groupings2),function(xx,yy)mappl
 outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmodi.*','',groupings)),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 
 #library(beeswarm)
-pdf('out/Fig.S6A.pdf',width=8,height=6)
+pdf('out/Fig.S9A.pdf',width=8,height=6)
   spacer<-.5
-  par(mar=c(6.6,4,.1,3),lheight=.85)
+  par(mar=c(6.6,4,.3,5),lheight=.85)
   plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(c(groupings,groupings2)))+.5+spacer),ylim=range(shannons),xaxt='n',xlab='',bty='l')
   groupFac<-factor(sub(' Plas','\nPlas',groupings))
   #xPos<-as.numeric(groupFac)+ave(shannons,groupFac,FUN=function(xx)swarmx(0,xx,cex=1.9)$x)
@@ -70,7 +70,7 @@ pdf('out/Fig.S6A.pdf',width=8,height=6)
   points(xPos,shannons,pch=21,bg=groupCols[groupings],cex=1.7)
     #,shannons,,pch=21,bg=groupCols[groupings],cex=1.5
   #vpPlot(factor(groupings2,levels=unique(groupings2)),shannons,ylab='Shannon diversity',las=2,pch=21,bg=group2Cols[groupings2],cex=1.5)
-  slantAxis(1,1:length(levels(groupFac)),sub(' Laverania','\nLaverania',levels(groupFac)),srt=-30)
+  slantAxis(1,1:length(levels(groupFac)),sub('(Chimpanzee|Bonobo)','\\1 samples',sub(' Laverania','\nLaverania',levels(groupFac))),srt=-30)
   groupFac2<-factor(groupings2,levels=unique(groupings2))
   #xPos<-as.numeric(groupFac2)+ave(shannons,groupFac2,FUN=function(xx)swarmx(0,xx,cex=1.9)$x)
   offset<-max(as.numeric(groupFac))+spacer
@@ -81,6 +81,6 @@ pdf('out/Fig.S6A.pdf',width=8,height=6)
   rect(offset+1:length(levels(groupFac2))-width,shannon2CI[1,sub('\n',' ',levels(groupFac2))],offset+1:length(levels(groupFac2))+width,shannon2CI[2,sub('\n',' ',levels(groupFac2))],lwd=2,border=NA,col=group2Cols2[sub('\n',' ',levels(groupFac2))])
   points(xPos,shannons,pch=21,bg=group2Cols[groupings2],cex=1.7)
   #replacing first space with \n
-  slantAxis(1,offset+1:length(levels(groupFac2)),sub(' ','\n',levels(groupFac2)),srt=-30)
+  slantAxis(1,offset+1:length(levels(groupFac2)),sub('(Chimpanzee|Bonobo)','\\1 samples',sub(' ','\n',levels(groupFac2))),srt=-30)
 dev.off()
 
