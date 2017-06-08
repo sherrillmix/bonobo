@@ -35,6 +35,8 @@ convertDeg<-function(xx){
 }
 samples[!grepl('[0-9.]+ [NS]',samples$cleanLat)&samples$cleanLat!='','cleanLat']<-sprintf('%0.5f %s',sapply(strsplit(probs,'[^0-9.]+'),convertDeg),probHemisphere)
 samples$cleanLon<-sub(';','.',sub('^0','',sub('([EW]) *([0-9.]+).*','\\2 \\1',trimws(samples$Lon)))) 
+#extra decimal
+samples[samples$Code=='TL3905'&grepl('[0-9]\\.[0-9]+\\.[0-9]',samples$cleanLon),'cleanLon']<-sub('13\\.760','13760',samples[samples$Code=='TL3905'&grepl('[0-9]\\.[0-9]+\\.[0-9]',samples$cleanLon),'cleanLon'])
 #all sites are eastern hemisphere
 samples[!grepl('E',samples$cleanLon)&samples$cleanLon!='','cleanLon']<-sprintf('%sE',samples[!grepl('E',samples$cleanLon)&samples$cleanLon!='','cleanLon'])
 probs<-samples$cleanLon[!grepl('[0-9.]+ [EW]',samples$cleanLon)&samples$cleanLon!='']
