@@ -3,7 +3,6 @@ library(dnar)
 
 source('../readSamples.R',chdir=TRUE)
 source('../functions.R')
-source('functions.R')
 nRequiredReads<-15000
 
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)

@@ -1,7 +1,6 @@
 library(dnar)
 library(parallel)
 source('functions.R')
-source('16s/functions.R')
 source('readSamples.R')
 
 #fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)

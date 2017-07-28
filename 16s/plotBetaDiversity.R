@@ -1,6 +1,6 @@
 library(vipor)
 library(dnar)
-source('functions.R')
+source('../functions.R')
 if(!exists('uniDist'))source('plotPcoa.R')
 
 # TL-E vs TL-W

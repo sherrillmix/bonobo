@@ -1,7 +1,7 @@
 
 library(dnar)
 if(!exists('otuTab'))source('runQiime.R')
-source('functions.R')
+source('../functions.R')
 ss<-samples[order(!samples$bonobo,samples$area2,samples$malaria),]
 
 tlGroups<-withAs(s=ss[ss$bonobo&ss$isEnough&ss$isTL,],tapply(s$name,s$area2,c))
