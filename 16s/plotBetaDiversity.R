@@ -1,12 +1,9 @@
 library(vipor)
 library(dnar)
+library(vegan)
 source('../functions.R')
 if(!exists('uniDist'))source('plotPcoa.R')
 
-# TL-E vs TL-W
-# TL vs TL
-# TL vs other sites
-# other sites vs other sites
 
 pullDists<-function(xx,distMat){
   isIdentical<-length(xx[[1]])==length(xx[[2]]) && all(xx[[1]]==xx[[2]])
@@ -44,11 +41,6 @@ comparisons<-withAs(s=samples[samples$isEnough,],list(
     'Between Laverania negative\n and positive chimpanzee samples'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
   )
 ))
-# list(
-#   'Within Laverania\nnegative bonobos'=list(s[s$bonobo&!s$malaria,'name'],s[s$bonobo&!s$malaria,'name']),
-#   'Within Laverania\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&s$malaria,'name']),
-#   'Between Laverania\nnegative and\npositive bonobos'=list(s[s$bonobo&s$malaria,'name'],s[s$bonobo&!s$malaria,'name'])
-# )
 nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
 names(nonTL)<-nonTL
 allCombo<-unique(t(apply(expand.grid(nonTL,nonTL),1,sort)))
@@ -78,38 +70,6 @@ pVals<-pVals[pVals$p<.01,]
 
 cols<-rainbow.lab(length(distList),start=1,end=-2)
 groupId<-rep(1:length(distList),sapply(distList,length))
-spacer<-.5
-pdf('out/dists.pdf',width=6,height=7)
-  par(mar=c(2.5,12.1,.1,.1),lheight=.8)
-  compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,names)))
-  stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
-  betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
-  pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
-  names(pos)<-levels(compareFactor)
-  pVals$top<-pos[pVals$x]
-  pVals$bottom<-pos[pVals$y]
-  pVals$row<-stackRegions(pVals$bottom,pVals$top)
-  pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
-  pVals$xPos<-.93+.035*(pVals$row-1)
-  plot(1,1,type='n',ylim=range(pos)+c(-.5,.5),xlim=c(min(unlist(distList)),1),yaxt='n',ylab='',xlab='Unweighted UniFrac distance',mgp=c(1.5,.6,0),tcl=-.3,yaxs='i')
-  for(ii in ncol(stats$stats):1){
-    rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
-    #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
-    thisCI<-betaCI[[stats$names[ii]]]
-    #xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
-    xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
-    yCoords<-c(.4,.4,.1,.4,.4)
-    segments(stats$stats[1,ii],pos[ii],stats$stats[5,ii],pos[ii],lwd=3,col=cols[groupId[ii]])
-    polygon(c(xCoords,rev(xCoords)),c(yCoords,-rev(yCoords))+pos[ii],col=cols[groupId[ii]])
-    segments(xCoords[3],pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3])
-  }
-  text(pVals$xPos+.005,pVals$middle,pVals$sig,srt=90,adj=c(0.5,1))
-  segments(pVals$xPos,pVals$bottom,pVals$xPos,pVals$top)
-  breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
-  #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
-  axis(2,pos,names(pos),las=1,mgp=c(3,.7,0))
-dev.off()
-
 
 spacer<-.6
 pdf('out/Fig.S9B.pdf',width=10,height=6)
@@ -127,9 +87,7 @@ pdf('out/Fig.S9B.pdf',width=10,height=6)
   plot(1,1,type='n',xlim=range(pos)+c(-.5-spacer,.5+spacer),ylim=c(min(unlist(distList)),1),xaxt='n',xlab='',ylab='UniFrac distance',mgp=c(1.75,.4,0),tcl=-.3,xaxs='i',las=1,bty='l')
   for(ii in ncol(stats$stats):1){
     rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
-    #points(rawDists,pos[ii]+offsetX(rawDists),cex=.5,pch=21,col=NA,bg=cols[groupId[ii]])
     thisCI<-betaCI[[stats$names[ii]]]
-    #xCoords<-c(stats$stats[2,ii],stats$conf[1,ii],stats$stats[3,ii],stats$conf[2,ii],stats$stats[4,ii])
     xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
     yCoords<-c(.4,.4,.1,.4,.4)
     segments(pos[ii],stats$stats[1,ii],pos[ii],stats$stats[5,ii],lwd=3,col=cols[groupId[ii]])
@@ -139,22 +97,12 @@ pdf('out/Fig.S9B.pdf',width=10,height=6)
   text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5),xpd=NA)
   segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
   breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
-  #abline(h=sapply(breaks,function(xx)mean(c(pos[xx],pos[xx-1]))))
   slantAxis(1,pos,names(pos),srt=-40)
 dev.off()
 
-
-#looks like mostly bonobo_lg4300
-zz<-which(as.matrix(uniDist)>.85,arr.ind=TRUE)
-zzz<-cbind(labels(uniDist)[zz[,1]],labels(uniDist)[zz[,2]])
-zzz[apply(zzz,1,function(xx)!any(grepl('LG4300',xx))),]
-
-library(vegan)
 allAdonis<-cacheOperation('work/allAdonis.Rdat',adonis,uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
 tlDist<-as.dist(as.matrix(uniDist)[samples[labels(uniDist),'isTL'],samples[labels(uniDist),'isTL']])
 tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=10)
 chimpDist<-as.dist(as.matrix(uniDist)[!samples[labels(uniDist),'bonobo'],!samples[labels(uniDist),'bonobo']])
 chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=10)
 
-allAdonisBray<-cacheOperation('work/allAdonisBray.Rdat',adonis,brayDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
-allAdonisWeighted<-cacheOperation('work/allAdonisWeighted.Rdat',adonis,uniDistW~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
