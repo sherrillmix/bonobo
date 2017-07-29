@@ -3,9 +3,6 @@ library(parallel)
 source('functions.R')
 source('readSamples.R')
 
-#fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
-#fastqs<-fastqs[!grepl('Undetermined',fastqs)]
-#primers<-sub('.*(matK|rbcL).*_R([0-9]+)_.*','\\1\\2',basename(fastqs))
 primers<-c('matK','rbcL')
 
 nReadCut<-5000

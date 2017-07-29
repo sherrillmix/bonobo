@@ -6,7 +6,7 @@ library(Rtsne)
 library(vegan)
 library(GUniFrac)
 library(ade4)
-source('16s/myBiplot.R')
+source('functions.R')
 
 tlAdonis<-interactAdonis<-plantAdonis<-chimpAdonis<-bonoboAdonis<-list()
 mantels<-list()
@@ -48,43 +48,21 @@ for(ii in names(swarmData)){
   areaCols<-colorBrew[1:nArea]
   names(areaCols)<-unique(selectSamples$area2[order(selectSamples$chimpBonobo)])
   areaPch<-sapply(names(areaCols),function(x)mostAbundant(selectSamples$chimpBonobo[selectSamples$area2==x]))
-  #malariaCols3<-c(NA,'#000000CC')
   malariaCols3<-c('#00000022','#000000CC')
   mediumMalariaCol<-'#00000077'
   malariaCols<-c('#00000022','#000000CC')
   malariaCols2<-rainbow.lab(2,alpha=.9,lightMultiple=.7)
   names(malariaCols3)<-names(malariaCols2)<-names(malariaCols)<-c('Laverania negative','Laverania positive')
   speciesPch<-20+1:length(unique(selectSamples$Species))
-  #speciesCols<-c('#FF0000CC','#0000FFCC')
-  #speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=2,alpha=.9,lightMultiple=.8)
   speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=1,alpha=.8,lightMultiple=.8)
   names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
-  #pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=Inf)
-  #legend(
-    #par('usr')[2]+.01*diff(par('usr')[1:2]), 
-    #mean(par('usr')[3:4]),
-    #c(names(malariaCols),names(areaCols),names(speciesPch)),
-    #col=c(malariaCols,rep(malariaCols,c(length(areaCols),length(speciesPch)))),
-    #pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
-    #pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
-    #inset=.01,pt.lwd=3,pt.cex=2.5,
-    #xjust=0,xpd=NA
-  #)
 
-  print(table(selectSamples$malaria,selectSamples$chimpBonobo))
   pdf(sprintf('out/pcoa_%s.pdf',ii),width=6,height=6)
     pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
     points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
     points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
-    #text(posl,1],pos[,2],1:nrow(selectSamples))
-    #tmp<-0+(plotProp2>0)
-    #tmp<-plotProp2
-    #colnames(tmp)<-swarmData[[ii]][['taxa']][colnames(tmp),'bestId']
-    #biplot(selectPca,tmp)
-    #biplot(selectPca,predictors)
-    #legend('bottomright',as.vector(outer(names(speciesCols),names(malariaCols3),paste,sep=' ')),col=as.vector(malariaCols3[outer(names(speciesCols),names(malariaCols3),function(x,y)y)]),pch=21,pt.bg=as.vector(speciesCols[outer(names(speciesCols),names(malariaCols3),function(x,y)x)]),inset=.01,pt.lwd=4,pt.cex=2.5,bty='n')
     title(main=sprintf('%s',ii,1,2))
   dev.off()
 
@@ -239,8 +217,8 @@ for(ii in names(swarmData)){
     biplot(prcomp(plotProp2>0))
   }
 }
-system('cp out/pcoa_matK.pdf out/Fig.5A.pdf')
-system('cp out/pcoa_rbcL.pdf out/Fig.5B.pdf')
-system('cp out/tsne_matK.pdf out/Fig.S6A.pdf')
-system('cp out/tsne_rbcL.pdf out/Fig.S6B.pdf')
+file.copy('out/pcoa_matK.pdf','out/Fig.5A.pdf')
+file.copy('out/pcoa_rbcL.pdf','out/Fig.5B.pdf')
+file.copy('out/tsne_matK.pdf','out/Fig.S6A.pdf')
+file.copy('out/tsne_rbcL.pdf','out/Fig.S6B.pdf')
 

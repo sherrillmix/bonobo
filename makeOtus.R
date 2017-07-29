@@ -8,25 +8,6 @@ fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=T
 fastqs<-fastqs[!grepl('Undetermined',fastqs)]
 primers<-sub('.*(matK|rbcL).*_R([0-9]+)_.*','\\1\\2',basename(fastqs))
 
-for(ii in unique(primers)){
-  message(ii)
-  outMat<-sprintf('work/swarm/%s.Rdat',ii)
-  outFa<-sprintf('work/swarm/%s.fa.gz',ii)
-  if(all(file.exists(outMat,outFa))){
-    message('Already processed. Skipping')
-    next()
-  }
-  thisPrimer<-primerSeqs[[sub('[12]$','',tolower(ii))]][as.numeric(substring(ii,nchar(ii)))]
-  thisFiles<-fastqs[primers==ii]
-  reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)$seq},mc.cores=6,mc.preschedule=FALSE)
-  trimReads<-lapply(reads,function(xx)substring(xx[!grepl('[^ACTG]',xx)],nchar(thisPrimer)+1))
-  samples<-rep(basename(thisFiles),sapply(trimReads,length))
-  otus<-runSwarm(unlist(trimReads),'~/installs/swarm/swarm',swarmArgs='-f -t 30')
-  swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
-  write.fa(otus[['seqs']]$name,otus[['seqs']]$seq,outFa)
-  save(swarmOtus,file=outMat)
-}
-
 primerBases<-sub('[0-9]$','',primers)
 for(primerBase in unique(primerBases)){
   message(primerBase)
@@ -79,24 +60,8 @@ for(primerBase in unique(primerBases)){
   cmd<-sprintf('~/installs/mafft/bin/mafft --thread 50 %s|gzip>%s',tmpFile,outAlign)
   message(cmd)
   system(cmd)
-  align<-read.fa(outAlign)
-  png(sprintf('out/align_%s.png',primerBase),width=4000,height=4000,res=250);plotDNA(align$seq);dev.off()
-  png(sprintf('out/align2_%s.png',primerBase),width=4000,height=4000,res=400);plotDNA(removeGapCols(align$seq),main=primerBase);dev.off()
   cmd<-sprintf('zcat %s|fasttree -gtr -nt>%s',outAlign,outTree)
   message(cmd)
   system(cmd)
 }
 
-if(FALSE){
-for(primerBase in unique(primerBases)){
-  tmpFile<-tempfile()
-  outFa<-sprintf('work/swarmPair/%s.fa.gz',primerBase)
-  outMat<-sprintf('work/swarmPair/%s.Rdat',primerBase)
-  outAlign<-sprintf('work/swarmPair/%s_align.fa.gz',primerBase)
-  outTree<-sprintf('work/swarmPair/%s_align.tre',primerBase)
-  cmd<-sprintf('zcat %s|fasttree -gtr -nt>%s',outAlign,outTree)
-  message(cmd)
-  system(cmd)
-}
-
-}

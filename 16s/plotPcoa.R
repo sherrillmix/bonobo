@@ -1,4 +1,5 @@
 if(!exists('otuTab'))source('runQiime.R')
+source('../functions.R')
 
 expandedHull<-function(xys,magnification=1,type=c('convex','ellipse')){
   library(cluster)
@@ -72,8 +73,6 @@ if(!exists('uniPca')){
 }
 
 
-#areaCols<-rainbow.lab(length(unique(samples$area)),alpha=.8)
-source('myBiplot.R')
 #last color made up
 colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
 nArea<-length(unique(selectSamples$area2))

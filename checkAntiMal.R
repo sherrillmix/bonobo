@@ -1,7 +1,8 @@
 library(taxonomizr)
-source('readSamples.R')
 library(vipor)
+source('readSamples.R')
 
+#TODO
 antiMal<-read.csv('AntiMalPlant_List_021817.csv',stringsAsFactors=FALSE)
 if(!exists('taxaNodes')){
   getNamesAndNodes('~/db/taxo/')
@@ -102,8 +103,8 @@ for(ii in names(swarmData)){
     dev.off()
   }
 }
-system('cp out/nineCompare_matK.pdf out/Fig.S7A.pdf')
-system('cp out/nineCompare_rbcL.pdf out/Fig.S7B.pdf')
+file.copy('out/nineCompare_matK.pdf','out/Fig.S7A.pdf')
+file.copy('out/nineCompare_rbcL.pdf','out/Fig.S7B.pdf')
 
 #check chimp
 pCut<-.05

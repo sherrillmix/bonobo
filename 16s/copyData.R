@@ -1,4 +1,5 @@
 source('../readSamples.R',chdir=TRUE)
+#TODO
 samples<-readLines('primates.txt')
 targetDir<-'~/projects/animalPoop/bigRun/split/'
 for(ii in samples){
