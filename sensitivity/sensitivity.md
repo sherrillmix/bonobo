@@ -26,7 +26,8 @@ packageVersion('actuar')
 ```
 
 ## Load data
-```{r]
+
+```r
 pcr<-read.csv('pcrPos.csv',stringsAsFactors=FALSE)
 ```
 
@@ -35,91 +36,33 @@ pcr<-read.csv('pcrPos.csv',stringsAsFactors=FALSE)
 ```r
 like<-function(theta,positives,replicates)-sum(dztbinom(positives,replicates,theta,log=TRUE))
 mle<-optimize(like,interval=0:1,pcr$positive,pcr$replicates)
-```
-
-```
-## Error in dztbinom(positives, replicates, theta, log = TRUE): object 'pcr' not found
-```
-
-```r
 print(mle)
 ```
 
 ```
-## Error in print(mle): object 'mle' not found
+## $minimum
+## [1] 0.1668332
+## 
+## $objective
+## [1] 82.88128
 ```
 
 ## Compare the observed data with that expected from the estimated sensitivity
 
 ```r
 hist(pcr$positive[pcr$replicates==8],breaks=0:9-.5,xlab='Number of positive PCRs',main='8 replicate samples',las=1)
-```
-
-```
-## Error in hist(pcr$positive[pcr$replicates == 8], breaks = 0:9 - 0.5, xlab = "Number of positive PCRs", : object 'pcr' not found
-```
-
-```r
 ps<-dztbinom(0:8,8,mle$minimum)
-```
-
-```
-## Error in dztbinom(0:8, 8, mle$minimum): object 'mle' not found
-```
-
-```r
 preds<-ps*sum(pcr$replicates==8)
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'ps' not found
-```
-
-```r
 segments(0:8-.5,preds,0:8+.5,preds,col='red')
 ```
 
-```
-## Error in segments(0:8 - 0.5, preds, 0:8 + 0.5, preds, col = "red"): object 'preds' not found
-```
+![plot of chunk hist](figure/hist-1.png)
 
 ```r
 hist(pcr$positive[pcr$replicates==10],breaks=0:10-.5,xlab='Number of positive PCRs',main='10 replicate samples',ylim=c(0,1.2),las=1)
-```
-
-```
-## Error in hist(pcr$positive[pcr$replicates == 10], breaks = 0:10 - 0.5, : object 'pcr' not found
-```
-
-```r
 ps<-dztbinom(0:10,10,mle$minimum)
-```
-
-```
-## Error in dztbinom(0:10, 10, mle$minimum): object 'mle' not found
-```
-
-```r
 preds<-ps*sum(pcr$replicates==10)
-```
-
-```
-## Error in eval(expr, envir, enclos): object 'ps' not found
-```
-
-```r
 segments(0:10-.5,preds,0:10+.5,preds,col='red')
 ```
 
-```
-## Error in segments(0:10 - 0.5, preds, 0:10 + 0.5, preds, col = "red"): object 'preds' not found
-```
-
-```r
-dev.off()
-```
-
-```
-## null device 
-##           1
-```
+![plot of chunk hist](figure/hist-2.png)

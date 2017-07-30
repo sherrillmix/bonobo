@@ -7,7 +7,7 @@ packageVersion('actuar')
 ```
 
 ## Load data
-```{r]
+```{r}
 pcr<-read.csv('pcrPos.csv',stringsAsFactors=FALSE)
 ```
 
@@ -19,7 +19,7 @@ print(mle)
 ```
 
 ## Compare the observed data with that expected from the estimated sensitivity
-```{r}
+```{r hist}
 hist(pcr$positive[pcr$replicates==8],breaks=0:9-.5,xlab='Number of positive PCRs',main='8 replicate samples',las=1)
 ps<-dztbinom(0:8,8,mle$minimum)
 preds<-ps*sum(pcr$replicates==8)
@@ -28,5 +28,4 @@ hist(pcr$positive[pcr$replicates==10],breaks=0:10-.5,xlab='Number of positive PC
 ps<-dztbinom(0:10,10,mle$minimum)
 preds<-ps*sum(pcr$replicates==10)
 segments(0:10-.5,preds,0:10+.5,preds,col='red')
-dev.off()
 ```
