@@ -55,7 +55,6 @@ pdf('out/Fig.5C.pdf',height=6,width=6)
   points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
   title(main=sprintf('16S rRNA',axes[1],axes[2]))
 dev.off()
-system('pdftk out/pcoa.pdf cat 4 output out/Fig.5C.pdf')
 
 
 #uw unifrac

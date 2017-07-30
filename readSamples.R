@@ -1,4 +1,5 @@
 library(lubridate)
+#TODO
 samples<-read.csv('SampleList_microbiome.csv',stringsAsFactors=FALSE)
 samples$malaria<-!grepl('[Nn]eg',samples$Plasmodium)
 samples$bonobo<-samples$Species=='Pan paniscus'
@@ -16,12 +17,12 @@ samples$area2[samples$tlNorth]<-'TL-NE'
 samples$area2<-sub('TL-','TL2-',samples$area2)
 samples$plasmoPM<-ifelse(samples$malaria,'+','-')
 samples$chimpBonobo<-ifelse(samples$bonobo,'Bonobo','Chimp')
-#arbitrary seasons
-samples$season<-as.character(ceiling(samples$month/3))
 rownames(samples)<-samples$Code
+#TODO
 #only infected with p vivax so not clearly negative or positive
 samples<-samples[samples$Code!='UB2041',]
 
+#TODO CLEANER IN SRA?
 #clean up lat lon
 samples$cleanLat<-trimws(sub('^0','',sub('([NS]) *([0-9.]+).*','\\2 \\1',samples$Lat)))
 #all other IK are S so assuming missing S
