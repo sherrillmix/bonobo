@@ -1,0 +1,20 @@
+## Read in SRA run table
+The SRA run table was downloaded from [https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776).
+```{r}
+samples<-read.table('SraRunTable.txt',sep='\t',header=TRUE)
+```
+
+## Download data from SRA
+```{r}
+system('fastq-dump --version')
+```
+
+```{r downloadFastqs, cache=TRUE}
+if(!dir.exists('data'))dir.create('data')
+setwd('data')
+for(ii in samples$Run_s){
+  cmd<-sprintf('fastq-dump --gzip --split-files %s',ii)
+  message(cmd)
+  system(cmd)
+}
+```
