@@ -15,4 +15,3 @@ samples$plasmoPM<-ifelse(samples$malaria,'+','-')
 samples$chimpBonobo<-ifelse(samples$bonobo,'Bonobo','Chimp')
 rownames(samples)<-samples$Code
 
-primerSeqs<-list('rbcl'=c('rbcL634F'='ATGCGTTGGAGAGACCGTTTC','rbcLbR'='TCGGTYAGAGCRGGCATRTGCCA'),'matk'=c('matK472F'='CCCRTYCATCTGGAAATCTTGGTTC','matK1248R'='GCTRTRATAATGAGAAAGATTTCTGC'))
