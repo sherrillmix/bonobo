@@ -10,7 +10,11 @@ samples[,c('sample','primer')]<-do.call(rbind,strsplit(samples$Library_Name_s,'_
 ## Download data from SRA
 
 ```r
-system('fastq-dump --version')
+system('fastq-dump --version 2>&1',intern=TRUE)
+```
+
+```
+## [1] ""                   "fastq-dump : 2.8.0" ""
 ```
 
 
