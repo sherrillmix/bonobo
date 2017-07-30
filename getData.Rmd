@@ -1,7 +1,9 @@
 ## Read in SRA run table
 The SRA run table was downloaded from [https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776).
 ```{r}
-samples<-read.table('SraRunTable.txt',sep='\t',header=TRUE)
+samples<-read.table('SraRunTable.txt',sep='\t',header=TRUE,stringsAsFactors=FALSE)
+rownames(samples)<-samples$Run_s
+samples[,c('sample','primer')]<-do.call(rbind,strsplit(samples$Library_Name_s,'_'))
 ```
 
 ## Download data from SRA
@@ -10,11 +12,28 @@ system('fastq-dump --version')
 ```
 
 ```{r downloadFastqs, cache=TRUE}
-if(!dir.exists('data'))dir.create('data')
-setwd('data')
+if(!dir.exists('sra'))dir.create('sra')
 for(ii in samples$Run_s){
-  cmd<-sprintf('fastq-dump --gzip --split-files %s',ii)
+  outFiles<-sprintf('sra/%s_%d.fastq.gz',ii,1:2)
+  cmd<-sprintf('fastq-dump --gzip --split-files --outdir data %s',ii)
   message(cmd)
-  system(cmd)
+  if(any(!file.exists(outFiles)))system(cmd)
+  if(any(!file.exists(outFiles)))stop('fastq-dump unsucessful')
 }
 ```
+
+## Rename into convenient form
+```{r renameFastqs, cache=TRUE}
+if(!dir.exists('16s/data'))dir.create('16s/data')
+if(!dir.exists('data'))dir.create('data')
+for(ii in samples$Run_s){
+  sraNames<-sprintf('sra/%s_%d.fastq.gz',ii,1:2)
+  newNames<-sprintf('%s/%s_%s_R%d_.fastq.gz', ifelse(samples[ii,'primer']=='16s','16s/data','data'),
+    samples[ii,'sample'], samples[ii,'primer'], 1:2)
+  message('Moving ',paste(sraNames,collapse=' '),' to ',paste(newNames,collapse=' '))
+  file.rename(sraNames,newNames)
+}
+```
+
+
+
