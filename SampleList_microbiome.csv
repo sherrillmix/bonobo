@@ -1,0 +1,99 @@
+No,Code, Individual,Site,Date,Species,Haplotype,Lat,Lon,Plasmodium,SIV,IgG,Box
+1,TL3793,TL01,TL,10/09/12,Pan paniscus,BJ688_JQ866273,S2.71434°  ,E025.13563° ,neg,neg,3+,C32
+2,TL3797,TL10,TL,10/09/12,Pan paniscus,BJ688_JQ866273,S2.71464° ,E025.13543°,neg,neg,2+,C32
+3,TL3814,TL44,TL,11/19/12,Pan paniscus,TL3814,S2.73634° ,E025.11536° ,neg,neg,3+,D32
+4,TL3816,TL24,TL,11/19/12,Pan paniscus,GU189663,S2.73634° ,E025.11536° ,Pos,neg,3+,D32
+5,TL3820,TL45,TL,11/19/12,Pan paniscus,TL3814,S2.69626° ,E025.13756° ,Pos,neg,3+,D32
+6,TL3821,TL26,TL,11/19/12,Pan paniscus,JF727238,S2.69672° ,E025.13752° ,neg,neg,3+,D32
+7,TL3824,TL17,TL,11/19/12,Pan paniscus,GU189663,S2.69673° ,E025.13754°,neg,neg,3+,E32
+8,TL3826,TL18,TL,11/19/12,Pan paniscus,GU189663,S2.69610° ,E025.13711°,Pos,neg,3+,E32
+9,TL3838,TL28,TL,11/26/12,Pan paniscus,JF727238,S2.69751° ,E025.13761° ,neg,neg,3+,E32
+10,TL3842,TL27,TL,11/26/12,Pan paniscus,JF727238,S2.69776° ,E025.13740° ,Pos (+Pv),neg,3+,F32
+11,TL3856,TL43,TL,11/28/12,Pan paniscus,TL3814,S2.69353° ,E025.13725° ,Pos,neg,3+,F32
+12,TL3862,TL46,TL,11/28/12,Pan paniscus,TL3814,S2.69321° ,E025.13744° ,Pos (+Pm),neg,3+,H32
+13,TL3882,TL15,TL,12/12/12,Pan paniscus,GU189657,S2.67151° ,E025.14455° ,Pos,neg,1+,I32
+14,TL3889,TL33,TL,12/12/12,Pan paniscus,TL3803,S2.67129° ,E025.14424° ,Pos,neg,3+,H32
+15,TL3905,TL06,TL,11/26/12,Pan paniscus,BJ688_JQ866273,S2.69218° ,E025.13.760° ,Pos,neg,3+,G32
+16,TL3910,TL03,TL,10/09/12,Pan paniscus,BJ688_JQ866273,S2.71429°,E025.13545° ,neg,neg,3+,I32
+17,TL3911,TL07,TL,01/08/13,Pan paniscus,BJ688_JQ866273,S 2.71764° ,E25.13718°,Pos,neg,3+,Y32
+18,TL3915,TL41,TL,01/08/13,Pan paniscus,TL3814,S 2.71777° ,E25.13698°,Pos,neg,1+,Z32
+19,TL3916,TL29,TL,01/11/13,Pan paniscus,TL3795,S 2.73126° ,E25.14773°,neg,neg,3+,Z32
+20,TL3918,TL50,TL,01/11/13,Pan paniscus,TL3876,S 2.73117°,E25.14776°,Pos,neg,1+,H32
+21,TL3925,TL57,TL (West),02/14/13,Pan paniscus,TL3924,S2.73794°,E25.08592°,neg,neg,2+,Z32
+22,TL3926,TL58,TL (West),02/14/13,Pan paniscus,TL3926,S2.73790°,E25.08533°,neg,neg,1+,A33
+23,TL3927,TL09,TL,02/13/13,Pan paniscus,BJ688_JQ866273,S2.46740° ,E25.10224°,neg,neg,1+,B33
+24,TL3929,TL52,TL,02/13/13,Pan paniscus,TL3878,S2.46748° ,E25.10211°,neg,neg,2+,A33
+25,TL3932,TL60,TL (West),02/15/13,Pan paniscus,TL3931,S2.73758° ,E25.08219°,Pos,neg,1+,B33
+26,TL3936,TL61,TL (West),02/15/13,Pan paniscus,TL3931,S2.73733° ,E25.08259°,Pos,neg,2+,A33
+27,TL3939,TL59,TL (West),02/15/13,Pan paniscus,TL3931,S2.73741° ,E25.08270°,neg,neg,1+,A33
+28,TL3940,TL62,TL (West),02/15/13,Pan paniscus,TL3940,S2.73773° ,E25.08260°,neg,neg,2+,A33
+29,TL3942,TL63,TL (West),02/15/13,Pan paniscus,TL3940,S2.73769° ,E25.08246°,Pos,neg,2+,A33
+30,TL3943,TL49,TL,02/13/13,Pan paniscus,TL3876,S2.46743° ,E25.10205°,Pos,neg,1+,A33
+31,TL3944,TL16,TL,02/13/13,Pan paniscus,GU189657,S2.46740° ,E25.10197°,neg,neg,1+,A33
+32,TL3945,TL55,TL,02/13/13,Pan paniscus,TL3886,S2.46741°,E25.10191°,neg,neg,1+,A33
+33,TL3946,TL56,TL,02/13/13,Pan paniscus,TL3886,S2.46726°,E25.10183°,neg,neg,1+,A33
+34,TL3948,TL25,TL,02/13/13,Pan paniscus,GU189663,S2.47118°,E25.08098°,Pos,neg,3+,A33
+1,KR02,KR5,Kokolopori,09/28/06,Pan paniscus,KR2,,,neg,neg,3+,S7
+2,KR05,KR18,Kokolopori,09/29/06,Pan paniscus,KR5,,,neg,neg,3+,S7
+3,KR07,KR11,Kokolopori,10/21/06,Pan paniscus,KR3,,,neg,neg,3+,M13
+4,KR10,KR28,Kokolopori,10/21/06,Pan paniscus,KR10,,,Pos,neg,3+,M13
+5,KR12,KR7,Kokolopori,10/28/06,Pan paniscus,KR3,,,neg,neg,3+,N13
+6,KR21,KR1,Kokolopori,11/07/06,Pan paniscus,IK2876,,,neg,neg,3+,N13
+7,KR33,KR2,Kokolopori,12/06/06,Pan paniscus,IK2876,,,neg,neg,3+,O13
+8,KR35,KR19,Kokolopori,12/07/06,Pan paniscus,KR5,,,neg,neg,2+,O13
+9,KR52,KR31,Kokolopori,12/19/06,Pan paniscus,KR23,,,neg,neg,3+,P13
+10,KR57,KR9,Kokolopori,12/19/06,Pan paniscus,KR3,,,neg,neg,3+,P13
+11,KR67,KR26,Kokolopori,01/04/07,Pan paniscus,KR10,,,neg,neg,3+,Q13
+1,IK3158,,Balanga forest (Ikela region),03/21/11,Pan paniscus,IK2879,01°11.200'S, 023°44.790',neg,,3+,M25
+2,IK3276,,Lilungu forest(Ikela region),03/21/11,Pan paniscus,KR05,"01°06'41.2"""," 023°36'55.4""",neg,,,T25
+3,IK3358,,Tompangoforest(Ikela region) ,04/11/11,Pan paniscus,IK2879,"01°07'47""S ","023°37'25""E",neg,,2+,Y25
+4,IK3469,,Bekoto forest(Ikela region) ,07/07/11,Pan paniscus,KR03,01°07.724S , 023°41.576E,neg,,,V27
+5,IK3513,,Lotshuku forest(Ikela region) ,07/09/11,Pan paniscus,KR10,"01°07'03.4""S ", 023°38'34.4E,neg,,,Y27
+6,IK3650,,"Ikela, Tompangu",12/14/11,Pan paniscus,IK2885," 01°07'38.3""S "," 023°37'30.6""E",neg,,,R28
+7,IK3701,,"Ikela, Bekoto",12/20/11,Pan paniscus,IK2876, 01°08.677'S, 023°41.501'E,neg,,,U28
+8,IK3777,,Lilungu forest(Ikela region) ,01/05/12,Pan paniscus,IK3187,"S 01°07.390"" ", E 023°37.308,neg,,,W30
+9,IK4184,,Besenge forest(Ikela region) ,10/18/2014,Pan paniscus,KR05,"01°07'43.7""S ","023°39'49.9""E",neg,,,A38
+10,IK4214,,Mbata foerest(Ikela region) ,11/27/2014,Pan paniscus,KR05,"01°09'19.7""S "," 023°37'10;2""E",neg,,,C38
+1,LG4300,,Lingunda,12/14/15,Pan paniscus,JQ866292.1,"N 00°33'21.4"" """," 20°45'39.2""",neg,,,Y39
+2,LG4314,,Lingunda,12/15/2015,Pan paniscus,JN191196.1,"N 00°33'21.4"" """," 20°45'39.2""",neg,,,Z39
+3,LG4322,,Boyela,12/20/2015,Pan paniscus,JQ866292.1,"N 00°34'50.7"" "," 20°47'51.2""",neg,,,Z39
+4,LG4327,,Boyela,01/08/16,Pan paniscus,JN191196.1,"N 00°34'50.7"" "," 20°47'51.2""",neg,,,A40
+1,LK645,LK01,Lui-kotal ,03/24/06,Pan paniscus,LK645,,,neg,neg,2+,J11
+2,LK647,LK06,Lui-kotal ,03/28/06,Pan paniscus,LK647,,,neg,neg,2+,J11
+3,LK653,LK04,Lui-kotal ,04/06/06,Pan paniscus,LK646,,,neg,neg,3+,J11
+4,LK661,LK13,Lui-kotal ,05/05/06,Pan paniscus,LK650,,,neg,neg,2+,K11
+5,LK665,LK14,Lui-kotal ,05/11/06,Pan paniscus,LK652,,,neg,neg,3+,K11
+6,LK668,LK16,Lui-kotal ,05/11/06,Pan paniscus,LK664,,,neg,neg,3+,K11
+7,LK670,LK02,Lui-kotal ,05/11/06,Pan paniscus,LK645,,,neg,neg,2+,K11
+8,LK682,LK08,Lui-kotal ,05/19/06,Pan paniscus,LK648,,,neg,neg,3+,L11
+9,LK685,LK05,Lui-kotal ,05/19/06,Pan paniscus,LK646,,,neg,neg,2+,L11
+10,LK686,LK09,Lui-kotal ,05/24/06,Pan paniscus,LK648,,,neg,neg,2+,L11
+1,BI0054,,Obiatuku ,03/15/03,P.t. schweinfurthii,KS11_DQ370342,,,Pos,neg,2+,I4
+2,BI0055,,Obiatuku ,03/15/03,P.t. schweinfurthii,KS15_DQ370346,,,neg,neg,3+,I4
+3,BI0093,,Obiatuku ,03/15/03,P.t. schweinfurthii,KS15_DQ370346,,,Pos,neg,3+,L4
+4,BI0097,,Obiatuku ,04/25/03,P.t. schweinfurthii,KS16_DQ370347,,,neg,neg,3+,L4
+5,BI0246,,Babingi,05/19/05,P.t. schweinfurthii,KS2_DQ370333,,,Pos,neg,1+,O9
+6,BI0248,,Babingi,07/08/05,P.t. schweinfurthii,BI248,,,neg,neg,3+,O9
+7,BI0257,,Babingi,07/14/05,P.t. schweinfurthii,WL111_EU527455,,,neg,neg,3+,P9
+8,BI0260,,Babingi,07/25/05,P.t. schweinfurthii,BI248,,,Pos,neg,3+,P9
+9,BI2414,,"Babingi, Penetungu ",04/21/07,P.t. schweinfurthii,BE1203,,,neg,neg,3+,P17
+10,BI2415,,"Babingi, Penetungu ",04/21/07,P.t. schweinfurthii,WL105_EU527448,,,Pos,neg,3+,P17
+1,UB0439,,"Ubangi, Yakoma, Lole",01/15/06,P.t. schweinfurthii,UB439,,,neg,neg,1+,R10
+2,UB0445,,"Ubangi, Yakoma, Lole",01/18/06,P.t. schweinfurthii,UB445,,,Pos,Pos,2+,S10
+3,UB0599,,"Ubangi, Yakoma, Biti",02/12/06,P.t. schweinfurthii,UB599,,,neg,neg,3+,G11
+4,UB1430,,"Ubangi, Kabe ",01/09/07,P.t. schweinfurthii,UB1430,03° 38'36N,022° 26'03,neg,neg,3+,N14
+5,UB1435,,"Ubangi, Mbengeye ",02/14/07,P.t. schweinfurthii,PO497,03° 38'36N,022° 26'03,neg,neg,3+,N14
+6,UB1446,,"Ubangi, Yakoma, Biti ",02/22/07,P.t. schweinfurthii,PO497,03° 24'15N,022° 10'17,Pos,neg,3+,O14
+7,UB1452,,"Ubangi, Yakoma, Biti ",02/22/07,P.t. schweinfurthii,x,,,Pos (+Pv),neg,3+,O14
+8,UB1454,,"Ubangi, Yakoma, Biti ",02/22/07,P.t. schweinfurthii,PO497,03° 24'15N,022° 10'17,Pos,neg,3+,O14
+9,UB2037,,"Ubangi,Abuzi,Mbengeye",04/05/07,P.t. schweinfurthii,UB2037,03°38'36N,022°26'03,neg,neg,3+,N16
+1,PA0367,,Parisi,12/15/05,P.t. schweinfurthii,PA366,,,neg,Pos,1+,E10
+2,PA0368,,Parisi,12/15/05,P.t. schweinfurthii,PA366,,,Pos,Pos,1+,E10
+3,PA0370,,Parisi,01/04/06,P.t. schweinfurthii,PA369,,,Pos,neg,1+,E10
+4,PA0456,,Kayete,01/30/06,P.t. schweinfurthii,PA460,,,neg,neg,1+,T10
+5,PA1038,,"Parisi, Ndjola",09/12/06,P.t. schweinfurthii,PA1065,,,neg,neg,2+,F13
+6,PA1039,,"Parisi, Ndjola",09/12/06,P.t. schweinfurthii,PA1065,,,Pos,neg,2+,F13
+7,PA1044,,"Parisi, Ndjola",09/12/06,P.t. schweinfurthii,PA1044,,,Pos,Pos,3+,F13
+8,PA1049,,"Parisi, Ndjola",09/15/06,P.t. schweinfurthii,PA1044,,,neg,Pos,3+,G13
+9,PA1059,,"Parisi, Ndjola",12/02/06,P.t. schweinfurthii,PA1065,,,Pos,neg,3+,G13
+10,PA1065,,"Parisi, Ndjola",12/06/06,P.t. schweinfurthii,PA1065,,,neg,Pos,3+,H13
