@@ -8,8 +8,6 @@ library(vipor)
 
 if(!exists('uniPca')){
   selectSamples<-samples[samples$isEnough,]
-  #make sure tree is bifurcating or breaks UniFrac without error
-  tree<-multi2di(read_tree('work/qiime/rep_set.tre'))
   subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
   qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
