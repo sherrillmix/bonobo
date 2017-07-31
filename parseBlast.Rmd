@@ -8,17 +8,19 @@ library(parallel)
 packageVersion('parallel')
 ```
 
-## Prepare database of NCBI accession numbers and taxonomy IDs
-```{r prepareNCBI,cache=TRUE}
+## Download NCBI accession numbers and taxonomy
+```{r downloadNCBI,cache=TRUE}
 sqlFile<-'work/accessionTaxa.sql'
-tmp<-tempdir()
 getNamesAndNodes('work')
 #this is a big download
-getAccession2taxid(tmp)
+getAccession2taxid('work')
+```
+
+## Prepare database of accession numbers and taxonomy
+```{r prepareDb,cache=TRUE}
 read.nodes2('work/nodes.dmp',sqlFile)
 read.names2('work/names.dmp',sqlFile)
-read.accession2taxid(list.files(tmp,'accession2taxid.gz$',full.names=TRUE),sqlFile)
-file.remove(list.files(tmp,'accession2taxid.gz$',full.names=TRUE))
+read.accession2taxid(list.files('work','accession2taxid.gz$',full.names=TRUE),sqlFile,overwrite=TRUE)
 ```
 
 ## Assign taxonomy to blast hits
