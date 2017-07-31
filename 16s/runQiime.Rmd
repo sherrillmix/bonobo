@@ -5,10 +5,6 @@ library(dnar)
 packageVersion('dnar')
 library(parallel)
 packageVersion('parallel')
-library(ape)
-packageVersion('ape')
-library(phyloseq)
-packageVersion('phyloseq')
 source('../functions.R')
 ```
 
@@ -38,10 +34,10 @@ nRequiredReads<-15000
 ```
 
 ## Read in all sequences
-```{r readFastqs,cache=TRUE}
+```{r readFastqs}
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
 #just get sequences to reduce memory
-allSeq<-mclapply(fastqs,function(xx)read.fastq(xx)$seq,mc.cores=10)
+allSeq<-mclapply(fastqs,function(xx)read.fastq(xx)$seq,mc.cores=12)
 message('Read ',length(unlist(allSeq)),' sequences in ',length(allSeq),' fastqs')
 ```
 
