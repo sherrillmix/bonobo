@@ -18,6 +18,27 @@ system('blastn -version',intern=TRUE)
 ## [2] "Package: blast 2.2.31, build Jan  7 2016 23:17:17"
 ```
 
+```r
+system('parallel --version',intern=TRUE)
+```
+
+```
+##  [1] "GNU parallel 20141022"                                                                             
+##  [2] "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and Free Software Foundation, Inc."
+##  [3] "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"                     
+##  [4] "This is free software: you are free to change and redistribute it."                                
+##  [5] "GNU parallel comes with no warranty."                                                              
+##  [6] ""                                                                                                  
+##  [7] "Web site: http://www.gnu.org/software/parallel"                                                    
+##  [8] ""                                                                                                  
+##  [9] "When using programs that use GNU Parallel to process data for publication please cite:"            
+## [10] ""                                                                                                  
+## [11] "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, "                                     
+## [12] ";login: The USENIX Magazine, February 2011:42-47."                                                 
+## [13] ""                                                                                                  
+## [14] "Or you can get GNU Parallel without this requirement by paying 10000 EUR."
+```
+
 ## Prepare blast databases
 rbcL and matk data were downloaded manually from the EBI:
 * [http://www.ebi.ac.uk/ena/data/search?query=rbcl](http://www.ebi.ac.uk/ena/data/search?query=rbcl)
