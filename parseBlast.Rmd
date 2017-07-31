@@ -12,8 +12,8 @@ packageVersion('parallel')
 ```{r prepareNCBI,cache=TRUE}
 sqlFile<-'work/accessionTaxa.sql'
 tmp<-tempdir()
-#this is a big download
 getNamesAndNodes('work')
+#this is a big download
 getAccession2taxid(tmp)
 read.nodes2('work/nodes.dmp',sqlFile)
 read.names2('work/names.dmp',sqlFile)
@@ -25,7 +25,7 @@ file.remove(list.files(tmp,'accession2taxid.gz$',full.names=TRUE))
 ```{r assignTaxa,cache=TRUE}
 blastFiles<-list.files('work/swarmPair','\\.blast\\.gz$',full.names=TRUE)
 
-taxas<-mclapply(blastFiles,function(ii,sqlFile,...){
+mclapply(blastFiles,function(ii,sqlFile,...){
   message('Parsing blast hits in ',ii)
   outFile<-sub('.blast.gz$','_taxa.csv',ii)
   outFile2<-sub('.blast.gz$','_allHits.csv',ii)
