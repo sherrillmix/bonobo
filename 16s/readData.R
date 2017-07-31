@@ -1,10 +1,14 @@
 library(ape)
+message('ape package version ',packageVersion('ape'))
 library(phyloseq)
+message('phyloseq package version ',packageVersion('phyloseq'))
 
 source('../readSamples.R',chdir=TRUE)
+source('../functions.R')
 
 #require 15000 reads
 nRequiredReads<-15000
+message('Requiring samples to have ',nRequiredReads,' reads')
 
 otus<-read.csv('work/qiimeOtuIds.csv.gz',stringsAsFactors=FALSE)
 otuTab<-as.data.frame.matrix(table(otus$otu,otus$file))
