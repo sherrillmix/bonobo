@@ -9,14 +9,9 @@ source('../functions.R')
 ```
 
 ## Software versions
-```{r,cache=TRUE}
+```{r}
 system('echo "source activate qiime1;print_qiime_config.py -t"|bash 2>&1',intern=TRUE)
 system('bbmerge.sh --version 2>&1',intern=TRUE)
-```
-
-## Require 15000 reads in a sample
-```{r}
-nRequiredReads<-15000
 ```
 
 ## Merge reads

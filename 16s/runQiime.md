@@ -94,7 +94,7 @@ system('echo "source activate qiime1;print_qiime_config.py -t"|bash 2>&1',intern
 ## [62] "==============================="                                                                                                                                             
 ## [63] "........."                                                                                                                                                                   
 ## [64] "----------------------------------------------------------------------"                                                                                                      
-## [65] "Ran 9 tests in 0.019s"                                                                                                                                                       
+## [65] "Ran 9 tests in 0.017s"                                                                                                                                                       
 ## [66] ""                                                                                                                                                                            
 ## [67] "OK"
 ```
@@ -107,12 +107,6 @@ system('bbmerge.sh --version 2>&1',intern=TRUE)
 ## [1] "java -Djava.library.path=/home/scott/installs/bbmap/jni/ -ea -Xmx1000m -Xmx1000m -cp /home/scott/installs/bbmap/current/ jgi.BBMerge --version"
 ## [2] "BBMap version 36.77"                                                                                                                           
 ## [3] "For help, please run the shellscript with no parameters, or look in /docs/."
-```
-
-## Require 15000 reads in a sample
-
-```r
-nRequiredReads<-15000
 ```
 
 ## Merge reads
@@ -447,7 +441,7 @@ out<-runQiime(unlist(allSeq),storeDir='work/qiime')
 ```
 
 ```
-## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/Rtmp0111pK/file450b380b69a6/XXX.fa --output /tmp/Rtmp0111pK/file450b4f21d341 --parallel --jobs_to_start 32 --force"|bash
+## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/RtmpTfT7gW/filea38447171fb9/XXX.fa --output /tmp/RtmpTfT7gW/filea384cfe426 --parallel --jobs_to_start 32 --force"|bash
 ```
 
 ```r
