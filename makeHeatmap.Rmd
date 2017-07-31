@@ -13,8 +13,7 @@ for(ii in names(swarmData)){
   if(ii=='matK')subLetters<-c('A','B')
   else subLetters<-c('C','D')
   message(ii)
-  #order by above order here
-  plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
+  plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
   plotProp<-plotProp[,apply(plotProp,2,max)>minProp]
   colnames(plotProp)<-swarmData[[ii]][['taxa']][colnames(plotProp),'bestId']
   plotProp<-plotProp[,order(apply(plotProp,2,mean),decreasing=TRUE)]
