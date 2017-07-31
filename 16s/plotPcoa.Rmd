@@ -1,12 +1,24 @@
-if(!exists('otuTab'))source('runQiime.R')
-source('../functions.R')
-
+## Load libraries
+```{r}
 library(phyloseq)
+packageVersion('phyloseq')
 library(Rtsne)
+packageVersion('Rtsne')
 library(ape)
-library(vipor)
+packageVersion('ape')
+```
 
-if(!exists('uniPca')){
+## Load the data
+```{r}
+source('readData.R')
+source('../functions.R')
+```
+
+
+
+## Calculate distance matrices from OTU table
+```{r}
+  #TODO
   selectSamples<-samples[samples$isEnough,]
   subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
@@ -26,10 +38,11 @@ if(!exists('uniPca')){
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
   colnames(predictors)<-sub('^Species','',colnames(predictors))
   colnames(predictors)[colnames(predictors)=='malariaTRUE']<-'malariaPos'
-}
+```
 
 
-#last color made up
+## Set up plotting parameters
+```
 colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
 nArea<-length(unique(selectSamples$area2))
 if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
@@ -45,19 +58,20 @@ speciesCols<-rainbow.lab(length(unique(selectSamples$chimpBonobo)),start=-2,end=
 names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 importance<-uniPca$values$Relative_eig
 colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
-pdf('out/Fig.5C.pdf',height=6,width=6)
+```
+## Plot 16s PCoA
+```{r}
   axes<-1:2
   #malaria/species
   pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
   points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
   points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
   title(main=sprintf('16S rRNA',axes[1],axes[2]))
-dev.off()
+```
 
-
-#uw unifrac
+## Plot 16s t-SNE
+```{r}
 tsne<-cacheOperation('work/tsne.Rdat',Rtsne,uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
-pdf('out/Fig.S9C.pdf',height=8,width=10)
   par(mar=c(4,4,1.5,9.5))
   plot(tsne$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='',bty='l')
   legend(
@@ -70,5 +84,4 @@ pdf('out/Fig.S9C.pdf',height=8,width=10)
     inset=.01,pt.lwd=3,pt.cex=2.5,
     xjust=0,xpd=NA,bty='n'
   )
-dev.off()
-
+```

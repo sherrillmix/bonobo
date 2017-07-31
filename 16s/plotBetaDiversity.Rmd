@@ -1,10 +1,19 @@
-library(vipor)
+## Load libraries
+```{r}
 library(dnar)
+packageVersion('dnar')
 library(vegan)
+packageVersion('vegan')
+```
+
+## Load data
+```{r}
+source('readData.R')
 source('../functions.R')
-if(!exists('uniDist'))source('plotPcoa.R')
+```
 
-
+## Convenience function for getting distances from matrix
+```{r}
 pullDists<-function(xx,distMat){
   isIdentical<-length(xx[[1]])==length(xx[[2]]) && all(xx[[1]]==xx[[2]])
   select<-distMat[xx[[1]],xx[[2]]]
@@ -12,8 +21,10 @@ pullDists<-function(xx,distMat){
   else dists<-as.vector(select)
   return(dists)
 }
+```
 
-
+## Pull out distances for comparisons
+```{r}
 comparisons<-withAs(s=samples[samples$isEnough,],list(
   list(
     'Within bonobo samples'=list(s[s$bonobo,'name'],s[s$bonobo,'name']),
@@ -54,6 +65,10 @@ distList<-lapply(distList,function(xx){
   if(any(names(xx)=='Within non-endemic bonobo\nfield site samples'))xx[['Within non-endemic bonobo\nfield site samples']]<-unlist(withinSites)
   return(xx)
 })
+```
+
+## Calculate Wilcoxon test p-values between groups of distances
+```{r}
 pVals<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy)$p.value},xx,yy)))
 pVals2<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy,alternative='less')$p.value},xx,yy)))
 pVals<-do.call(rbind,mapply(function(xx,yy){
@@ -67,42 +82,50 @@ pVals<-do.call(rbind,mapply(function(xx,yy){
 },pVals,pVals2,SIMPLIFY=FALSE))
 pVals$sig<- symnum(pVals$p, corr = FALSE, na = FALSE, cutpoints = c(0, 1e-6, 1e-4, 1e-2,1), symbols = c("***", "**", "*",''))
 pVals<-pVals[pVals$p<.01,]
+```
 
+## Setup plotting parameters
+```{r}
+spacer<-.6
 cols<-rainbow.lab(length(distList),start=1,end=-2)
 groupId<-rep(1:length(distList),sapply(distList,length))
+```
 
-spacer<-.6
-pdf('out/Fig.S9B.pdf',width=10,height=6)
-  par(mar=c(11,2.75,.3,4),lheight=.8)
-  compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
-  stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
-  betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
-  pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
-  names(pos)<-levels(compareFactor)
-  pVals$top<-pos[pVals$x]
-  pVals$bottom<-pos[pVals$y]
-  pVals$row<-stackRegions(pVals$top,pVals$bottom)
-  pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
-  pVals$xPos<-.95+.03*(pVals$row-1)
-  plot(1,1,type='n',xlim=range(pos)+c(-.5-spacer,.5+spacer),ylim=c(min(unlist(distList)),1),xaxt='n',xlab='',ylab='UniFrac distance',mgp=c(1.75,.4,0),tcl=-.3,xaxs='i',las=1,bty='l')
-  for(ii in ncol(stats$stats):1){
-    rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
-    thisCI<-betaCI[[stats$names[ii]]]
-    xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
-    yCoords<-c(.4,.4,.1,.4,.4)
-    segments(pos[ii],stats$stats[1,ii],pos[ii],stats$stats[5,ii],lwd=3,col=cols[groupId[ii]])
-    polygon(c(yCoords,-rev(yCoords))+pos[ii],c(xCoords,rev(xCoords)),col=cols[groupId[ii]])
-    segments(pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3],xCoords[3])
-  }
-  text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5),xpd=NA)
-  segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
-  breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
-  slantAxis(1,pos,names(pos),srt=-40)
-dev.off()
+## Plot comparison of distances between groups
+```{r}
+par(mar=c(11,2.75,.3,4),lheight=.8)
+compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
+stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
+betaCI<-tapply(unlist(distList),compareFactor,function(xx)medianCI(xx))
+pos<-sum(sapply(distList,length)):1-rep((1:length(distList)-1)*spacer,sapply(distList,length))
+names(pos)<-levels(compareFactor)
+pVals$top<-pos[pVals$x]
+pVals$bottom<-pos[pVals$y]
+pVals$row<-stackRegions(pVals$top,pVals$bottom)
+pVals$middle<-apply(pVals[,c('bottom','top')],1,mean)
+pVals$xPos<-.95+.03*(pVals$row-1)
+plot(1,1,type='n',xlim=range(pos)+c(-.5-spacer,.5+spacer),ylim=c(min(unlist(distList)),1),xaxt='n',xlab='',ylab='UniFrac distance',mgp=c(1.75,.4,0),tcl=-.3,xaxs='i',las=1,bty='l')
+for(ii in ncol(stats$stats):1){
+  rawDists<-distList[[groupId[ii]]][[stats$names[ii]]]
+  thisCI<-betaCI[[stats$names[ii]]]
+  xCoords<-c(stats$stats[2,ii],thisCI[1],stats$stats[3,ii],thisCI[2],stats$stats[4,ii])
+  yCoords<-c(.4,.4,.1,.4,.4)
+  segments(pos[ii],stats$stats[1,ii],pos[ii],stats$stats[5,ii],lwd=3,col=cols[groupId[ii]])
+  polygon(c(yCoords,-rev(yCoords))+pos[ii],c(xCoords,rev(xCoords)),col=cols[groupId[ii]])
+  segments(pos[ii]+yCoords[3],xCoords[3],pos[ii]-yCoords[3],xCoords[3])
+}
+text(pVals$middle,pVals$xPos+.005,pVals$sig,adj=c(.5,0.5),xpd=NA)
+segments(pVals$bottom,pVals$xPos,pVals$top,pVals$xPos)
+breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
+slantAxis(1,pos,names(pos),srt=-40)
+```
 
-allAdonis<-cacheOperation('work/allAdonis.Rdat',adonis,uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=5)
+## Calculate PERMANOVA statistics of distances and covariates
+```{r,cache=TRUE}
+adonis(uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=20)
 tlDist<-as.dist(as.matrix(uniDist)[samples[labels(uniDist),'isTL'],samples[labels(uniDist),'isTL']])
-tlAdonis<-cacheOperation('work/tlAdonis.Rdat',adonis,tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=10)
+adonis(tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,parallel=20)
 chimpDist<-as.dist(as.matrix(uniDist)[!samples[labels(uniDist),'bonobo'],!samples[labels(uniDist),'bonobo']])
-chimpAdonis<-cacheOperation('work/chimpAdonis.Rdat',adonis,chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=10)
+adonis(chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7,parallel=20)
+```
 
