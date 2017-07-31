@@ -27,13 +27,7 @@ runQiime<-function(seqs,storeDir=NULL){
   #get sequences
   seqs<-read.fa(file.path(outDir,'pynast_aligned_seqs/XXX_rep_set_aligned_pfiltered.fasta'))
   seqs<-structure(seqs$seq,.Names=seqs$name)
-  if(!is.null(storeDir)){
-    #avoid problems with cross filesystem copies
-    tmpDir<-tempfile(tmpdir='.')
-    dir.create(tmpDir)
-    file.copy(outDir,tmpDir)
-    file.rename(file.path(tmpDir,basename(outDir)),storeDir)
-  }
+  if(!is.null(storeDir))file.copy(outDir,storeDir)
   return(list('otus'=out,'seqs'=seqs,'taxa'=taxa))
 }
 parseQiimeTaxa<-function(taxas,desiredTaxa=c('k','p','c','o','f','g','s'),concatLastTwo=TRUE){
