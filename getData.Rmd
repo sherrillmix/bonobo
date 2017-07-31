@@ -1,3 +1,8 @@
+## Software versions
+```{r}
+system('fastq-dump --version',intern=TRUE)
+```
+
 ## Read in SRA run table
 The SRA run table was downloaded from [https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776).
 ```{r}
