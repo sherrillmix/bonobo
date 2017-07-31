@@ -28,7 +28,7 @@ isChloro<-taxa[rownames(otuTab),'c']=='Chloroplast'&!is.na(taxa[rownames(otuTab)
 otuTab<-otuTab[!isChloro,]
 
 # Filter samples without enough reads
-otuTab<-otuTab[,apply(otuTab,2,sum)>nRequiredReads]
+isEnough<-apply(otuTab,2,sum)>nRequiredReads
 
 # Convert to proportions
 otuProp<-apply(otuTab,2,function(x)x/sum(x))

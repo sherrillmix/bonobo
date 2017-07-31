@@ -14,8 +14,8 @@ source('../functions.R')
 ```{r}
 ss<-samples[order(!samples$bonobo,samples$area2,samples$malaria),]
 
-tlGroups<-withAs(s=ss[ss$bonobo&ss$isEnough&ss$isTL,],tapply(s$name,s$area2,c))
-nonTlGroups<-withAs(s=ss[ss$bonobo&ss$isEnough&!ss$isTL,],tapply(s$name,s$area2,c))
+tlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&ss$isTL,],tapply(s$name,s$area2,c))
+nonTlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&!ss$isTL,],tapply(s$name,s$area2,c))
 nonTlGroups<-nonTlGroups[sapply(nonTlGroups,length)>5]
 
 comparisons<-expand.grid('tl'=names(tlGroups),'nontl'=names(nonTlGroups))

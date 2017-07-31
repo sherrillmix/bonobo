@@ -25,7 +25,7 @@ pullDists<-function(xx,distMat){
 
 ## Pull out distances for comparisons
 ```{r}
-comparisons<-withAs(s=samples[samples$isEnough,],list(
+comparisons<-withAs(s=samples[isEnough[samples$Code],],list(
   list(
     'Within bonobo samples'=list(s[s$bonobo,'name'],s[s$bonobo,'name']),
     'Within chimpanzee samples'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
@@ -56,8 +56,8 @@ nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
 names(nonTL)<-nonTL
 allCombo<-unique(t(apply(expand.grid(nonTL,nonTL),1,sort)))
 allCombo<-allCombo[allCombo[,1]!=allCombo[,2],]
-betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx[1],'name'],samples[samples$isEnough&samples$area==xx[2],'name']),distMat),as.matrix(uniDist))
-withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[samples$isEnough&samples$area==xx,'name'],samples[samples$isEnough&samples$area==xx,'name']),distMat),as.matrix(uniDist))
+betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx[1],'name'],samples[isEnough[samples$Code]&samples$area==xx[2],'name']),distMat),as.matrix(uniDist))
+withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx,'name'],samples[isEnough[samples$Code]&samples$area==xx,'name']),distMat),as.matrix(uniDist))
 distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(uniDist)))
 distList<-lapply(distList,function(xx){
   names(xx)<-ifelse(nchar(names(xx))>20,sub(' vs ',' vs\n',names(xx)),names(xx))

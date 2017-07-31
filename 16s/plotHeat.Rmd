@@ -12,10 +12,10 @@ source('readData.R')
 ## Setup plotting parameters
 ```{r}
 samples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
-moreThanProp<-apply(otuProp[,samples$name[samples$isEnough]],1,max,na.rm=TRUE)>.02
+moreThanProp<-apply(otuProp[,samples$name[isEnough[samples$Code]]],1,max,na.rm=TRUE)>.02
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
-plotProp<-t(otuProp[moreThanProp,samples$name[samples$isEnough]])
-maxProp<-apply(otuProp[moreThanProp,samples$name[samples$isEnough]],1,function(x)x/max(x))
+plotProp<-t(otuProp[moreThanProp,samples$name[isEnough[samples$Code]]])
+maxProp<-apply(otuProp[moreThanProp,samples$name[isEnough[samples$Code]]],1,function(x)x/max(x))
 colnames(plotProp)<-colnames(maxProp)<-taxa[colnames(plotProp),'bestId']
 plotProp<-plotProp[,order(apply(plotProp,2,mean),decreasing=TRUE)]
 maxTree<-hclust(dist(t(maxProp[,])))
@@ -50,9 +50,9 @@ addMetaData(metadata,cex=.75)
 
 ## Calculate p-values 
 ```{r}
-sampleOrder<-withAs(s=samples[samples$isEnough,],s$name[order(!s$bonobo,ifelse(s$area=='KR',FALSE,s$malaria),s$area2,s$malaria)])
-tlPos<-samples$name[samples$isEnough&samples$isTL&samples$malaria]
-tlNeg<-samples$name[samples$isEnough&samples$isTL&!samples$malaria]
+sampleOrder<-withAs(s=samples[isEnough[samples$Code],],s$name[order(!s$bonobo,ifelse(s$area=='KR',FALSE,s$malaria),s$area2,s$malaria)])
+tlPos<-samples$name[isEnough[sample$Code]&samples$isTL&samples$malaria]
+tlNeg<-samples$name[isEnough[sample$Code]&samples$isTL&!samples$malaria]
 #from functions.R
 tmp<-setupHeat(tlPos,tlNeg,otuProp[,sampleOrder],taxa,pCut=.05)
 selectProp<-tmp[[1]]

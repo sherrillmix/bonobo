@@ -18,8 +18,7 @@ source('../functions.R')
 
 ## Calculate distance matrices from OTU table
 ```{r}
-  #TODO
-  selectSamples<-samples[samples$isEnough,]
+  selectSamples<-samples[isEnough[samples$Code],]
   subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
   qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
