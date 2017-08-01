@@ -2,6 +2,8 @@
 ```{r}
 library(dnar)
 packageVersion('dnar')
+library(vipor)
+packageVersion('vipor')
 ```
 
 ## Load the data
@@ -31,7 +33,7 @@ names(group2Cols)<-names(group2Cols2)<-unique(groupings2)
 
 ## Calculate Shannon diversities
 ```{r}
-shannons<-apply(otuTab[,samples$name[isEnough[samples$Code]]],2,shannon)
+shannons<-apply(otuTab[,samples$Code[isEnough[samples$Code]]],2,shannon)
 groupShannon<-sapply(unique(groupings),function(xx)median(shannons[groupings==xx]))
 shannonCI<-sapply(unique(groupings),function(xx)medianCI(shannons[groupings==xx]))
 group2Shannon<-sapply(unique(groupings2),function(xx)median(shannons[groupings2==xx]))
@@ -46,7 +48,7 @@ outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmod
 ```
 
 ## Generate distance comparison figure
-```{r}
+```{r shannonDiversity}
 spacer<-.5
 par(mar=c(6.6,4,.3,5),lheight=.85)
 plot(1,1,type='n',ylab='Shannon diversity',las=2,xlim=c(.5,length(unique(c(groupings,groupings2)))+.5+spacer),ylim=range(shannons),xaxt='n',xlab='',bty='l')
