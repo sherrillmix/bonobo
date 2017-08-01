@@ -17,13 +17,14 @@ source('../functions.R')
 
 
 ## Calculate distance matrices from OTU table
-```{r}
+```{r,cache=TRUE}
   selectSamples<-samples[isEnough[samples$Code],]
-  subsampledOtus<-cacheOperation('work/rarefyOtus.Rdat',apply,otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$name],2,rarefyCounts,nRequiredReads)
+  subsampledOtus<-apply(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$Code],2,rarefyCounts,nRequiredReads)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
   qiimeData<-phyloseq(otu_table=phyOtu,phy_tree=tree)
   uniDist<-UniFrac(qiimeData,weighted=FALSE)
-  phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$name],taxa_are_rows=TRUE)
+  save(uniDist,file='work/uniDist.csv')
+  phyOtuW<-otu_table(otuProp[rownames(otuTab) %in% tree$tip.label,selectSamples$Code],taxa_are_rows=TRUE)
   qiimeDataW<-phyloseq(otu_table=phyOtuW,phy_tree=tree)
   uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
   brayDist<-distance(qiimeDataW,'bray')
@@ -41,7 +42,7 @@ source('../functions.R')
 
 
 ## Set up plotting parameters
-```
+```{r}
 colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
 nArea<-length(unique(selectSamples$area2))
 if(nArea>length(colorBrew))stop('Need to adjust colors for more areas')
@@ -59,7 +60,7 @@ importance<-uniPca$values$Relative_eig
 colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
 ```
 ## Plot 16s PCoA
-```{r}
+```{r bacteriaPCoA}
   axes<-1:2
   #malaria/species
   pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=axes,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
@@ -69,18 +70,18 @@ colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1
 ```
 
 ## Plot 16s t-SNE
-```{r}
-tsne<-cacheOperation('work/tsne.Rdat',Rtsne,uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
-  par(mar=c(4,4,1.5,9.5))
-  plot(tsne$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='',bty='l')
-  legend(
-    par('usr')[2]+.01*diff(par('usr')[1:2]), 
-    mean(par('usr')[3:4]),
-    c(names(malariaCols),names(areaCols),names(speciesPch)),
-    col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
-    pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
-    pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
-    inset=.01,pt.lwd=3,pt.cex=2.5,
-    xjust=0,xpd=NA,bty='n'
-  )
+```{r bacteria_tSNE}
+tsne<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
+par(mar=c(4,4,1.5,9.5))
+plot(tsne$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,ylab='t-SNE 2',xlab='t-SNE 1',main='',bty='l')
+legend(
+  par('usr')[2]+.01*diff(par('usr')[1:2]), 
+  mean(par('usr')[3:4]),
+  c(names(malariaCols),names(areaCols),names(speciesPch)),
+  col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
+  pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
+  pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
+  inset=.01,pt.lwd=3,pt.cex=2.5,
+  xjust=0,xpd=NA,bty='n'
+)
 ```
