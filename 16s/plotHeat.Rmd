@@ -26,7 +26,7 @@ breaks2<-c(-1e-6,seq(min(maxProp[maxProp>0])-1e-10,max(maxProp)+1e-10,length.out
 ```
 
 ## Plot heatmap of bacterial proportions
-```{r bacteriaHeatmap,fig.width=10,fig.height=12}
+```{r bacteriaHeatmap,fig.width=14,fig.height=20}
 par(mfrow=c(2,1),mar=c(12,.1,3.5,14))
 image(1:ncol(plotProp),1:nrow(plotProp),t(plotProp),col=cols,breaks=breaks,xlab='',ylab='',xaxt='n',yaxt='n')
 text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'A)',xpd=NA,cex=3,adj=0:1)
@@ -60,7 +60,7 @@ effectSplit<-tmp[[2]]
 ```
 
 ## Plot OTUs that different between TL-2 plasmodium positive and negative bonobos
-```{r differingOtus,fig.width=10,fig.height=12}
+```{r differingOtus,fig.width=14,fig.height=20}
 par(mar=c(11.5,.1,3,13.5),lheight=.7)
 plotHeat(selectProp,breaks2,cols,yaxt='n')
 abline(v=effectSplit-.5)
