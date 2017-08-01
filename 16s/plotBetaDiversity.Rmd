@@ -10,6 +10,8 @@ packageVersion('vegan')
 ```{r}
 source('readData.R')
 source('../functions.R')
+#from plotPcoa.Rmd
+load('work/uniDist.Rdat')
 ```
 
 ## Convenience function for getting distances from matrix
@@ -27,37 +29,29 @@ pullDists<-function(xx,distMat){
 ```{r}
 comparisons<-withAs(s=samples[isEnough[samples$Code],],list(
   list(
-    'Within bonobo samples'=list(s[s$bonobo,'name'],s[s$bonobo,'name']),
-    'Within chimpanzee samples'=list(s[!s$bonobo,'name'],s[!s$bonobo,'name']),
-    'Between bonobo and\nchimpanzee samples'=list(s[s$bonobo,'name'],s[!s$bonobo,'name'])
+    'Within bonobo samples'=list(s[s$bonobo,'Code'],s[s$bonobo,'Code']),
+    'Within chimpanzee samples'=list(s[!s$bonobo,'Code'],s[!s$bonobo,'Code']),
+    'Between bonobo and\nchimpanzee samples'=list(s[s$bonobo,'Code'],s[!s$bonobo,'Code'])
   ),list(
     'Within non-endemic bonobo\nfield site samples'=list(0,0),
     'Between non-endemic bonobo\nfield site samples'=list(0,0),
-    'Between TL2 and non-endemic\nbonobo field site samples'=list(s[s$isTL&s$bonobo,'name'],s[!s$isTL&s$bonobo,'name'])
+    'Between TL2 and non-endemic\nbonobo field site samples'=list(s[s$isTL&s$bonobo,'Code'],s[!s$isTL&s$bonobo,'Code'])
   ),list(
-    'Within TL2 Laverania negative samples'=list(s[s$isTL&!s$malaria,'name'],s[s$isTL&!s$malaria,'name']),
-    'Within TL2 Laverania positive samples'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&s$malaria,'name']),
-    'Between TL2 Laverania\npositive and negative samples'=list(s[s$isTL&s$malaria,'name'],s[s$isTL&!s$malaria,'name'])
-  #),list(
-  #  'Within BI Laverania negative'=list(s[s$area=='BI'&!s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name']),
-  #  'Within BI Laverania positive'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&s$malaria,'name']),
-  #  'Between BI Laverania\npositive and negative'=list(s[s$area=='BI'&s$malaria,'name'],s[s$area=='BI'&!s$malaria,'name'])
-  #),list(
-  #  'Within UB Laverania negative'=list(s[s$area=='UB'&!s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name']),
-  #  'Within UB Laverania positive'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&s$malaria,'name']),
-  #  'Between UB Laverania\npositive and negative'=list(s[s$area=='UB'&s$malaria,'name'],s[s$area=='UB'&!s$malaria,'name'])
+    'Within TL2 Laverania negative samples'=list(s[s$isTL&!s$malaria,'Code'],s[s$isTL&!s$malaria,'Code']),
+    'Within TL2 Laverania positive samples'=list(s[s$isTL&s$malaria,'Code'],s[s$isTL&s$malaria,'Code']),
+    'Between TL2 Laverania\npositive and negative samples'=list(s[s$isTL&s$malaria,'Code'],s[s$isTL&!s$malaria,'Code'])
   ),list(
-    'Within Laverania negative\nchimpanzee samples'=list(s[!s$bonobo&!s$malaria,'name'],s[!s$bonobo&!s$malaria,'name']),
-    'Within Laverania positive\nchimpanzee samples'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&s$malaria,'name']),
-    'Between Laverania negative\n and positive chimpanzee samples'=list(s[!s$bonobo&s$malaria,'name'],s[!s$bonobo&!s$malaria,'name'])
+    'Within Laverania negative\nchimpanzee samples'=list(s[!s$bonobo&!s$malaria,'Code'],s[!s$bonobo&!s$malaria,'Code']),
+    'Within Laverania positive\nchimpanzee samples'=list(s[!s$bonobo&s$malaria,'Code'],s[!s$bonobo&s$malaria,'Code']),
+    'Between Laverania negative\n and positive chimpanzee samples'=list(s[!s$bonobo&s$malaria,'Code'],s[!s$bonobo&!s$malaria,'Code'])
   )
 ))
 nonTL<-unique(samples[samples$bonobo&!samples$isTL,'area'])
 names(nonTL)<-nonTL
 allCombo<-unique(t(apply(expand.grid(nonTL,nonTL),1,sort)))
 allCombo<-allCombo[allCombo[,1]!=allCombo[,2],]
-betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx[1],'name'],samples[isEnough[samples$Code]&samples$area==xx[2],'name']),distMat),as.matrix(uniDist))
-withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx,'name'],samples[isEnough[samples$Code]&samples$area==xx,'name']),distMat),as.matrix(uniDist))
+betweenSites<-apply(allCombo,1,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx[1],'Code'],samples[isEnough[samples$Code]&samples$area==xx[2],'Code']),distMat),as.matrix(uniDist))
+withinSites<-lapply(nonTL,function(xx,distMat)pullDists(list(samples[isEnough[samples$Code]&samples$area==xx,'Code'],samples[isEnough[samples$Code]&samples$area==xx,'Code']),distMat),as.matrix(uniDist))
 distList<-lapply(comparisons,function(xx)lapply(xx,pullDists,as.matrix(uniDist)))
 distList<-lapply(distList,function(xx){
   names(xx)<-ifelse(nchar(names(xx))>20,sub(' vs ',' vs\n',names(xx)),names(xx))
@@ -92,7 +86,7 @@ groupId<-rep(1:length(distList),sapply(distList,length))
 ```
 
 ## Plot comparison of distances between groups
-```{r}
+```{r distanceComparison}
 par(mar=c(11,2.75,.3,4),lheight=.8)
 compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
 stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)
