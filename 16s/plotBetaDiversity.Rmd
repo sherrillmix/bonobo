@@ -26,7 +26,7 @@ pullDists<-function(xx,distMat){
 ```
 
 ## Pull out distances for comparisons
-```{r}
+```{r, cache=TRUE}
 comparisons<-withAs(s=samples[isEnough[samples$Code],],list(
   list(
     'Within bonobo samples'=list(s[s$bonobo,'Code'],s[s$bonobo,'Code']),
@@ -86,7 +86,7 @@ groupId<-rep(1:length(distList),sapply(distList,length))
 ```
 
 ## Plot comparison of distances between groups
-```{r distanceComparison}
+```{r distanceComparison,fig.width=14}
 par(mar=c(11,2.75,.3,4),lheight=.8)
 compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
 stats<-boxplot(unlist(distList)~compareFactor,range=Inf,notch=TRUE,plot=FALSE)

@@ -205,7 +205,7 @@ adonis(uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=
 ##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
 ## bonobo     1    1.5005 1.50050  8.6010 0.07490   1e-07 ***
 ## area2      8    3.8150 0.47687  2.7334 0.19043   1e-07 ***
-## malaria    1    0.2382 0.23817  1.3652 0.01189 0.04571 *  
+## malaria    1    0.2382 0.23817  1.3652 0.01189 0.04587 *  
 ## Residuals 83   14.4799 0.17446         0.72278            
 ## Total     93   20.0335                 1.00000            
 ## ---
@@ -229,7 +229,7 @@ adonis(tlDist~area2+malaria,data=samples[labels(tlDist),],permutations=1e7,paral
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
 ## area2      2    0.8622 0.43108  2.6072 0.14149    1e-07 ***
-## malaria    1    0.2711 0.27115  1.6399 0.04450 0.002455 ** 
+## malaria    1    0.2711 0.27115  1.6399 0.04450 0.002445 ** 
 ## Residuals 30    4.9603 0.16534         0.81402             
 ## Total     33    6.0936                 1.00000             
 ## ---
@@ -251,11 +251,11 @@ adonis(chimpDist~area2+malaria,data=samples[labels(chimpDist),],permutations=1e7
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
-## area2      2    0.9274 0.46372  2.4584 0.17562 2.3e-05 ***
-## malaria    1    0.2037 0.20367  1.0797 0.03857  0.2999    
-## Residuals 22    4.1498 0.18863         0.78581            
-## Total     25    5.2810                 1.00000            
+##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
+## area2      2    0.9274 0.46372  2.4584 0.17562 2.25e-05 ***
+## malaria    1    0.2037 0.20367  1.0797 0.03857   0.2998    
+## Residuals 22    4.1498 0.18863         0.78581             
+## Total     25    5.2810                 1.00000             
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
