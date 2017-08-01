@@ -1,16 +1,46 @@
 ## Load libraries
-```{r}
+
+```r
 library(dnar)
 packageVersion('dnar')
 ```
 
+```
+## [1] '0.1'
+```
+
 ## Load the data
-```{r}
+
+```r
 source('readData.R')
 ```
 
+```
+## 
+## Attaching package: 'ape'
+```
+
+```
+## The following object is masked from 'package:dnar':
+## 
+##     read.fastq
+```
+
+```
+## ape package version 4.1
+```
+
+```
+## phyloseq package version 1.20.0
+```
+
+```
+## Requiring samples to have 15000 reads
+```
+
 ## Setup plotting parameters
-```{r}
+
+```r
 samples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
 moreThanProp<-apply(otuProp[,samples$Code[isEnough[samples$Code]]],1,max,na.rm=TRUE)>.02
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
@@ -26,7 +56,8 @@ breaks2<-c(-1e-6,seq(min(maxProp[maxProp>0])-1e-10,max(maxProp)+1e-10,length.out
 ```
 
 ## Plot heatmap of bacterial proportions
-```{r bacteriaHeatmap}
+
+```r
 par(mfrow=c(2,1),mar=c(12,.1,3.5,14))
 image(1:ncol(plotProp),1:nrow(plotProp),t(plotProp),col=cols,breaks=breaks,xlab='',ylab='',xaxt='n',yaxt='n')
 text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'A)',xpd=NA,cex=3,adj=0:1)
@@ -48,8 +79,11 @@ colnames(metadata)<-c('Species','Site','Laverania','Sample')
 addMetaData(metadata,cex=.75)
 ```
 
+![plot of chunk bacteriaHeatmap](figure/bacteriaHeatmap-1.png)
+
 ## Calculate p-values 
-```{r}
+
+```r
 sampleOrder<-withAs(s=samples[isEnough[samples$Code],],s$Code[order(!s$bonobo,ifelse(s$area=='KR',FALSE,s$malaria),s$area2,s$malaria)])
 tlPos<-samples$Code[isEnough[samples$Code]&samples$isTL&samples$malaria]
 tlNeg<-samples$Code[isEnough[samples$Code]&samples$isTL&!samples$malaria]
@@ -60,7 +94,8 @@ effectSplit<-tmp[[2]]
 ```
 
 ## Plot OTUs that different between TL-2 plasmodium positive and negative bonobos
-```{r differingOtus}
+
+```r
 par(mar=c(11.5,.1,3,13.5),lheight=.7)
 plotHeat(selectProp,breaks2,cols,yaxt='n')
 abline(v=effectSplit-.5)
@@ -68,5 +103,7 @@ metadata<-samples[rownames(selectProp),c('chimpBonobo','area2','plasmoPM','Code'
 colnames(metadata)<-c('Species','Site','Laverania','Sample')
 addMetaData(metadata,cex=.75)
 ```
+
+![plot of chunk differingOtus](figure/differingOtus-1.png)
 
 
