@@ -26,7 +26,7 @@ breaks2<-c(-1e-6,seq(min(maxProp[maxProp>0])-1e-10,max(maxProp)+1e-10,length.out
 ```
 
 ## Plot heatmap of bacterial proportions
-```{r bacteriaHeatmap,fig.width=14,fig.height=20}
+```{r bacteriaHeatmap,fig.width=20,fig.height=30}
 par(mfrow=c(2,1),mar=c(12,.1,3.5,14))
 image(1:ncol(plotProp),1:nrow(plotProp),t(plotProp),col=cols,breaks=breaks,xlab='',ylab='',xaxt='n',yaxt='n')
 text(grconvertX(.005, "nfc", "user"),grconvertY(.995, "nfc", "user"),'A)',xpd=NA,cex=3,adj=0:1)
