@@ -25,5 +25,5 @@ makeClusters.md: makeClusters.Rmd parseBlast.md
 16s/plotHeat.md: 16s/plotHeat.Rmd 16s/runQiime.md
 	cd 16s && R -e 'knitr::knit("plotHeat.Rmd")'
 
-16s/plotPcoa.Rmd: 16s/plotPcoa.Rmd 16s/runQiime.md
+16s/plotPcoa.md: 16s/plotPcoa.Rmd 16s/runQiime.md
 	cd 16s && R -e 'knitr::knit("plotPcoa.Rmd")'
