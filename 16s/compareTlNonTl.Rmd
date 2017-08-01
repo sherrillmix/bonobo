@@ -14,8 +14,8 @@ source('../functions.R')
 ```{r}
 ss<-samples[order(!samples$bonobo,samples$area2,samples$malaria),]
 
-tlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&ss$isTL,],tapply(s$name,s$area2,c))
-nonTlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&!ss$isTL,],tapply(s$name,s$area2,c))
+tlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&ss$isTL,],tapply(s$Code,s$area2,c))
+nonTlGroups<-withAs(s=ss[ss$bonobo&isEnough[ss$Code]&!ss$isTL,],tapply(s$Code,s$area2,c))
 nonTlGroups<-nonTlGroups[sapply(nonTlGroups,length)>5]
 
 comparisons<-expand.grid('tl'=names(tlGroups),'nontl'=names(nonTlGroups))
@@ -27,7 +27,7 @@ ninePsGt<-apply(inBonobo,1,function(xx)apply(comparisons,1,function(select)suppr
 ```{r}
 
 ```{r}
-condensePLt<-p.adjust(apply(ninePs,2,fishers,correct=3),'fdr')
+condensePLt<-p.adjust(apply(ninePsLt,2,fishers,correct=3),'fdr')
 summary(condensePLt)
 condensePGt<-p.adjust(apply(ninePsGt,2,fishers,correct=3),'fdr')
 summary(condensePGt)
