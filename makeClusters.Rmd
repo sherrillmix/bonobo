@@ -1,4 +1,6 @@
-## Load libraries
+## PCoA and t-SNE of matK and rbcL abundances
+
+### Load libraries
 ```{r}
 library(phyloseq)
 packageVersion('phyloseq')
@@ -13,14 +15,13 @@ packageVersion('ade4')
 source('functions.R')
 ```
 
-
-
-## Load data
-```{r}
+### Load data
+```{r loadData, cache=TRUE}
 source("loadData.R")
 ```
 
-```{r}
+### Plot plant PCoA and t-SNE
+```{r plantPcoaTsne,cache=TRUE}
 tlAdonis<-interactAdonis<-plantAdonis<-chimpAdonis<-bonoboAdonis<-list()
 mantels<-list()
 for(ii in names(swarmData)){
@@ -65,24 +66,24 @@ for(ii in names(swarmData)){
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
 
   #pcoa
-    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
-    points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
-    points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
-    title(main=sprintf('%s',ii,1,2))
+  pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
+  points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
+  points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
+  title(main=sprintf('%s',ii,1,2))
 
   #tsne
-    par(mar=c(4,4,1.5,10))
-    plot(tsneUni$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
-    legend(
-      par('usr')[2]+.01*diff(par('usr')[1:2]), 
-      mean(par('usr')[3:4]),
-      c(names(malariaCols),names(areaCols),names(speciesPch)),
-      col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
-      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
-      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
-      inset=.01,pt.lwd=3,pt.cex=2.5,
-      xjust=0,xpd=NA,bty='n'
-    )
+  par(mar=c(4,4,1.5,10))
+  plot(tsneUni$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
+  legend(
+    par('usr')[2]+.01*diff(par('usr')[1:2]), 
+    mean(par('usr')[3:4]),
+    c(names(malariaCols),names(areaCols),names(speciesPch)),
+    col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
+    pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
+    pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
+    inset=.01,pt.lwd=3,pt.cex=2.5,
+    xjust=0,xpd=NA,bty='n'
+  )
 
   ss<-samples[labels(selectDist),]
   plantAdonis[[ii]]<-cacheOperation(sprintf('work/adonis_%s.Rdat',ii),adonis,selectDist~bonobo+area2+malaria,data=ss,permutations=1e7,parallel=10)
@@ -95,7 +96,20 @@ for(ii in names(swarmData)){
   bonoboAdonis[[ii]]<-cacheOperation(sprintf('work/adonisBonobo_%s.Rdat',ii),adonis,bonoboDist~area2+malaria,data=ss[ss$bonobo,],permutations=1e7,parallel=10)
   tlDist<-as.dist(as.matrix(selectDist)[ss$isTL,ss$isTL])
   tlAdonis[[ii]]<-cacheOperation(sprintf('work/adonisTL_%s.Rdat',ii),adonis,tlDist~malaria,data=ss[ss$isTL,],permutations=1e7,parallel=5)
-
 }
 ```
+
+### Mantel test of different distances
+```{r}
+mantels
+```
+
+### PERMANOVA testing of covariates
+```{r}
+plantAdonis
+chimpAdonis
+bonoboAdonis
+tlAdonis
+```
+
 
