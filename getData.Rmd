@@ -1,9 +1,11 @@
-## Software versions
+## Download data from SRA
+
+### Software versions
 ```{r}
 system('fastq-dump --version',intern=TRUE)
 ```
 
-## Read in SRA run table
+### Read in SRA run table
 The SRA run table was downloaded from [https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776).
 ```{r}
 samples<-read.table('SraRunTable.txt',sep='\t',header=TRUE,stringsAsFactors=FALSE)
@@ -11,7 +13,7 @@ rownames(samples)<-samples$Run_s
 samples[,c('sample','primer')]<-do.call(rbind,strsplit(samples$Library_Name_s,'_'))
 ```
 
-## Download data from SRA
+### Download data from SRA
 ```{r}
 system('fastq-dump --version 2>&1',intern=TRUE)
 ```
@@ -27,7 +29,7 @@ for(ii in samples$Run_s){
 }
 ```
 
-## Rename into convenient form
+### Rename into convenient form
 ```{r renameFastqs, cache=TRUE}
 if(!dir.exists('16s/data'))dir.create('16s/data')
 if(!dir.exists('data'))dir.create('data')

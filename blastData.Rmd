@@ -1,11 +1,13 @@
-## Software versions
+## Blast OTUs against rbcL and matK databases
+
+### Software versions
 ```{r}
 system('makeblastdb -version',intern=TRUE)
 system('blastn -version',intern=TRUE)
 system('parallel --version',intern=TRUE)
 ```
 
-## Prepare blast databases
+### Prepare blast databases
 rbcL and matk data were downloaded manually from the EBI:
 * [http://www.ebi.ac.uk/ena/data/search?query=rbcl](http://www.ebi.ac.uk/ena/data/search?query=rbcl)
 * [http://www.ebi.ac.uk/ena/data/search?query=matk](http://www.ebi.ac.uk/ena/data/search?query=matk)
@@ -17,7 +19,7 @@ system('zcat ebi/matk.fa.gz | makeblastdb -in - -title matk -dbtype nucl -out wo
 system('zcat ebi/rbcl.fa.gz | makeblastdb -in - -title rbcl -dbtype nucl -out work/rbcl')
 ```
 
-## Blast swarm OTUs against rbcl/matk databases
+### Blast swarm OTUs against rbcl/matk databases
 ```{r,cache=TRUE}
 contigFa<-list.files('work/swarmPair','.fa.gz$',full.names=TRUE)
 contigFa<-contigFa[!grepl('_align',contigFa)]

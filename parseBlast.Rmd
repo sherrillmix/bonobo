@@ -1,4 +1,6 @@
-## Load libraries
+## Assign taxonomy based on BLAST results
+
+### Load libraries
 ```{r}
 library(dnar)
 packageVersion('dnar')
@@ -8,7 +10,7 @@ library(parallel)
 packageVersion('parallel')
 ```
 
-## Download NCBI accession numbers and taxonomy
+### Download NCBI accession numbers and taxonomy
 ```{r downloadNCBI,cache=TRUE}
 sqlFile<-'work/accessionTaxa.sql'
 getNamesAndNodes('work')
@@ -16,14 +18,14 @@ getNamesAndNodes('work')
 getAccession2taxid('work')
 ```
 
-## Prepare database of accession numbers and taxonomy
+### Prepare database of accession numbers and taxonomy
 ```{r prepareDb,cache=TRUE}
 read.nodes2('work/nodes.dmp',sqlFile)
 read.names2('work/names.dmp',sqlFile)
 read.accession2taxid(list.files('work','accession2taxid.gz$',full.names=TRUE),sqlFile,overwrite=TRUE)
 ```
 
-## Assign taxonomy to blast hits
+### Assign taxonomy to blast hits
 ```{r assignTaxa,cache=TRUE}
 blastFiles<-list.files('work/swarmPair','\\.blast\\.gz$',full.names=TRUE)
 

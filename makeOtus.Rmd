@@ -1,4 +1,6 @@
-## Load libraries
+## Make rbcL and matK OTUs
+
+### Load libraries
 ```{r}
 # installed from https://github.com/sherrillmix/dnar 
 library(dnar)
@@ -7,19 +9,19 @@ library(parallel)
 packageVersion('parallel')
 source('functions.R')
 ```
-## Check software versions
+### Check software versions
 ```{r}
 suppressWarnings(system('mafft --help 2>&1',intern=TRUE))
 system('dpkg -s fasttree 2>&1',intern=TRUE)
 suppressWarnings(system('swarm --version 2>&1',intern=TRUE))
 ```
 
-## Primers used
+### Primers used
 ```{r}
 primerSeqs<-list('rbcl'=c('rbcL634F'='ATGCGTTGGAGAGACCGTTTC','rbcLbR'='TCGGTYAGAGCRGGCATRTGCCA'),'matk'=c('matK472F'='CCCRTYCATCTGGAAATCTTGGTTC','matK1248R'='GCTRTRATAATGAGAAAGATTTCTGC'))
 ```
 
-## Find fastqs
+### Find fastqs
 ```{r}
 fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
 fastqs<-fastqs[!grepl('Undetermined',fastqs)]
@@ -28,7 +30,7 @@ primerBases<-sub('[0-9]$','',primers)
 ```
 
 
-## Run swarm, mafft and fasttree
+### Run swarm, mafft and fasttree
 ```{r,cache=TRUE}
 for(primerBase in unique(primerBases)){
   message('Working on ',primerBase)
