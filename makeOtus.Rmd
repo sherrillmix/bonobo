@@ -17,7 +17,7 @@ source('functions.R')
 ### Check software versions
 ```{r}
 suppressWarnings(system('mafft --help 2>&1',intern=TRUE))
-system('dpkg -s fasttree 2>&1',intern=TRUE)
+system('test -x dpkg && dpkg -s fasttree 2>&1',intern=TRUE)
 suppressWarnings(system('swarm --version 2>&1',intern=TRUE))
 ```
 
@@ -86,7 +86,7 @@ for(primerBase in unique(primerBases)){
   rownames(seqs)<-seqs$name
   write.fa(colnames(swarmOtus),seqs[colnames(swarmOtus),'seq'],tmpFile)
   message('Aligning with mafft')
-  cmd<-sprintf('~/installs/mafft/bin/mafft --thread 50 %s|gzip>%s',tmpFile,outAlign)
+  cmd<-sprintf('mafft --thread 50 %s|gzip>%s',tmpFile,outAlign)
   message(cmd)
   system(cmd)
   message('Creating tree with fasttree')
