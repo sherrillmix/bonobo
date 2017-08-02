@@ -13,7 +13,7 @@ source("loadData.R")
 ```
 
 ### Make heatmap of OTU abundances
-```{r plantHeatmap,fig.width=20,fig.height=30}
+```{r plantHeatmap,fig.width=20,fig.height=30,dpi=150}
 sortSamples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
 
