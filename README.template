@@ -1,2 +1,36 @@
 # Analysis code for "Geographically restricted malaria infections of wild bonobos include a new Laverania species"
 
+To regenerate this document, run `make` in this directory.
+
+The code depends on R packages:
+* library(actuar)
+* library(ade4)
+* library(ape)
+* library(parallel)
+* library(phyloseq)
+* library(Rtsne)
+* library(vegan)
+* library(vipor)
+* library(taxonomizr)
+
+And convenience function in the package:
+* library(dnar)
+installable with `devtools::install_github('sherrillmix/dnar')`.
+
+And programs:
+* R
+* makeblastdb
+* blastn
+* parallel
+* zcat
+* pick_de_novo_otus.py
+* fastq-dump
+* swarm
+* mafft
+* fasttree
+* bbmerge.sh
+* gzip
+* fasttree
+* bash
+* make
+
