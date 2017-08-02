@@ -32,3 +32,10 @@ plotHeatmap.md: plotHeatmap.Rmd parseBlast.md
 
 16s/plotBetaDiversity.md: 16s/plotBetaDiversity.Rmd 16s/runQiime.md 16s/plotPcoa.md
 	cd 16s && R -e 'knitr::knit("plotBetaDiversity.Rmd")'
+
+README.md: README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md
+	cat README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md > README.md
+
+README.html: README.md
+	pandoc --standalone --smart  --toc README.md -o README.html
+
