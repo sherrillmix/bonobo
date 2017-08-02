@@ -3,6 +3,7 @@
 ```{r}
 library(dnar)
 packageVersion('dnar')
+source('functions.R')
 ```
 
 ## Load data
