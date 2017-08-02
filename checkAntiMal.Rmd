@@ -1,27 +1,51 @@
-library(taxonomizr)
-library(vipor)
-source('readSamples.R')
+## Check for antimalarial plant taxa
 
-#TODO
-antiMal<-read.csv('AntiMalPlant_List_021817.csv',stringsAsFactors=FALSE)
+```{r}
+#stop on errors
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
+### Load libraries
+```{r}
+library(taxonomizr)
+packageVersion('taxonomizr')
+library(vipor)
+packageVersion('vipor')
+source('functions.R')
+```
+
+### Load data
+
+```{r loadData,cache=TRUE}
+source("loadData.R")
+```
+
+### Load taxonomy files
+
+```{r loadTaxonomy,cache=TRUE}
 if(!exists('taxaNodes')){
-  getNamesAndNodes('~/db/taxo/')
-  taxaNodes<-read.nodes('~/db/taxo/nodes.dmp')
-  taxaNamesAmbig<-read.names('~/db/taxo/names.dmp',FALSE)
-  taxaNames<-read.names('~/db/taxo/names.dmp')
+  getNamesAndNodes('work/')
+  taxaNodes<-read.nodes('work/nodes.dmp')
+  taxaNamesAmbig<-read.names('work/names.dmp',FALSE)
+  taxaNames<-read.names('work/names.dmp')
 }
-antiMal$clean<-sub(' sp$','',sub('([A-Za-z]+ [a-z]+).*','\\1',antiMal$Plant))
-antiMal$clean[antiMal$clean=="AAloe parvibracteata"]<-"Aloe parvibracteata"
-antiMal$clean[antiMal$clean=="Curcuma aromatic"]<-"Curcuma aromatica"
-antiMal$clean[antiMal$clean=="Uvariopsis congensis"]<-"Uvariopsis"
-antiMal$isGenus<-!grepl(' ',antiMal$clean)
-antiMal$id<-getId(antiMal$clean,taxaNamesAmbig)
+```
+
+### Read in antimalarial plants
+
+```{r readAntiMal,cache=TRUE}
+antiMal<-read.csv('antiMalarials.csv',stringsAsFactors=FALSE)
+antiMal$isGenus<-!grepl(' ',antiMal$Plant)
+antiMal$id<-getId(antiMal$Plant,taxaNamesAmbig)
 antiMal$species<-getTaxonomy(antiMal$id,taxaNodes,taxaNames,'species')
 antiMal$genus<-getTaxonomy(antiMal$id,taxaNodes,taxaNames,'genus')
-write.csv(antiMal,'work/antiMal.csv',row.names=FALSE)
+```
 
+### Find OTUs with antimalarial hits
+
+```{r findAntimals,cache=TRUE}
+#only counts hits with match > 95% of read
 hitCut<-.95
-if(!exists('swarmData'))source("loadData.R")
 antiMals<-lapply(names(swarmData),function(ii){
   species<-swarmData[[ii]][['taxa']][colnames(swarmData[[ii]][['props']]),'species']
   genus<-swarmData[[ii]][['taxa']][colnames(swarmData[[ii]][['props']]),'genus']
@@ -35,37 +59,13 @@ antiMals<-lapply(names(swarmData),function(ii){
   return(list('prop'=antiMalProp,'taxa'=antiMalTaxa,'plants'=antiMalPlants))
 })
 names(antiMals)<-names(swarmData)
+```
 
-pdf('out/allAntiMal.pdf',width=10)
-for(ii in names(antiMals)){
-  propsAntiMal<-antiMals[[ii]][['prop']]
-  propsAntiMal<-propsAntiMal[rownames(propsAntiMal) %in% rownames(samples),]
-  sampleInfo<-samples[rownames(samples) %in% rownames(propsAntiMal),]
-  sampleInfo$speciesMal<-paste(sampleInfo$Species,ifelse(sampleInfo$malaria,'Positive','Negative'))
-  propsAntiMal<-propsAntiMal[rownames(sampleInfo),]
-  propAntiMal<-apply(propsAntiMal,1,sum)
-  #
-  cols<-rainbow.lab(length(unique(sampleInfo$speciesMal)),alpha=.7)
-  names(cols)<-unique(sampleInfo$speciesMal)
-  #
-  print(tapply(propAntiMal,sampleInfo$speciesMal,median)*100)
-  tapply(propAntiMal,list(sampleInfo$area2,sampleInfo$speciesMal),mean)*100
-  #
-  pTL<-wilcox.test(
-    propAntiMal[grepl('TL',sampleInfo$area)&sampleInfo$bonobo],
-    propAntiMal[!grepl('TL',sampleInfo$area)&sampleInfo$bonobo],
-  )$p.value
-  print(pTL)
-  vpPlot(factor(sampleInfo$area2,levels=unique(sampleInfo$area2)),propAntiMal*100,ylab='Percent antimalarial',las=1,main=sprintf('%s p(TL not equal other bonobos)=%0.3f',ii,pTL),bg=cols[sampleInfo$speciesMal],pch=21,cex=1.5)
-  legend('topleft',names(cols),pch=21,pt.bg=cols,pt.cex=1.5)
-}
-dev.off()
-
-
+### Compare antimalarial plant OTUs between endemic and non-endemic bonobo sites
+```{r compareAntimals,cache=TRUE,fig.width=12,fig.height=12,resolution=150}
 pCut<-Inf #show all
 for(ii in names(swarmData)){
   message(ii)
-  #otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
   otuProp<-antiMals[[ii]][['prop']]
   otuProp<-otuProp[rownames(otuProp) %in% rownames(samples),]
   ss<-samples[rownames(otuProp),]
@@ -92,7 +92,6 @@ for(ii in names(swarmData)){
     maxTree<-hclust(dist(t(selectPropAll[,])))
     selectPropAll<-selectPropAll[,rev(maxTree$labels[maxTree$order])]
     selectPropAll<-selectPropAll[,order(colnames(selectPropAll))]
-    pdf(sprintf('out/nineCompare_%s.pdf',ii),height=13,width=13)
       par(mar=c(10.5,.1,3,14),lheight=.7)
       metadata<-ss[rownames(selectPropAll),c('chimpBonobo','area2','plasmoPM','Code')]
       colnames(metadata)<-c('Species','Area','Laverania','Sample')
@@ -100,22 +99,20 @@ for(ii in names(swarmData)){
       title(main=ii)
       axis(1,1:ncol(selectPropAll),colnames(selectPropAll),las=2,cex.axis=.7)
       addMetaData(metadata,cex=.75)
-    dev.off()
   }
 }
-file.copy('out/nineCompare_matK.pdf','out/Fig.S7A.pdf')
-file.copy('out/nineCompare_rbcL.pdf','out/Fig.S7B.pdf')
+```
 
-#check chimp
+### Compare antimalarial plant OTUs in plasmodium positive and negative chimps
+
+```{r}
 pCut<-.05
 for(ii in names(swarmData)){
   message(ii)
   otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
-  #otuProp<-antiMals[[ii]][['prop']]
   otuProp<-otuProp[rownames(otuProp) %in% rownames(samples),]
   ss<-samples[rownames(otuProp),]
   ss<-ss[order(!ss$bonobo,ss$area2,ss$malaria),]
-  #
   mal<-rownames(ss)[!ss$bonobo&ss$malaria]
   noMal<-rownames(ss)[!ss$bonobo&!ss$malaria]
   inChimp<-otuProp[,apply(otuProp[c(mal,noMal),],2,max)>0]
@@ -123,6 +120,7 @@ for(ii in names(swarmData)){
   condenseP<-p.adjust(ninePs,'fdr')
   print(summary(condenseP<pCut))
 }
+```
 
 
 

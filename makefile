@@ -1,4 +1,4 @@
-all: getData.md makeOtus.md downloadDatabases.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
+all: getData.md makeOtus.md downloadDatabases.md blastData.md parseBlast.md plotPcoa.md checkAntiMal.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
 
 getData.md: getData.Rmd
 	R -e 'knitr::knit("getData.Rmd")'
@@ -21,6 +21,9 @@ plotPcoa.md: plotPcoa.Rmd parseBlast.md
 plotHeatmap.md: plotHeatmap.Rmd parseBlast.md
 	R -e 'knitr::knit("plotHeatmap.Rmd")'
 	
+checkAntiMal.md: checkAntiMal.Rmd parseBlast.md
+	R -e 'knitr::knit("checkAntiMal.Rmd")'
+
 16s/runQiime.md: 16s/runQiime.Rmd getData.md
 	cd 16s && R -e 'knitr::knit("runQiime.Rmd")'
 
@@ -39,8 +42,8 @@ plotHeatmap.md: plotHeatmap.Rmd parseBlast.md
 sensitivity/sensitivity.md: sensitivity/sensitivity.Rmd
 	cd sensitivity && R -e 'knitr::knit("sensitivity.Rmd")'
 
-README.md: README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md
-	cat README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md <( sed 's@(figure/@(16s/figure/@' 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md) <( sed 's@(figure/@(sensitivity/figure/@' sensitivity/sensitivity.md) > README.md
+README.md: README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md checkAntiMal.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md
+	cat README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md checkAntiMal.md <( sed 's@(figure/@(16s/figure/@' 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md) <( sed 's@(figure/@(sensitivity/figure/@' sensitivity/sensitivity.md) > README.md
 
 README.html: README.md
 	pandoc --standalone --smart --self-contained  --css=github-pandoc.css --toc README.md -o README.html
