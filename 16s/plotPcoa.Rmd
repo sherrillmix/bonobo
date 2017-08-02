@@ -87,3 +87,8 @@ legend(
   xjust=0,xpd=NA,bty='n'
 )
 ```
+
+### Mantel tests for different distance measures
+```{r}
+mantels
+```
