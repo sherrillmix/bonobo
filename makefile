@@ -1,12 +1,15 @@
-all: getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
+all: getData.md makeOtus.md downloadDatabases.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
 
 getData.md: getData.Rmd
 	R -e 'knitr::knit("getData.Rmd")'
 
+downloadDatabases.md: downloadDatabases.Rmd
+	R -e 'knitr::knit("downloadDatabases.Rmd")'
+
 makeOtus.md: makeOtus.Rmd getData.md
 	R -e 'knitr::knit("makeOtus.Rmd")'
 
-blastData.md: blastData.Rmd makeOtus.md
+blastData.md: blastData.Rmd downloadDatabases.md makeOtus.md
 	R -e 'knitr::knit("blastData.Rmd")'
 
 parseBlast.md: parseBlast.Rmd blastData.md
