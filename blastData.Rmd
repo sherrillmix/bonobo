@@ -2,7 +2,7 @@
 
 ```{r}
 #stop on errors
-opts_chunk$set(error=FALSE,tidy=TRUE)
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```
 
 ### Software versions
