@@ -1,5 +1,10 @@
 ## PCoA and t-SNE of microbial abundances
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Load libraries
 ```{r}
 library(phyloseq)

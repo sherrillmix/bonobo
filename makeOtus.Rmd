@@ -1,5 +1,10 @@
 ## Make rbcL and matK OTUs
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Load libraries
 ```{r}
 # installed from https://github.com/sherrillmix/dnar 
@@ -17,12 +22,12 @@ suppressWarnings(system('swarm --version 2>&1',intern=TRUE))
 ```
 
 ### Primers used
-```{r}
+```{r primers}
 primerSeqs<-list('rbcl'=c('rbcL634F'='ATGCGTTGGAGAGACCGTTTC','rbcLbR'='TCGGTYAGAGCRGGCATRTGCCA'),'matk'=c('matK472F'='CCCRTYCATCTGGAAATCTTGGTTC','matK1248R'='GCTRTRATAATGAGAAAGATTTCTGC'))
 ```
 
 ### Find fastqs
-```{r}
+```{r listFastqs}
 fastqs<-list.files('data/','_R[12]_.*\\.fastq\\.gz$',recursive=TRUE,full.names=TRUE)
 fastqs<-fastqs[!grepl('Undetermined',fastqs)]
 primers<-sub('.*(matK|rbcL).*_R([0-9]+)_.*','\\1\\2',basename(fastqs))
@@ -31,7 +36,7 @@ primerBases<-sub('[0-9]$','',primers)
 
 
 ### Run swarm, mafft and fasttree
-```{r,cache=TRUE}
+```{r swarmAlign, cache=TRUE}
 for(primerBase in unique(primerBases)){
   message('Working on ',primerBase)
   if(!dir.exists('work/swarmPair'))dir.create('work/swarmPair',recursive=TRUE)

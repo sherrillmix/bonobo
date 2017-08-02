@@ -1,5 +1,10 @@
 ## Blast OTUs against rbcL and matK databases
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Software versions
 ```{r}
 system('makeblastdb -version',intern=TRUE)

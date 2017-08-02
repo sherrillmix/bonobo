@@ -1,5 +1,10 @@
 ## rbcL and matK abundances
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Load libraries
 
 ```{r}

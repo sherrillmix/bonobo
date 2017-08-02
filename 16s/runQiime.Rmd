@@ -1,5 +1,10 @@
 ## Prepare reads and run QIIME
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Load libraries
 ```{r}
 # installed from https://github.com/sherrillmix/dnar 
@@ -31,7 +36,7 @@ system('bbmerge.sh --version 2>&1',intern=TRUE)
 ```
 
 ### Read in all sequences
-```{r readFastqs}
+```{r readFastqs,cache=TRUE}
 fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
 #just get sequences to reduce memory
 allSeq<-mclapply(fastqs,function(xx)read.fastq(xx)$seq,mc.cores=12)
@@ -39,7 +44,7 @@ message('Read ',length(unlist(allSeq)),' sequences in ',length(allSeq),' fastqs'
 ```
 
 ### Run qiime
-```{r runQiime}
+```{r runQiime,cache=TRUE,dependson=readFastqs}
 if(!dir.exists('work/'))dir.create('work')
 out<-runQiime(unlist(allSeq),storeDir='work/qiime')
 outDf<-data.frame(

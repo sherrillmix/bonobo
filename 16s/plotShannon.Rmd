@@ -1,5 +1,10 @@
 ## Shannon diversity of the microbiome
 
+```{r}
+#stop on errors
+opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
 ### Load libraries
 ```{r}
 library(dnar)
