@@ -44,7 +44,7 @@ message('Read ',length(unlist(allSeq)),' sequences in ',length(allSeq),' fastqs'
 ```
 
 ### Run qiime
-```{r runQiime,cache=TRUE,dependson=readFastqs}
+```{r runQiime,cache=TRUE,dependson='readFastqs'}
 if(!dir.exists('work/'))dir.create('work')
 out<-runQiime(unlist(allSeq),storeDir='work/qiime')
 outDf<-data.frame(
