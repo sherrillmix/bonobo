@@ -27,7 +27,7 @@ system('fastq-dump --version 2>&1',intern=TRUE)
 if(!dir.exists('sra'))dir.create('sra')
 for(ii in samples$Run_s){
   outFiles<-sprintf('sra/%s_%d.fastq.gz',ii,1:2)
-  cmd<-sprintf('fastq-dump --gzip --split-files --outdir data %s',ii)
+  cmd<-sprintf('fastq-dump --gzip --split-files --outdir sra %s',ii)
   message(cmd)
   if(any(!file.exists(outFiles)))system(cmd)
   if(any(!file.exists(outFiles)))stop('fastq-dump unsucessful')
