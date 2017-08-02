@@ -1,4 +1,4 @@
-all: getData.md makeOtus.md blastData.md parseBlast.md makeClusters.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md
+all: getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md
 
 getData.md: getData.Rmd
 	R -e 'knitr::knit("getData.Rmd")'
@@ -12,8 +12,8 @@ blastData.md: blastData.Rmd makeOtus.md
 parseBlast.md: parseBlast.Rmd blastData.md
 	R -e 'knitr::knit("parseBlast.Rmd")'
 
-makeClusters.md: makeClusters.Rmd parseBlast.md
-	R -e 'knitr::knit("makeClusters.Rmd")'
+plotPcoa.md: plotPcoa.Rmd parseBlast.md
+	R -e 'knitr::knit("plotPcoa.Rmd")'
 
 plotHeatmap.md: plotHeatmap.Rmd parseBlast.md
 	R -e 'knitr::knit("plotHeatmap.Rmd")'
