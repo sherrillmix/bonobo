@@ -1,4 +1,6 @@
-## Load libraries
+## Beta diversity between samples
+
+### Load libraries
 ```{r}
 library(dnar)
 packageVersion('dnar')
@@ -6,15 +8,15 @@ library(vegan)
 packageVersion('vegan')
 ```
 
-## Load data
+### Load data
 ```{r}
-source('readData.R')
+source('loadData.R')
 source('../functions.R')
 #from plotPcoa.Rmd
 load('work/uniDist.Rdat')
 ```
 
-## Convenience function for getting distances from matrix
+### Convenience function for getting distances from matrix
 ```{r}
 pullDists<-function(xx,distMat){
   isIdentical<-length(xx[[1]])==length(xx[[2]]) && all(xx[[1]]==xx[[2]])
@@ -25,7 +27,7 @@ pullDists<-function(xx,distMat){
 }
 ```
 
-## Pull out distances for comparisons
+### Pull out distances for comparisons
 ```{r, cache=TRUE}
 comparisons<-withAs(s=samples[isEnough[samples$Code],],list(
   list(
@@ -61,7 +63,7 @@ distList<-lapply(distList,function(xx){
 })
 ```
 
-## Calculate Wilcoxon test p-values between groups of distances
+### Calculate Wilcoxon test p-values between groups of distances
 ```{r}
 pVals<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy)$p.value},xx,yy)))
 pVals2<-lapply(distList,function(dists)outer(dists,dists,function(xx,yy)mapply(function(xxx,yyy){wilcox.test(xxx,yyy,alternative='less')$p.value},xx,yy)))
@@ -78,14 +80,14 @@ pVals$sig<- symnum(pVals$p, corr = FALSE, na = FALSE, cutpoints = c(0, 1e-6, 1e-
 pVals<-pVals[pVals$p<.01,]
 ```
 
-## Setup plotting parameters
+### Setup plotting parameters
 ```{r}
 spacer<-.6
 cols<-rainbow.lab(length(distList),start=1,end=-2)
 groupId<-rep(1:length(distList),sapply(distList,length))
 ```
 
-## Plot comparison of distances between groups
+### Plot comparison of distances between groups
 ```{r distanceComparison,fig.width=14}
 par(mar=c(11,2.75,.3,4),lheight=.8)
 compareFactor<-factor(rep(unlist(lapply(distList,names)),unlist(lapply(distList,sapply,length))),levels=unlist(lapply(distList,function(xx)rev(names(xx)))))
@@ -114,7 +116,7 @@ breaks<-which(c(FALSE,pos[-1]-pos[-length(pos)]< -1))
 slantAxis(1,pos,names(pos),srt=-40)
 ```
 
-## Calculate PERMANOVA statistics of distances and covariates
+### Calculate PERMANOVA statistics of distances and covariates
 ```{r,cache=TRUE}
 adonis(uniDist~bonobo+area2+malaria,data=samples[labels(uniDist),],permutations=1e7,parallel=20)
 tlDist<-as.dist(as.matrix(uniDist)[samples[labels(uniDist),'isTL'],samples[labels(uniDist),'isTL']])

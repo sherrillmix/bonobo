@@ -1,4 +1,6 @@
-## Load libraries
+## Shannon diversity of the microbiome
+
+### Load libraries
 ```{r}
 library(dnar)
 packageVersion('dnar')
@@ -6,19 +8,19 @@ library(vipor)
 packageVersion('vipor')
 ```
 
-## Load the data
+### Load the data
 ```{r}
-source('readData.R')
+source('loadData.R')
 ```
 
-## Set up grouping variables
+### Set up grouping variables
 
 ```{r}
 groupings<-paste(ifelse(samples$bonobo[isEnough[samples$Code]],'Bonobo','Chimpanzee'),ifelse(samples$malaria[isEnough[samples$Code]],'Laverania positive','Laverania negative'))
 groupings2<-paste(ifelse(samples$bonobo[isEnough[samples$Code]],'Bonobo ','Chimpanzee '),ifelse(grepl('^TL',samples$area[isEnough[samples$Code]]),'TL2 site',ifelse(samples$bonobo[isEnough[samples$Code]],'non-endemic sites','all sites')),sep='')
 ```
 
-## Set up plotting parameters
+### Set up plotting parameters
 ```{r}
 #mildly magic number throwing out 3rd color to leave gap in coloring between two groups
 nGroupings<-length(unique(groupings))
@@ -31,7 +33,7 @@ group2Cols2<-rainbow.lab(nGroupings+nGroupings2+1,alpha=.25)[1+nGroupings+1:nGro
 names(group2Cols)<-names(group2Cols2)<-unique(groupings2)
 ```
 
-## Calculate Shannon diversities
+### Calculate Shannon diversities
 ```{r}
 shannons<-apply(otuTab[,samples$Code[isEnough[samples$Code]]],2,shannon)
 groupShannon<-sapply(unique(groupings),function(xx)median(shannons[groupings==xx]))
@@ -40,14 +42,14 @@ group2Shannon<-sapply(unique(groupings2),function(xx)median(shannons[groupings2=
 shannon2CI<-sapply(unique(groupings2),function(xx)medianCI(shannons[groupings2==xx]))
 ```
 
-## Calculate Wilcoxon test p-values
+### Calculate Wilcoxon test p-values
 ```{r}
 outer(split(shannons,groupings),split(shannons,groupings),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 outer(split(shannons,groupings2),split(shannons,groupings2),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 outer(split(shannons,sub('Plasmodi.*','',groupings)),split(shannons,sub('Plasmodi.*','',groupings)),function(xx,yy)mapply(function(xxx,yyy)wilcox.test(xxx,yyy)$p.value,xx,yy))
 ```
 
-## Generate distance comparison figure
+### Generate distance comparison figure
 ```{r shannonDiversity}
 spacer<-.5
 par(mar=c(6.6,4,.3,5),lheight=.85)

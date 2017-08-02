@@ -1,4 +1,6 @@
-## Load libraries
+## PCoA and t-SNE of microbial abundances
+
+### Load libraries
 ```{r}
 library(phyloseq)
 packageVersion('phyloseq')
@@ -8,15 +10,15 @@ library(ape)
 packageVersion('ape')
 ```
 
-## Load the data
+### Load the data
 ```{r}
-source('readData.R')
+source('loadData.R')
 source('../functions.R')
 ```
 
 
 
-## Calculate distance matrices from OTU table
+### Calculate distance matrices from OTU table
 ```{r,cache=TRUE}
   selectSamples<-samples[isEnough[samples$Code],]
   subsampledOtus<-apply(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$Code],2,rarefyCounts,nRequiredReads)
@@ -41,7 +43,7 @@ source('../functions.R')
 ```
 
 
-## Set up plotting parameters
+### Set up plotting parameters
 ```{r}
 colorBrew<-c('#e41a1cBB','#377eb8BB','#4daf4aBB','#984ea3BB','#ff7f00BB','#ffff33BB','#a65628BB','#f781bfBB','#999999BB','#88ddffBB')
 nArea<-length(unique(selectSamples$area2))
@@ -59,7 +61,7 @@ names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 importance<-uniPca$values$Relative_eig
 colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
 ```
-## Plot 16s PCoA
+### Plot 16s PCoA
 ```{r bacteriaPCoA}
   axes<-1:2
   #malaria/species
@@ -69,7 +71,7 @@ colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1
   title(main=sprintf('16S rRNA',axes[1],axes[2]))
 ```
 
-## Plot 16s t-SNE
+### Plot 16s t-SNE
 ```{r bacteria_tSNE}
 tsne<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=5000)
 par(mar=c(4,4,1.5,9.5))
