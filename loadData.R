@@ -5,6 +5,7 @@ source('readSamples.R')
 
 primers<-c('matK','rbcL')
 
+#require 5000 reads
 nReadCut<-5000
 swarmData<-lapply(primers,function(ii){
   message(ii)
