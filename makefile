@@ -37,5 +37,5 @@ README.md: README.template getData.md makeOtus.md blastData.md parseBlast.md plo
 	cat README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md > README.md
 
 README.html: README.md
-	pandoc --standalone --smart  --toc README.md -o README.html
+	pandoc --standalone --smart --include-in-header github-pandoc.css --toc README.md -o README.html
 
