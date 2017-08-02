@@ -1,10 +1,18 @@
+## Load libraries
+
+```{r}
+library(dnar)
+packageVersion('dnar')
+```
+
 ## Load data
-```{r,cache=TRUE}
+
+```{r loadData,cache=TRUE}
 source("loadData.R")
 ```
 
 ### Make heatmap of OTU abundances
-```{r}
+```{r plantHeatmap,fig.width=20,fig.height=30}
 sortSamples<-samples[order(samples$Species,samples$area2,samples$malaria,samples$Code),]
 cols<-c('white',tail(rev(heat.colors(110)),99)) 
 

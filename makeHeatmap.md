@@ -1,4 +1,17 @@
+## Load libraries
+
+
+```r
+library(dnar)
+packageVersion('dnar')
+```
+
+```
+## [1] '0.1'
+```
+
 ## Load data
+
 
 ```r
 source("loadData.R")
@@ -69,7 +82,7 @@ for(ii in names(swarmData)){
 ```
 
 ```
-## rbcL
+## Error in addMetaData(metadata, cex = 0.75): could not find function "addMetaData"
 ```
 
-![plot of chunk plantHeatmap](figure/plantHeatmap-1.png)![plot of chunk plantHeatmap](figure/plantHeatmap-2.png)
+![plot of chunk plantHeatmap](figure/plantHeatmap-1.png)
