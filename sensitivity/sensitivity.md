@@ -1,6 +1,6 @@
-# Analyze sensitivity of plasmodium PCR detection
+## Sensitivity of plasmodium PCR detection
 
-## Libraries
+### Libraries
 
 ```r
 library(actuar)
@@ -25,13 +25,13 @@ packageVersion('actuar')
 ## [1] '2.1.1'
 ```
 
-## Load data
+### Load data
 
 ```r
 pcr<-read.csv('pcrPos.csv',stringsAsFactors=FALSE)
 ```
 
-## Find maximum likelihood estimate for sensitivity using a zero truncated binomial
+### Find maximum likelihood estimate for sensitivity using a zero truncated binomial
 
 ```r
 like<-function(theta,positives,replicates)-sum(dztbinom(positives,replicates,theta,log=TRUE))
@@ -47,7 +47,7 @@ print(mle)
 ## [1] 82.88128
 ```
 
-## Compare the observed data with that expected from the estimated sensitivity
+### Compare the observed data with that expected from the estimated sensitivity
 
 ```r
 hist(pcr$positive[pcr$replicates==8],breaks=0:9-.5,xlab='Number of positive PCRs',main='8 replicate samples',las=1)
