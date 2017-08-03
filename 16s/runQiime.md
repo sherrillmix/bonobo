@@ -1,9 +1,17 @@
-## Load libraries
+## Prepare reads and run QIIME
+
 
 ```r
-# installed from https://github.com/sherrillmix/dnar 
+#stop on errors
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
+### Load libraries
+
+```r
+# installed from https://github.com/sherrillmix/dnar
 library(dnar)
-packageVersion('dnar')
+packageVersion("dnar")
 ```
 
 ```
@@ -12,7 +20,7 @@ packageVersion('dnar')
 
 ```r
 library(parallel)
-packageVersion('parallel')
+packageVersion("parallel")
 ```
 
 ```
@@ -20,13 +28,14 @@ packageVersion('parallel')
 ```
 
 ```r
-source('../functions.R')
+source("../functions.R")
 ```
 
-## Software versions
+### Software versions
 
 ```r
-system('echo "source activate qiime1;print_qiime_config.py -t"|bash 2>&1',intern=TRUE)
+system("echo \"source activate qiime1;print_qiime_config.py -t\"|bash 2>&1", 
+    intern = TRUE)
 ```
 
 ```
@@ -94,13 +103,13 @@ system('echo "source activate qiime1;print_qiime_config.py -t"|bash 2>&1',intern
 ## [62] "==============================="                                                                                                                                             
 ## [63] "........."                                                                                                                                                                   
 ## [64] "----------------------------------------------------------------------"                                                                                                      
-## [65] "Ran 9 tests in 0.017s"                                                                                                                                                       
+## [65] "Ran 9 tests in 0.013s"                                                                                                                                                       
 ## [66] ""                                                                                                                                                                            
 ## [67] "OK"
 ```
 
 ```r
-system('bbmerge.sh --version 2>&1',intern=TRUE)
+system("bbmerge.sh --version 2>&1", intern = TRUE)
 ```
 
 ```
@@ -109,19 +118,21 @@ system('bbmerge.sh --version 2>&1',intern=TRUE)
 ## [3] "For help, please run the shellscript with no parameters, or look in /docs/."
 ```
 
-## Merge reads
+### Merge reads
 
 ```r
-  if(!dir.exists('data/joined'))dir.create('data/joined')
-  fastq1s<-list.files('data','_R1_.*\\.fastq.gz',full.name=TRUE)
-  mclapply(fastq1s,function(ii){
-    out<-sprintf('data/joined/%s.fastq',sub('_R1_.*$','',basename(ii)))
-    cmd<-sprintf('bbmerge.sh in1=%s in2=%s out=%s t=10 2>%s',ii,sub('_R1_','_R2_',ii),out,sub('fastq$','out',out))
-    exit<-system(cmd)
-    if(exit!=0)stop("Problem running pairing in",ii)
-    system(sprintf('gzip %s',out))
+if (!dir.exists("data/joined")) dir.create("data/joined")
+fastq1s <- list.files("data", "_R1_.*\\.fastq.gz", full.name = TRUE)
+mclapply(fastq1s, function(ii) {
+    out <- sprintf("data/joined/%s.fastq", sub("_R1_.*$", "", basename(ii)))
+    cmd <- sprintf("bbmerge.sh in1=%s in2=%s out=%s t=10 2>%s", ii, sub("_R1_", 
+        "_R2_", ii), out, sub("fastq$", "out", out))
+    exit <- system(cmd)
+    if (exit != 0) 
+        stop("Problem running pairing in", ii)
+    system(sprintf("gzip %s", out))
     return(cmd)
-  },mc.cores=10)
+}, mc.cores = 10)
 ```
 
 ```
@@ -420,42 +431,36 @@ system('bbmerge.sh --version 2>&1',intern=TRUE)
 ## [1] "bbmerge.sh in1=data/UB2037_16s_R1_.fastq.gz in2=data/UB2037_16s_R2_.fastq.gz out=data/joined/UB2037_16s.fastq t=10 2>data/joined/UB2037_16s.out"
 ```
 
-## Read in all sequences
+### Read in all sequences
 
 ```r
-fastqs<-list.files('data/joined','.fastq.gz',full.name=TRUE)
-#just get sequences to reduce memory
-allSeq<-mclapply(fastqs,function(xx)read.fastq(xx)$seq,mc.cores=12)
-message('Read ',length(unlist(allSeq)),' sequences in ',length(allSeq),' fastqs')
+fastqs <- list.files("data/joined", ".fastq.gz", full.name = TRUE)
+# just get sequences to reduce memory
+allSeq <- mclapply(fastqs, function(xx) read.fastq(xx)$seq, mc.cores = 12)
+message("Read ", length(unlist(allSeq)), " sequences in ", length(allSeq), " fastqs")
 ```
 
 ```
 ## Read 6574907 sequences in 98 fastqs
 ```
 
-## Run qiime
+### Run qiime
 
 ```r
-if(!dir.exists('work/'))dir.create('work')
-out<-runQiime(unlist(allSeq),storeDir='work/qiime')
+if (!dir.exists("work/")) dir.create("work")
+out <- runQiime(unlist(allSeq), storeDir = "work/qiime")
 ```
 
 ```
-## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/RtmpTfT7gW/filea38447171fb9/XXX.fa --output /tmp/RtmpTfT7gW/filea384cfe426 --parallel --jobs_to_start 32 --force"|bash
+## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/RtmpXrHG6Z/file941a69811d81/XXX.fa --output /tmp/RtmpXrHG6Z/file941a208f7e57 --parallel --jobs_to_start 32 --force"|bash
 ```
 
 ```r
-outDf<-data.frame(
-  'file'=rep(sub('_16s.fastq.gz','',basename(fastqs)),sapply(allSeq,length)),
-  'otu'=out[['otus']],
-  stringsAsFactors=FALSE
-)
-withAs(outFile=gzfile('work/qiimeOtuIds.csv.gz'),write.csv(outDf,outFile,row.names=FALSE))
-write.fa(names(out[['seqs']]),out[['seqs']],'work/qiimeOtus.fa.gz')
-outTaxa<-data.frame(
-  'name'=names(out[['taxa']]),
-  'taxa'=out[['taxa']],
-  stringsAsFactors=FALSE
-)
-write.csv(outTaxa,'work/qiimeOtus.taxa',row.names=FALSE)
+outDf <- data.frame(file = rep(sub("_16s.fastq.gz", "", basename(fastqs)), sapply(allSeq, 
+    length)), otu = out[["otus"]], stringsAsFactors = FALSE)
+withAs(outFile = gzfile("work/qiimeOtuIds.csv.gz"), write.csv(outDf, outFile, 
+    row.names = FALSE))
+write.fa(names(out[["seqs"]]), out[["seqs"]], "work/qiimeOtus.fa.gz")
+outTaxa <- data.frame(name = names(out[["taxa"]]), taxa = out[["taxa"]], stringsAsFactors = FALSE)
+write.csv(outTaxa, "work/qiimeOtus.taxa", row.names = FALSE)
 ```
