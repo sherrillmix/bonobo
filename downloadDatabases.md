@@ -22,7 +22,7 @@ packageVersion("parallel")
 ```r
 if (!dir.exists("ebi")) dir.create("ebi")
 # note limit=400000
-downloadUrls <- c("ebi/rbcl.fa.gz", "http://www.ebi.ac.uk/ena/data/search?query=rbcl&result=sequence_release&display=fasta&download=gzip&limit=400000", 
+downloadUrls <- c(`ebi/rbcl.fa.gz` = "http://www.ebi.ac.uk/ena/data/search?query=rbcl&result=sequence_release&display=fasta&download=gzip&limit=400000", 
     `ebi/matk.fa.gz` = "http://www.ebi.ac.uk/ena/data/search?query=matk&result=sequence_release&display=fasta&download=gzip&limit=400000")
 mclapply(names(downloadUrls), function(xx) download.file(downloadUrls[xx], xx, 
     mode = "wb"), mc.cores = 2)
@@ -30,11 +30,8 @@ mclapply(names(downloadUrls), function(xx) download.file(downloadUrls[xx], xx,
 
 ```
 ## [[1]]
-## [1] 1
+## [1] 0
 ## 
 ## [[2]]
-## [1] 1
-## 
-## [[3]]
 ## [1] 0
 ```
