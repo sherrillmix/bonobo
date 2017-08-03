@@ -74,7 +74,7 @@ for(primerBase in unique(primerBases)){
   print(readCounts)
   samples<-rep(basename(names(trimReads)),sapply(trimReads,length))
   message('Running swarm')
-  otus<-runSwarm(unlist(trimReads),'~/installs/swarm/swarm',swarmArgs='-f -t 40')
+  otus<-runSwarm(unlist(trimReads),swarmArgs='-f -t 40')
   swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
   write.fa(otus[['seqs']]$name,otus[['seqs']]$seq,outFa)
   save(swarmOtus,file=outMat)
