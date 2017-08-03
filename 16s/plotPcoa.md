@@ -91,7 +91,7 @@ subsampledOtus <- apply(otuTab[rownames(otuTab) %in% tree$tip.label, selectSampl
 phyOtu <- otu_table(subsampledOtus, taxa_are_rows = TRUE)
 qiimeData <- phyloseq(otu_table = phyOtu, phy_tree = tree)
 uniDist <- UniFrac(qiimeData, weighted = FALSE)
-save(uniDist, file = "work/uniDist.csv")
+save(uniDist, file = "work/uniDist.Rdat")
 phyOtuW <- otu_table(otuProp[rownames(otuTab) %in% tree$tip.label, selectSamples$Code], 
     taxa_are_rows = TRUE)
 qiimeDataW <- phyloseq(otu_table = phyOtuW, phy_tree = tree)
@@ -162,109 +162,109 @@ tsne <- Rtsne(uniDist, is_distance = TRUE, verbose = TRUE, perplexity = 15,
 ## Computing input similarities...
 ## Building tree...
 ##  - point 0 of 94
-## Done in 0.01 seconds (sparsity = 0.613173)!
+## Done in 0.01 seconds (sparsity = 0.616342)!
 ## Learning embedding...
-## Iteration 50: error is 61.550814 (50 iterations in 0.02 seconds)
-## Iteration 100: error is 60.825390 (50 iterations in 0.03 seconds)
-## Iteration 150: error is 57.786927 (50 iterations in 0.02 seconds)
-## Iteration 200: error is 57.637336 (50 iterations in 0.02 seconds)
-## Iteration 250: error is 58.763252 (50 iterations in 0.02 seconds)
-## Iteration 300: error is 1.934430 (50 iterations in 0.02 seconds)
-## Iteration 350: error is 1.427391 (50 iterations in 0.02 seconds)
-## Iteration 400: error is 0.844366 (50 iterations in 0.02 seconds)
-## Iteration 450: error is 0.634361 (50 iterations in 0.02 seconds)
-## Iteration 500: error is 0.332486 (50 iterations in 0.02 seconds)
-## Iteration 550: error is 0.318553 (50 iterations in 0.02 seconds)
-## Iteration 600: error is 0.310503 (50 iterations in 0.02 seconds)
-## Iteration 650: error is 0.305856 (50 iterations in 0.02 seconds)
-## Iteration 700: error is 0.304269 (50 iterations in 0.02 seconds)
-## Iteration 750: error is 0.299161 (50 iterations in 0.02 seconds)
-## Iteration 800: error is 0.302137 (50 iterations in 0.02 seconds)
-## Iteration 850: error is 0.303162 (50 iterations in 0.02 seconds)
-## Iteration 900: error is 0.303458 (50 iterations in 0.02 seconds)
-## Iteration 950: error is 0.299883 (50 iterations in 0.02 seconds)
-## Iteration 1000: error is 0.298317 (50 iterations in 0.02 seconds)
-## Iteration 1050: error is 0.300473 (50 iterations in 0.02 seconds)
-## Iteration 1100: error is 0.297014 (50 iterations in 0.02 seconds)
-## Iteration 1150: error is 0.301228 (50 iterations in 0.02 seconds)
-## Iteration 1200: error is 0.301497 (50 iterations in 0.02 seconds)
-## Iteration 1250: error is 0.297683 (50 iterations in 0.02 seconds)
-## Iteration 1300: error is 0.298731 (50 iterations in 0.02 seconds)
-## Iteration 1350: error is 0.299037 (50 iterations in 0.02 seconds)
-## Iteration 1400: error is 0.299018 (50 iterations in 0.02 seconds)
-## Iteration 1450: error is 0.299133 (50 iterations in 0.02 seconds)
-## Iteration 1500: error is 0.296154 (50 iterations in 0.02 seconds)
-## Iteration 1550: error is 0.299348 (50 iterations in 0.02 seconds)
-## Iteration 1600: error is 0.298866 (50 iterations in 0.02 seconds)
-## Iteration 1650: error is 0.301355 (50 iterations in 0.02 seconds)
-## Iteration 1700: error is 0.303047 (50 iterations in 0.02 seconds)
-## Iteration 1750: error is 0.300421 (50 iterations in 0.02 seconds)
-## Iteration 1800: error is 0.297495 (50 iterations in 0.02 seconds)
-## Iteration 1850: error is 0.298254 (50 iterations in 0.02 seconds)
-## Iteration 1900: error is 0.302182 (50 iterations in 0.02 seconds)
-## Iteration 1950: error is 0.299589 (50 iterations in 0.02 seconds)
-## Iteration 2000: error is 0.300055 (50 iterations in 0.02 seconds)
-## Iteration 2050: error is 0.301662 (50 iterations in 0.02 seconds)
-## Iteration 2100: error is 0.298693 (50 iterations in 0.02 seconds)
-## Iteration 2150: error is 0.301719 (50 iterations in 0.02 seconds)
-## Iteration 2200: error is 0.303190 (50 iterations in 0.02 seconds)
-## Iteration 2250: error is 0.303169 (50 iterations in 0.02 seconds)
-## Iteration 2300: error is 0.301376 (50 iterations in 0.02 seconds)
-## Iteration 2350: error is 0.301689 (50 iterations in 0.02 seconds)
-## Iteration 2400: error is 0.299583 (50 iterations in 0.02 seconds)
-## Iteration 2450: error is 0.298376 (50 iterations in 0.02 seconds)
-## Iteration 2500: error is 0.297462 (50 iterations in 0.02 seconds)
-## Iteration 2550: error is 0.298885 (50 iterations in 0.02 seconds)
-## Iteration 2600: error is 0.299304 (50 iterations in 0.02 seconds)
-## Iteration 2650: error is 0.301300 (50 iterations in 0.02 seconds)
-## Iteration 2700: error is 0.301796 (50 iterations in 0.02 seconds)
-## Iteration 2750: error is 0.300517 (50 iterations in 0.02 seconds)
-## Iteration 2800: error is 0.300856 (50 iterations in 0.02 seconds)
-## Iteration 2850: error is 0.300319 (50 iterations in 0.02 seconds)
-## Iteration 2900: error is 0.303261 (50 iterations in 0.02 seconds)
-## Iteration 2950: error is 0.299474 (50 iterations in 0.02 seconds)
-## Iteration 3000: error is 0.300781 (50 iterations in 0.02 seconds)
-## Iteration 3050: error is 0.301408 (50 iterations in 0.02 seconds)
-## Iteration 3100: error is 0.300871 (50 iterations in 0.02 seconds)
-## Iteration 3150: error is 0.298967 (50 iterations in 0.03 seconds)
-## Iteration 3200: error is 0.301464 (50 iterations in 0.03 seconds)
-## Iteration 3250: error is 0.304698 (50 iterations in 0.03 seconds)
-## Iteration 3300: error is 0.302759 (50 iterations in 0.02 seconds)
-## Iteration 3350: error is 0.306509 (50 iterations in 0.02 seconds)
-## Iteration 3400: error is 0.303328 (50 iterations in 0.02 seconds)
-## Iteration 3450: error is 0.302991 (50 iterations in 0.02 seconds)
-## Iteration 3500: error is 0.301116 (50 iterations in 0.02 seconds)
-## Iteration 3550: error is 0.300577 (50 iterations in 0.02 seconds)
-## Iteration 3600: error is 0.299650 (50 iterations in 0.02 seconds)
-## Iteration 3650: error is 0.301637 (50 iterations in 0.02 seconds)
-## Iteration 3700: error is 0.298671 (50 iterations in 0.02 seconds)
-## Iteration 3750: error is 0.297352 (50 iterations in 0.02 seconds)
-## Iteration 3800: error is 0.298837 (50 iterations in 0.02 seconds)
-## Iteration 3850: error is 0.298785 (50 iterations in 0.02 seconds)
-## Iteration 3900: error is 0.301499 (50 iterations in 0.02 seconds)
-## Iteration 3950: error is 0.303716 (50 iterations in 0.02 seconds)
-## Iteration 4000: error is 0.298526 (50 iterations in 0.02 seconds)
-## Iteration 4050: error is 0.297517 (50 iterations in 0.02 seconds)
-## Iteration 4100: error is 0.301783 (50 iterations in 0.02 seconds)
-## Iteration 4150: error is 0.300836 (50 iterations in 0.02 seconds)
-## Iteration 4200: error is 0.295351 (50 iterations in 0.02 seconds)
-## Iteration 4250: error is 0.299213 (50 iterations in 0.02 seconds)
-## Iteration 4300: error is 0.300792 (50 iterations in 0.02 seconds)
-## Iteration 4350: error is 0.300138 (50 iterations in 0.02 seconds)
-## Iteration 4400: error is 0.295860 (50 iterations in 0.02 seconds)
-## Iteration 4450: error is 0.296623 (50 iterations in 0.02 seconds)
-## Iteration 4500: error is 0.300295 (50 iterations in 0.02 seconds)
-## Iteration 4550: error is 0.297782 (50 iterations in 0.02 seconds)
-## Iteration 4600: error is 0.300288 (50 iterations in 0.02 seconds)
-## Iteration 4650: error is 0.298931 (50 iterations in 0.02 seconds)
-## Iteration 4700: error is 0.298640 (50 iterations in 0.02 seconds)
-## Iteration 4750: error is 0.299009 (50 iterations in 0.02 seconds)
-## Iteration 4800: error is 0.297538 (50 iterations in 0.02 seconds)
-## Iteration 4850: error is 0.298937 (50 iterations in 0.02 seconds)
-## Iteration 4900: error is 0.299421 (50 iterations in 0.02 seconds)
-## Iteration 4950: error is 0.299087 (50 iterations in 0.02 seconds)
-## Iteration 5000: error is 0.298765 (50 iterations in 0.02 seconds)
-## Fitting performed in 1.75 seconds.
+## Iteration 50: error is 58.437373 (50 iterations in 0.03 seconds)
+## Iteration 100: error is 57.957607 (50 iterations in 0.02 seconds)
+## Iteration 150: error is 58.143236 (50 iterations in 0.02 seconds)
+## Iteration 200: error is 58.662373 (50 iterations in 0.02 seconds)
+## Iteration 250: error is 57.750374 (50 iterations in 0.02 seconds)
+## Iteration 300: error is 1.756438 (50 iterations in 0.02 seconds)
+## Iteration 350: error is 1.022433 (50 iterations in 0.01 seconds)
+## Iteration 400: error is 0.644021 (50 iterations in 0.01 seconds)
+## Iteration 450: error is 0.354354 (50 iterations in 0.02 seconds)
+## Iteration 500: error is 0.331171 (50 iterations in 0.01 seconds)
+## Iteration 550: error is 0.327768 (50 iterations in 0.01 seconds)
+## Iteration 600: error is 0.326284 (50 iterations in 0.01 seconds)
+## Iteration 650: error is 0.327519 (50 iterations in 0.01 seconds)
+## Iteration 700: error is 0.328141 (50 iterations in 0.01 seconds)
+## Iteration 750: error is 0.327342 (50 iterations in 0.01 seconds)
+## Iteration 800: error is 0.324472 (50 iterations in 0.01 seconds)
+## Iteration 850: error is 0.318763 (50 iterations in 0.01 seconds)
+## Iteration 900: error is 0.321057 (50 iterations in 0.01 seconds)
+## Iteration 950: error is 0.324198 (50 iterations in 0.01 seconds)
+## Iteration 1000: error is 0.325283 (50 iterations in 0.01 seconds)
+## Iteration 1050: error is 0.322956 (50 iterations in 0.01 seconds)
+## Iteration 1100: error is 0.319744 (50 iterations in 0.02 seconds)
+## Iteration 1150: error is 0.325053 (50 iterations in 0.03 seconds)
+## Iteration 1200: error is 0.312315 (50 iterations in 0.03 seconds)
+## Iteration 1250: error is 0.307998 (50 iterations in 0.02 seconds)
+## Iteration 1300: error is 0.307051 (50 iterations in 0.02 seconds)
+## Iteration 1350: error is 0.305888 (50 iterations in 0.02 seconds)
+## Iteration 1400: error is 0.305397 (50 iterations in 0.02 seconds)
+## Iteration 1450: error is 0.305962 (50 iterations in 0.02 seconds)
+## Iteration 1500: error is 0.305236 (50 iterations in 0.02 seconds)
+## Iteration 1550: error is 0.304303 (50 iterations in 0.02 seconds)
+## Iteration 1600: error is 0.304160 (50 iterations in 0.02 seconds)
+## Iteration 1650: error is 0.305535 (50 iterations in 0.02 seconds)
+## Iteration 1700: error is 0.303403 (50 iterations in 0.02 seconds)
+## Iteration 1750: error is 0.303619 (50 iterations in 0.02 seconds)
+## Iteration 1800: error is 0.305301 (50 iterations in 0.02 seconds)
+## Iteration 1850: error is 0.307589 (50 iterations in 0.02 seconds)
+## Iteration 1900: error is 0.304247 (50 iterations in 0.02 seconds)
+## Iteration 1950: error is 0.306426 (50 iterations in 0.02 seconds)
+## Iteration 2000: error is 0.305548 (50 iterations in 0.02 seconds)
+## Iteration 2050: error is 0.303611 (50 iterations in 0.02 seconds)
+## Iteration 2100: error is 0.305331 (50 iterations in 0.02 seconds)
+## Iteration 2150: error is 0.305139 (50 iterations in 0.03 seconds)
+## Iteration 2200: error is 0.307088 (50 iterations in 0.03 seconds)
+## Iteration 2250: error is 0.307213 (50 iterations in 0.02 seconds)
+## Iteration 2300: error is 0.305910 (50 iterations in 0.02 seconds)
+## Iteration 2350: error is 0.305349 (50 iterations in 0.02 seconds)
+## Iteration 2400: error is 0.305939 (50 iterations in 0.02 seconds)
+## Iteration 2450: error is 0.305246 (50 iterations in 0.02 seconds)
+## Iteration 2500: error is 0.304827 (50 iterations in 0.02 seconds)
+## Iteration 2550: error is 0.304775 (50 iterations in 0.02 seconds)
+## Iteration 2600: error is 0.304768 (50 iterations in 0.02 seconds)
+## Iteration 2650: error is 0.304345 (50 iterations in 0.02 seconds)
+## Iteration 2700: error is 0.305367 (50 iterations in 0.02 seconds)
+## Iteration 2750: error is 0.305602 (50 iterations in 0.02 seconds)
+## Iteration 2800: error is 0.303739 (50 iterations in 0.02 seconds)
+## Iteration 2850: error is 0.304716 (50 iterations in 0.02 seconds)
+## Iteration 2900: error is 0.304794 (50 iterations in 0.02 seconds)
+## Iteration 2950: error is 0.306799 (50 iterations in 0.02 seconds)
+## Iteration 3000: error is 0.305167 (50 iterations in 0.02 seconds)
+## Iteration 3050: error is 0.307342 (50 iterations in 0.02 seconds)
+## Iteration 3100: error is 0.306322 (50 iterations in 0.02 seconds)
+## Iteration 3150: error is 0.304973 (50 iterations in 0.02 seconds)
+## Iteration 3200: error is 0.305270 (50 iterations in 0.02 seconds)
+## Iteration 3250: error is 0.305581 (50 iterations in 0.02 seconds)
+## Iteration 3300: error is 0.306318 (50 iterations in 0.02 seconds)
+## Iteration 3350: error is 0.304971 (50 iterations in 0.02 seconds)
+## Iteration 3400: error is 0.303495 (50 iterations in 0.02 seconds)
+## Iteration 3450: error is 0.306078 (50 iterations in 0.02 seconds)
+## Iteration 3500: error is 0.305475 (50 iterations in 0.02 seconds)
+## Iteration 3550: error is 0.303364 (50 iterations in 0.02 seconds)
+## Iteration 3600: error is 0.304528 (50 iterations in 0.02 seconds)
+## Iteration 3650: error is 0.308490 (50 iterations in 0.02 seconds)
+## Iteration 3700: error is 0.301876 (50 iterations in 0.02 seconds)
+## Iteration 3750: error is 0.305483 (50 iterations in 0.01 seconds)
+## Iteration 3800: error is 0.306440 (50 iterations in 0.01 seconds)
+## Iteration 3850: error is 0.304317 (50 iterations in 0.01 seconds)
+## Iteration 3900: error is 0.305378 (50 iterations in 0.01 seconds)
+## Iteration 3950: error is 0.305179 (50 iterations in 0.01 seconds)
+## Iteration 4000: error is 0.304050 (50 iterations in 0.01 seconds)
+## Iteration 4050: error is 0.305314 (50 iterations in 0.01 seconds)
+## Iteration 4100: error is 0.304518 (50 iterations in 0.01 seconds)
+## Iteration 4150: error is 0.304009 (50 iterations in 0.01 seconds)
+## Iteration 4200: error is 0.304108 (50 iterations in 0.01 seconds)
+## Iteration 4250: error is 0.303675 (50 iterations in 0.01 seconds)
+## Iteration 4300: error is 0.304014 (50 iterations in 0.01 seconds)
+## Iteration 4350: error is 0.302212 (50 iterations in 0.02 seconds)
+## Iteration 4400: error is 0.303822 (50 iterations in 0.02 seconds)
+## Iteration 4450: error is 0.298097 (50 iterations in 0.02 seconds)
+## Iteration 4500: error is 0.304026 (50 iterations in 0.02 seconds)
+## Iteration 4550: error is 0.304514 (50 iterations in 0.02 seconds)
+## Iteration 4600: error is 0.301500 (50 iterations in 0.02 seconds)
+## Iteration 4650: error is 0.298263 (50 iterations in 0.02 seconds)
+## Iteration 4700: error is 0.300299 (50 iterations in 0.02 seconds)
+## Iteration 4750: error is 0.304943 (50 iterations in 0.02 seconds)
+## Iteration 4800: error is 0.305162 (50 iterations in 0.02 seconds)
+## Iteration 4850: error is 0.298532 (50 iterations in 0.02 seconds)
+## Iteration 4900: error is 0.298594 (50 iterations in 0.02 seconds)
+## Iteration 4950: error is 0.302466 (50 iterations in 0.02 seconds)
+## Iteration 5000: error is 0.301655 (50 iterations in 0.02 seconds)
+## Fitting performed in 1.82 seconds.
 ```
 
 ```r
@@ -293,38 +293,38 @@ mantels
 ## Monte-Carlo test
 ## Call: mantelnoneuclid(m1 = m1, m2 = m2, nrepet = nrepet)
 ## 
-## Observation: 0.7601437 
-## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
-## Alternative hypothesis: greater 
-## 
-##      Std.Obs  Expectation     Variance 
-## 1.180260e+01 5.751147e-04 4.141700e-03 
-## 
-## $brayW
-## Monte-Carlo test
-## Call: mantelnoneuclid(m1 = m1, m2 = m2, nrepet = nrepet)
-## 
-## Observation: 0.8147986 
-## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
-## Alternative hypothesis: greater 
-## 
-##      Std.Obs  Expectation     Variance 
-## 1.379798e+01 7.254888e-05 3.486520e-03 
-## 
-## $brayUW
-## Monte-Carlo test
-## Call: ade4::mantel.rtest(m1 = uniDist, m2 = brayDistUW, nrepet = 10000)
-## 
-## Observation: 0.9040559 
+## Observation: 0.7642008 
 ## 
 ## Based on 10000 replicates
 ## Simulated p-value: 9.999e-05 
 ## Alternative hypothesis: greater 
 ## 
 ##       Std.Obs   Expectation      Variance 
-## 15.9828178456 -0.0002701692  0.0032014253
+## 11.9919593305 -0.0003860444  0.0040651194 
+## 
+## $brayW
+## Monte-Carlo test
+## Call: mantelnoneuclid(m1 = m1, m2 = m2, nrepet = nrepet)
+## 
+## Observation: 0.8201452 
+## 
+## Based on 10000 replicates
+## Simulated p-value: 9.999e-05 
+## Alternative hypothesis: greater 
+## 
+##      Std.Obs  Expectation     Variance 
+## 1.374983e+01 9.936259e-04 3.549230e-03 
+## 
+## $brayUW
+## Monte-Carlo test
+## Call: ade4::mantel.rtest(m1 = uniDist, m2 = brayDistUW, nrepet = 10000)
+## 
+## Observation: 0.9074262 
+## 
+## Based on 10000 replicates
+## Simulated p-value: 9.999e-05 
+## Alternative hypothesis: greater 
+## 
+##      Std.Obs  Expectation     Variance 
+## 1.622388e+01 2.466056e-04 3.126634e-03
 ```
