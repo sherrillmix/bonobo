@@ -66,7 +66,7 @@ speciesPch<-20+1:length(unique(selectSamples$chimpBonobo))
 speciesCols<-rainbow.lab(length(unique(selectSamples$chimpBonobo)),start=-2,end=1,alpha=.8,lightMultiple=.8)
 names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 importance<-uniPca$values$Relative_eig
-colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(targetPca$vectors)]
+colnames(uniPca$vectors)<-sprintf('Principal coordinate %d (%d%% of variance)',1:length(importance),round(importance*100))[1:ncol(uniPca$vectors)]
 ```
 ### Plot 16s PCoA
 ```{r bacteriaPCoA}
