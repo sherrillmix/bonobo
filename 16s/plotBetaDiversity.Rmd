@@ -1,6 +1,8 @@
 ## Beta diversity between samples
 
 ```{r}
+#set seed so reproducible
+set.seed(12345)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```

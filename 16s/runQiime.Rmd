@@ -1,6 +1,8 @@
 ## Prepare reads and run QIIME
 
 ```{r}
+#set seed so reproducible
+set.seed(12349)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```

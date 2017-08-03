@@ -1,6 +1,8 @@
 ## Make rbcL and matK OTUs
 
 ```{r}
+#set seed so reproducible
+set.seed(12354)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```

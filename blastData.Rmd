@@ -1,6 +1,8 @@
 ## Blast OTUs against rbcL and matK databases
 
 ```{r}
+#set seed so reproducible
+set.seed(12350)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```
