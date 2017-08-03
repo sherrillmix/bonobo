@@ -51,7 +51,7 @@ for(primerBase in unique(primerBases)){
     reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)},mc.cores=20,mc.preschedule=FALSE)
     if(mean(unlist(lapply(reads,function(xx)substring(xx$seq,1,nchar(thisPrimer))))%in% expandAmbiguous(thisPrimer)[[1]])<.75)stop(simpleError('Expected primer does not match read start'))
     trimReads<-lapply(reads,function(xx){
-      xx$primerMatch<-substring(xx$seq,1,nchar(thisPrimer)) %in% expandAmbiguous(thisPrimer)
+      xx$primerMatch<-substring(xx$seq,1,nchar(thisPrimer)) %in% expandAmbiguous(thisPrimer)[[1]]
       xx$seq<-substring(xx$seq,nchar(thisPrimer)+1)
       return(xx)
     })
