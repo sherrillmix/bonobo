@@ -1,16 +1,35 @@
-## Read in SRA run table
+## Download data from SRA
+
+
+```r
+#stop on errors
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
+### Software versions
+
+```r
+system("fastq-dump --version", intern = TRUE)
+```
+
+```
+## [1] ""                   "fastq-dump : 2.8.0" ""
+```
+
+### Read in SRA run table
 The SRA run table was downloaded from [https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP108776).
 
 ```r
-samples<-read.table('SraRunTable.txt',sep='\t',header=TRUE,stringsAsFactors=FALSE)
-rownames(samples)<-samples$Run_s
-samples[,c('sample','primer')]<-do.call(rbind,strsplit(samples$Library_Name_s,'_'))
+samples <- read.table("SraRunTable.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+rownames(samples) <- samples$Run_s
+samples[, c("sample", "primer")] <- do.call(rbind, strsplit(samples$Library_Name_s, 
+    "_"))
 ```
 
-## Download data from SRA
+### Download data from SRA
 
 ```r
-system('fastq-dump --version 2>&1',intern=TRUE)
+system("fastq-dump --version 2>&1", intern = TRUE)
 ```
 
 ```
@@ -19,1203 +38,1207 @@ system('fastq-dump --version 2>&1',intern=TRUE)
 
 
 ```r
-if(!dir.exists('sra'))dir.create('sra')
-for(ii in samples$Run_s){
-  outFiles<-sprintf('sra/%s_%d.fastq.gz',ii,1:2)
-  cmd<-sprintf('fastq-dump --gzip --split-files --outdir data %s',ii)
-  message(cmd)
-  if(any(!file.exists(outFiles)))system(cmd)
-  if(any(!file.exists(outFiles)))stop('fastq-dump unsucessful')
+if (!dir.exists("sra")) dir.create("sra")
+for (ii in samples$Run_s) {
+    outFiles <- sprintf("sra/%s_%d.fastq.gz", ii, 1:2)
+    cmd <- sprintf("fastq-dump --gzip --split-files --outdir sra %s", ii)
+    message(cmd)
+    if (any(!file.exists(outFiles))) 
+        system(cmd)
+    if (any(!file.exists(outFiles))) 
+        stop("fastq-dump unsucessful")
 }
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656515
+## fastq-dump --gzip --split-files --outdir sra SRR5656515
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656723
+## fastq-dump --gzip --split-files --outdir sra SRR5656723
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656724
+## fastq-dump --gzip --split-files --outdir sra SRR5656724
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656721
+## fastq-dump --gzip --split-files --outdir sra SRR5656721
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656722
+## fastq-dump --gzip --split-files --outdir sra SRR5656722
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656520
+## fastq-dump --gzip --split-files --outdir sra SRR5656520
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656517
+## fastq-dump --gzip --split-files --outdir sra SRR5656517
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656719
+## fastq-dump --gzip --split-files --outdir sra SRR5656719
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656720
+## fastq-dump --gzip --split-files --outdir sra SRR5656720
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656717
+## fastq-dump --gzip --split-files --outdir sra SRR5656717
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656514
+## fastq-dump --gzip --split-files --outdir sra SRR5656514
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656521
+## fastq-dump --gzip --split-files --outdir sra SRR5656521
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656581
+## fastq-dump --gzip --split-files --outdir sra SRR5656581
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656582
+## fastq-dump --gzip --split-files --outdir sra SRR5656582
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656620
+## fastq-dump --gzip --split-files --outdir sra SRR5656620
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656621
+## fastq-dump --gzip --split-files --outdir sra SRR5656621
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656646
+## fastq-dump --gzip --split-files --outdir sra SRR5656646
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656647
+## fastq-dump --gzip --split-files --outdir sra SRR5656647
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656699
+## fastq-dump --gzip --split-files --outdir sra SRR5656699
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656700
+## fastq-dump --gzip --split-files --outdir sra SRR5656700
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656701
+## fastq-dump --gzip --split-files --outdir sra SRR5656701
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656702
+## fastq-dump --gzip --split-files --outdir sra SRR5656702
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656710
+## fastq-dump --gzip --split-files --outdir sra SRR5656710
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656711
+## fastq-dump --gzip --split-files --outdir sra SRR5656711
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656712
+## fastq-dump --gzip --split-files --outdir sra SRR5656712
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656713
+## fastq-dump --gzip --split-files --outdir sra SRR5656713
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656714
+## fastq-dump --gzip --split-files --outdir sra SRR5656714
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656715
+## fastq-dump --gzip --split-files --outdir sra SRR5656715
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656716
+## fastq-dump --gzip --split-files --outdir sra SRR5656716
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656718
+## fastq-dump --gzip --split-files --outdir sra SRR5656718
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656432
+## fastq-dump --gzip --split-files --outdir sra SRR5656432
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656433
+## fastq-dump --gzip --split-files --outdir sra SRR5656433
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656479
+## fastq-dump --gzip --split-files --outdir sra SRR5656479
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656604
+## fastq-dump --gzip --split-files --outdir sra SRR5656604
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656642
+## fastq-dump --gzip --split-files --outdir sra SRR5656642
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656643
+## fastq-dump --gzip --split-files --outdir sra SRR5656643
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656644
+## fastq-dump --gzip --split-files --outdir sra SRR5656644
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656645
+## fastq-dump --gzip --split-files --outdir sra SRR5656645
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656648
+## fastq-dump --gzip --split-files --outdir sra SRR5656648
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656649
+## fastq-dump --gzip --split-files --outdir sra SRR5656649
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656652
+## fastq-dump --gzip --split-files --outdir sra SRR5656652
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656654
+## fastq-dump --gzip --split-files --outdir sra SRR5656654
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656655
+## fastq-dump --gzip --split-files --outdir sra SRR5656655
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656662
+## fastq-dump --gzip --split-files --outdir sra SRR5656662
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656664
+## fastq-dump --gzip --split-files --outdir sra SRR5656664
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656665
+## fastq-dump --gzip --split-files --outdir sra SRR5656665
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656666
+## fastq-dump --gzip --split-files --outdir sra SRR5656666
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656667
+## fastq-dump --gzip --split-files --outdir sra SRR5656667
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656674
+## fastq-dump --gzip --split-files --outdir sra SRR5656674
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656675
+## fastq-dump --gzip --split-files --outdir sra SRR5656675
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656686
+## fastq-dump --gzip --split-files --outdir sra SRR5656686
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656687
+## fastq-dump --gzip --split-files --outdir sra SRR5656687
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656688
+## fastq-dump --gzip --split-files --outdir sra SRR5656688
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656689
+## fastq-dump --gzip --split-files --outdir sra SRR5656689
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656690
+## fastq-dump --gzip --split-files --outdir sra SRR5656690
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656691
+## fastq-dump --gzip --split-files --outdir sra SRR5656691
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656692
+## fastq-dump --gzip --split-files --outdir sra SRR5656692
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656693
+## fastq-dump --gzip --split-files --outdir sra SRR5656693
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656694
+## fastq-dump --gzip --split-files --outdir sra SRR5656694
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656695
+## fastq-dump --gzip --split-files --outdir sra SRR5656695
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656696
+## fastq-dump --gzip --split-files --outdir sra SRR5656696
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656697
+## fastq-dump --gzip --split-files --outdir sra SRR5656697
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656698
+## fastq-dump --gzip --split-files --outdir sra SRR5656698
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656703
+## fastq-dump --gzip --split-files --outdir sra SRR5656703
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656704
+## fastq-dump --gzip --split-files --outdir sra SRR5656704
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656705
+## fastq-dump --gzip --split-files --outdir sra SRR5656705
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656706
+## fastq-dump --gzip --split-files --outdir sra SRR5656706
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656707
+## fastq-dump --gzip --split-files --outdir sra SRR5656707
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656708
+## fastq-dump --gzip --split-files --outdir sra SRR5656708
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656709
+## fastq-dump --gzip --split-files --outdir sra SRR5656709
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656431
+## fastq-dump --gzip --split-files --outdir sra SRR5656431
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656434
+## fastq-dump --gzip --split-files --outdir sra SRR5656434
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656440
+## fastq-dump --gzip --split-files --outdir sra SRR5656440
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656441
+## fastq-dump --gzip --split-files --outdir sra SRR5656441
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656442
+## fastq-dump --gzip --split-files --outdir sra SRR5656442
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656451
+## fastq-dump --gzip --split-files --outdir sra SRR5656451
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656462
+## fastq-dump --gzip --split-files --outdir sra SRR5656462
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656463
+## fastq-dump --gzip --split-files --outdir sra SRR5656463
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656464
+## fastq-dump --gzip --split-files --outdir sra SRR5656464
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656465
+## fastq-dump --gzip --split-files --outdir sra SRR5656465
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656483
+## fastq-dump --gzip --split-files --outdir sra SRR5656483
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656488
+## fastq-dump --gzip --split-files --outdir sra SRR5656488
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656489
+## fastq-dump --gzip --split-files --outdir sra SRR5656489
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656490
+## fastq-dump --gzip --split-files --outdir sra SRR5656490
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656491
+## fastq-dump --gzip --split-files --outdir sra SRR5656491
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656492
+## fastq-dump --gzip --split-files --outdir sra SRR5656492
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656493
+## fastq-dump --gzip --split-files --outdir sra SRR5656493
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656497
+## fastq-dump --gzip --split-files --outdir sra SRR5656497
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656498
+## fastq-dump --gzip --split-files --outdir sra SRR5656498
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656499
+## fastq-dump --gzip --split-files --outdir sra SRR5656499
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656500
+## fastq-dump --gzip --split-files --outdir sra SRR5656500
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656501
+## fastq-dump --gzip --split-files --outdir sra SRR5656501
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656512
+## fastq-dump --gzip --split-files --outdir sra SRR5656512
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656513
+## fastq-dump --gzip --split-files --outdir sra SRR5656513
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656524
+## fastq-dump --gzip --split-files --outdir sra SRR5656524
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656525
+## fastq-dump --gzip --split-files --outdir sra SRR5656525
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656528
+## fastq-dump --gzip --split-files --outdir sra SRR5656528
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656529
+## fastq-dump --gzip --split-files --outdir sra SRR5656529
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656535
+## fastq-dump --gzip --split-files --outdir sra SRR5656535
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656544
+## fastq-dump --gzip --split-files --outdir sra SRR5656544
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656545
+## fastq-dump --gzip --split-files --outdir sra SRR5656545
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656546
+## fastq-dump --gzip --split-files --outdir sra SRR5656546
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656548
+## fastq-dump --gzip --split-files --outdir sra SRR5656548
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656566
+## fastq-dump --gzip --split-files --outdir sra SRR5656566
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656568
+## fastq-dump --gzip --split-files --outdir sra SRR5656568
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656579
+## fastq-dump --gzip --split-files --outdir sra SRR5656579
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656601
+## fastq-dump --gzip --split-files --outdir sra SRR5656601
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656602
+## fastq-dump --gzip --split-files --outdir sra SRR5656602
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656603
+## fastq-dump --gzip --split-files --outdir sra SRR5656603
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656612
+## fastq-dump --gzip --split-files --outdir sra SRR5656612
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656619
+## fastq-dump --gzip --split-files --outdir sra SRR5656619
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656629
+## fastq-dump --gzip --split-files --outdir sra SRR5656629
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656630
+## fastq-dump --gzip --split-files --outdir sra SRR5656630
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656631
+## fastq-dump --gzip --split-files --outdir sra SRR5656631
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656632
+## fastq-dump --gzip --split-files --outdir sra SRR5656632
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656633
+## fastq-dump --gzip --split-files --outdir sra SRR5656633
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656634
+## fastq-dump --gzip --split-files --outdir sra SRR5656634
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656635
+## fastq-dump --gzip --split-files --outdir sra SRR5656635
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656636
+## fastq-dump --gzip --split-files --outdir sra SRR5656636
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656637
+## fastq-dump --gzip --split-files --outdir sra SRR5656637
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656638
+## fastq-dump --gzip --split-files --outdir sra SRR5656638
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656639
+## fastq-dump --gzip --split-files --outdir sra SRR5656639
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656640
+## fastq-dump --gzip --split-files --outdir sra SRR5656640
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656641
+## fastq-dump --gzip --split-files --outdir sra SRR5656641
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656650
+## fastq-dump --gzip --split-files --outdir sra SRR5656650
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656651
+## fastq-dump --gzip --split-files --outdir sra SRR5656651
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656653
+## fastq-dump --gzip --split-files --outdir sra SRR5656653
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656656
+## fastq-dump --gzip --split-files --outdir sra SRR5656656
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656657
+## fastq-dump --gzip --split-files --outdir sra SRR5656657
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656658
+## fastq-dump --gzip --split-files --outdir sra SRR5656658
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656659
+## fastq-dump --gzip --split-files --outdir sra SRR5656659
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656660
+## fastq-dump --gzip --split-files --outdir sra SRR5656660
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656661
+## fastq-dump --gzip --split-files --outdir sra SRR5656661
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656663
+## fastq-dump --gzip --split-files --outdir sra SRR5656663
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656668
+## fastq-dump --gzip --split-files --outdir sra SRR5656668
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656669
+## fastq-dump --gzip --split-files --outdir sra SRR5656669
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656670
+## fastq-dump --gzip --split-files --outdir sra SRR5656670
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656671
+## fastq-dump --gzip --split-files --outdir sra SRR5656671
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656672
+## fastq-dump --gzip --split-files --outdir sra SRR5656672
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656673
+## fastq-dump --gzip --split-files --outdir sra SRR5656673
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656676
+## fastq-dump --gzip --split-files --outdir sra SRR5656676
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656677
+## fastq-dump --gzip --split-files --outdir sra SRR5656677
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656678
+## fastq-dump --gzip --split-files --outdir sra SRR5656678
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656679
+## fastq-dump --gzip --split-files --outdir sra SRR5656679
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656680
+## fastq-dump --gzip --split-files --outdir sra SRR5656680
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656681
+## fastq-dump --gzip --split-files --outdir sra SRR5656681
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656682
+## fastq-dump --gzip --split-files --outdir sra SRR5656682
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656683
+## fastq-dump --gzip --split-files --outdir sra SRR5656683
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656684
+## fastq-dump --gzip --split-files --outdir sra SRR5656684
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656685
+## fastq-dump --gzip --split-files --outdir sra SRR5656685
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656435
+## fastq-dump --gzip --split-files --outdir sra SRR5656435
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656436
+## fastq-dump --gzip --split-files --outdir sra SRR5656436
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656437
+## fastq-dump --gzip --split-files --outdir sra SRR5656437
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656438
+## fastq-dump --gzip --split-files --outdir sra SRR5656438
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656439
+## fastq-dump --gzip --split-files --outdir sra SRR5656439
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656443
+## fastq-dump --gzip --split-files --outdir sra SRR5656443
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656444
+## fastq-dump --gzip --split-files --outdir sra SRR5656444
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656445
+## fastq-dump --gzip --split-files --outdir sra SRR5656445
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656446
+## fastq-dump --gzip --split-files --outdir sra SRR5656446
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656447
+## fastq-dump --gzip --split-files --outdir sra SRR5656447
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656448
+## fastq-dump --gzip --split-files --outdir sra SRR5656448
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656449
+## fastq-dump --gzip --split-files --outdir sra SRR5656449
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656450
+## fastq-dump --gzip --split-files --outdir sra SRR5656450
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656452
+## fastq-dump --gzip --split-files --outdir sra SRR5656452
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656453
+## fastq-dump --gzip --split-files --outdir sra SRR5656453
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656454
+## fastq-dump --gzip --split-files --outdir sra SRR5656454
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656455
+## fastq-dump --gzip --split-files --outdir sra SRR5656455
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656456
+## fastq-dump --gzip --split-files --outdir sra SRR5656456
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656457
+## fastq-dump --gzip --split-files --outdir sra SRR5656457
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656458
+## fastq-dump --gzip --split-files --outdir sra SRR5656458
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656459
+## fastq-dump --gzip --split-files --outdir sra SRR5656459
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656460
+## fastq-dump --gzip --split-files --outdir sra SRR5656460
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656461
+## fastq-dump --gzip --split-files --outdir sra SRR5656461
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656466
+## fastq-dump --gzip --split-files --outdir sra SRR5656466
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656467
+## fastq-dump --gzip --split-files --outdir sra SRR5656467
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656468
+## fastq-dump --gzip --split-files --outdir sra SRR5656468
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656469
+## fastq-dump --gzip --split-files --outdir sra SRR5656469
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656470
+## fastq-dump --gzip --split-files --outdir sra SRR5656470
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656471
+## fastq-dump --gzip --split-files --outdir sra SRR5656471
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656472
+## fastq-dump --gzip --split-files --outdir sra SRR5656472
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656473
+## fastq-dump --gzip --split-files --outdir sra SRR5656473
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656474
+## fastq-dump --gzip --split-files --outdir sra SRR5656474
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656475
+## fastq-dump --gzip --split-files --outdir sra SRR5656475
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656476
+## fastq-dump --gzip --split-files --outdir sra SRR5656476
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656477
+## fastq-dump --gzip --split-files --outdir sra SRR5656477
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656478
+## fastq-dump --gzip --split-files --outdir sra SRR5656478
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656480
+## fastq-dump --gzip --split-files --outdir sra SRR5656480
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656481
+## fastq-dump --gzip --split-files --outdir sra SRR5656481
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656482
+## fastq-dump --gzip --split-files --outdir sra SRR5656482
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656484
+## fastq-dump --gzip --split-files --outdir sra SRR5656484
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656485
+## fastq-dump --gzip --split-files --outdir sra SRR5656485
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656486
+## fastq-dump --gzip --split-files --outdir sra SRR5656486
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656487
+## fastq-dump --gzip --split-files --outdir sra SRR5656487
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656494
+## fastq-dump --gzip --split-files --outdir sra SRR5656494
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656495
+## fastq-dump --gzip --split-files --outdir sra SRR5656495
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656496
+## fastq-dump --gzip --split-files --outdir sra SRR5656496
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656502
+## fastq-dump --gzip --split-files --outdir sra SRR5656502
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656503
+## fastq-dump --gzip --split-files --outdir sra SRR5656503
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656504
+## fastq-dump --gzip --split-files --outdir sra SRR5656504
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656505
+## fastq-dump --gzip --split-files --outdir sra SRR5656505
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656506
+## fastq-dump --gzip --split-files --outdir sra SRR5656506
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656507
+## fastq-dump --gzip --split-files --outdir sra SRR5656507
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656508
+## fastq-dump --gzip --split-files --outdir sra SRR5656508
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656509
+## fastq-dump --gzip --split-files --outdir sra SRR5656509
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656510
+## fastq-dump --gzip --split-files --outdir sra SRR5656510
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656511
+## fastq-dump --gzip --split-files --outdir sra SRR5656511
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656516
+## fastq-dump --gzip --split-files --outdir sra SRR5656516
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656518
+## fastq-dump --gzip --split-files --outdir sra SRR5656518
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656519
+## fastq-dump --gzip --split-files --outdir sra SRR5656519
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656522
+## fastq-dump --gzip --split-files --outdir sra SRR5656522
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656523
+## fastq-dump --gzip --split-files --outdir sra SRR5656523
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656526
+## fastq-dump --gzip --split-files --outdir sra SRR5656526
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656527
+## fastq-dump --gzip --split-files --outdir sra SRR5656527
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656530
+## fastq-dump --gzip --split-files --outdir sra SRR5656530
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656531
+## fastq-dump --gzip --split-files --outdir sra SRR5656531
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656532
+## fastq-dump --gzip --split-files --outdir sra SRR5656532
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656533
+## fastq-dump --gzip --split-files --outdir sra SRR5656533
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656534
+## fastq-dump --gzip --split-files --outdir sra SRR5656534
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656536
+## fastq-dump --gzip --split-files --outdir sra SRR5656536
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656537
+## fastq-dump --gzip --split-files --outdir sra SRR5656537
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656538
+## fastq-dump --gzip --split-files --outdir sra SRR5656538
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656539
+## fastq-dump --gzip --split-files --outdir sra SRR5656539
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656540
+## fastq-dump --gzip --split-files --outdir sra SRR5656540
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656541
+## fastq-dump --gzip --split-files --outdir sra SRR5656541
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656542
+## fastq-dump --gzip --split-files --outdir sra SRR5656542
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656543
+## fastq-dump --gzip --split-files --outdir sra SRR5656543
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656547
+## fastq-dump --gzip --split-files --outdir sra SRR5656547
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656549
+## fastq-dump --gzip --split-files --outdir sra SRR5656549
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656550
+## fastq-dump --gzip --split-files --outdir sra SRR5656550
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656551
+## fastq-dump --gzip --split-files --outdir sra SRR5656551
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656552
+## fastq-dump --gzip --split-files --outdir sra SRR5656552
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656553
+## fastq-dump --gzip --split-files --outdir sra SRR5656553
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656554
+## fastq-dump --gzip --split-files --outdir sra SRR5656554
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656555
+## fastq-dump --gzip --split-files --outdir sra SRR5656555
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656556
+## fastq-dump --gzip --split-files --outdir sra SRR5656556
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656557
+## fastq-dump --gzip --split-files --outdir sra SRR5656557
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656558
+## fastq-dump --gzip --split-files --outdir sra SRR5656558
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656559
+## fastq-dump --gzip --split-files --outdir sra SRR5656559
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656560
+## fastq-dump --gzip --split-files --outdir sra SRR5656560
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656561
+## fastq-dump --gzip --split-files --outdir sra SRR5656561
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656562
+## fastq-dump --gzip --split-files --outdir sra SRR5656562
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656563
+## fastq-dump --gzip --split-files --outdir sra SRR5656563
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656564
+## fastq-dump --gzip --split-files --outdir sra SRR5656564
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656565
+## fastq-dump --gzip --split-files --outdir sra SRR5656565
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656567
+## fastq-dump --gzip --split-files --outdir sra SRR5656567
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656569
+## fastq-dump --gzip --split-files --outdir sra SRR5656569
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656570
+## fastq-dump --gzip --split-files --outdir sra SRR5656570
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656571
+## fastq-dump --gzip --split-files --outdir sra SRR5656571
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656572
+## fastq-dump --gzip --split-files --outdir sra SRR5656572
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656573
+## fastq-dump --gzip --split-files --outdir sra SRR5656573
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656574
+## fastq-dump --gzip --split-files --outdir sra SRR5656574
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656575
+## fastq-dump --gzip --split-files --outdir sra SRR5656575
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656576
+## fastq-dump --gzip --split-files --outdir sra SRR5656576
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656577
+## fastq-dump --gzip --split-files --outdir sra SRR5656577
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656578
+## fastq-dump --gzip --split-files --outdir sra SRR5656578
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656580
+## fastq-dump --gzip --split-files --outdir sra SRR5656580
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656583
+## fastq-dump --gzip --split-files --outdir sra SRR5656583
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656584
+## fastq-dump --gzip --split-files --outdir sra SRR5656584
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656585
+## fastq-dump --gzip --split-files --outdir sra SRR5656585
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656586
+## fastq-dump --gzip --split-files --outdir sra SRR5656586
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656587
+## fastq-dump --gzip --split-files --outdir sra SRR5656587
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656588
+## fastq-dump --gzip --split-files --outdir sra SRR5656588
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656589
+## fastq-dump --gzip --split-files --outdir sra SRR5656589
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656590
+## fastq-dump --gzip --split-files --outdir sra SRR5656590
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656591
+## fastq-dump --gzip --split-files --outdir sra SRR5656591
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656592
+## fastq-dump --gzip --split-files --outdir sra SRR5656592
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656593
+## fastq-dump --gzip --split-files --outdir sra SRR5656593
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656594
+## fastq-dump --gzip --split-files --outdir sra SRR5656594
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656595
+## fastq-dump --gzip --split-files --outdir sra SRR5656595
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656596
+## fastq-dump --gzip --split-files --outdir sra SRR5656596
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656597
+## fastq-dump --gzip --split-files --outdir sra SRR5656597
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656598
+## fastq-dump --gzip --split-files --outdir sra SRR5656598
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656599
+## fastq-dump --gzip --split-files --outdir sra SRR5656599
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656600
+## fastq-dump --gzip --split-files --outdir sra SRR5656600
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656605
+## fastq-dump --gzip --split-files --outdir sra SRR5656605
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656606
+## fastq-dump --gzip --split-files --outdir sra SRR5656606
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656607
+## fastq-dump --gzip --split-files --outdir sra SRR5656607
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656608
+## fastq-dump --gzip --split-files --outdir sra SRR5656608
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656609
+## fastq-dump --gzip --split-files --outdir sra SRR5656609
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656610
+## fastq-dump --gzip --split-files --outdir sra SRR5656610
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656611
+## fastq-dump --gzip --split-files --outdir sra SRR5656611
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656613
+## fastq-dump --gzip --split-files --outdir sra SRR5656613
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656614
+## fastq-dump --gzip --split-files --outdir sra SRR5656614
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656615
+## fastq-dump --gzip --split-files --outdir sra SRR5656615
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656616
+## fastq-dump --gzip --split-files --outdir sra SRR5656616
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656617
+## fastq-dump --gzip --split-files --outdir sra SRR5656617
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656618
+## fastq-dump --gzip --split-files --outdir sra SRR5656618
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656622
+## fastq-dump --gzip --split-files --outdir sra SRR5656622
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656623
+## fastq-dump --gzip --split-files --outdir sra SRR5656623
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656624
+## fastq-dump --gzip --split-files --outdir sra SRR5656624
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656625
+## fastq-dump --gzip --split-files --outdir sra SRR5656625
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656626
+## fastq-dump --gzip --split-files --outdir sra SRR5656626
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656627
+## fastq-dump --gzip --split-files --outdir sra SRR5656627
 ```
 
 ```
-## fastq-dump --gzip --split-files --outdir data SRR5656628
+## fastq-dump --gzip --split-files --outdir sra SRR5656628
 ```
 
-## Rename into convenient form
+### Rename into convenient form
 
 ```r
-if(!dir.exists('16s/data'))dir.create('16s/data')
-if(!dir.exists('data'))dir.create('data')
-for(ii in samples$Run_s){
-  sraNames<-sprintf('sra/%s_%d.fastq.gz',ii,1:2)
-  newNames<-sprintf('%s/%s_%s_R%d_.fastq.gz', ifelse(samples[ii,'primer']=='16s','16s/data','data'),
-    samples[ii,'sample'], samples[ii,'primer'], 1:2)
-  message('Moving ',paste(sraNames,collapse=' '),' to ',paste(newNames,collapse=' '))
-  file.rename(sraNames,newNames)
+if (!dir.exists("16s/data")) dir.create("16s/data")
+if (!dir.exists("data")) dir.create("data")
+for (ii in samples$Run_s) {
+    sraNames <- sprintf("sra/%s_%d.fastq.gz", ii, 1:2)
+    newNames <- sprintf("%s/%s_%s_R%d_.fastq.gz", ifelse(samples[ii, "primer"] == 
+        "16s", "16s/data", "data"), samples[ii, "sample"], samples[ii, "primer"], 
+        1:2)
+    message("Moving ", paste(sraNames, collapse = " "), " to ", paste(newNames, 
+        collapse = " "))
+    file.rename(sraNames, newNames)
 }
 ```
 
