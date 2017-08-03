@@ -17,7 +17,10 @@ packageVersion("parallel")
 ## [1] '3.4.1'
 ```
 
-### Download data from EBI
+### Download data from ENA
+Download the equivalent of searches for "rbcl" and "matk" from EMBL-EBI European Nucleotide Archive:
+* [http://www.ebi.ac.uk/ena/data/search?query=rbcl](http://www.ebi.ac.uk/ena/data/search?query=rbcl)
+* [http://www.ebi.ac.uk/ena/data/search?query=matk](http://www.ebi.ac.uk/ena/data/search?query=matk)
 
 ```r
 if (!dir.exists("ebi")) dir.create("ebi")
