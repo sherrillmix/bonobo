@@ -91,16 +91,16 @@ for(ii in names(swarmData)){
   )
 
   ss<-samples[labels(selectDist),]
-  plantAdonis[[ii]]<-cacheOperation(sprintf('work/adonis_%s.Rdat',ii),adonis,selectDist~bonobo+area2+malaria,data=ss,permutations=1e7,parallel=10)
-  interactAdonis[[ii]]<-cacheOperation(sprintf('work/interactAdonis_%s.Rdat',ii),adonis,selectDist~bonobo+area2+malaria*bonobo,data=ss,permutations=1e7,parallel=10)
+  plantAdonis[[ii]]<-adonis(selectDist~bonobo+area2+malaria,data=ss,permutations=1e7,parallel=10)
+  interactAdonis[[ii]]<-adonis(selectDist~bonobo+area2+malaria*bonobo,data=ss,permutations=1e7,parallel=10)
   chimpDist<-as.matrix(selectDist)
   chimpDist<-as.dist(chimpDist[!ss$bonobo,!ss$bonobo])
-  chimpAdonis[[ii]]<-cacheOperation(sprintf('work/adonisChimp_%s.Rdat',ii),adonis,chimpDist~area2+malaria,data=ss[!ss$bonobo,],permutations=1e7,parallel=10)
+  chimpAdonis[[ii]]<-adonis(chimpDist~area2+malaria,data=ss[!ss$bonobo,],permutations=1e7,parallel=10)
   bonoboDist<-as.matrix(selectDist)
   bonoboDist<-as.dist(bonoboDist[ss$bonobo,ss$bonobo])
-  bonoboAdonis[[ii]]<-cacheOperation(sprintf('work/adonisBonobo_%s.Rdat',ii),adonis,bonoboDist~area2+malaria,data=ss[ss$bonobo,],permutations=1e7,parallel=10)
+  bonoboAdonis[[ii]]<-adonis(bonoboDist~area2+malaria,data=ss[ss$bonobo,],permutations=1e7,parallel=10)
   tlDist<-as.dist(as.matrix(selectDist)[ss$isTL,ss$isTL])
-  tlAdonis[[ii]]<-cacheOperation(sprintf('work/adonisTL_%s.Rdat',ii),adonis,tlDist~malaria,data=ss[ss$isTL,],permutations=1e7,parallel=5)
+  tlAdonis[[ii]]<-adonis(tlDist~malaria,data=ss[ss$isTL,],permutations=1e7,parallel=5)
 }
 ```
 
@@ -112,6 +112,7 @@ mantels
 ### PERMANOVA testing of covariates
 ```{r}
 plantAdonis
+interactAdonis
 chimpAdonis
 bonoboAdonis
 tlAdonis
