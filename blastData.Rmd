@@ -12,10 +12,7 @@ system('blastn -version',intern=TRUE)
 system('parallel --version',intern=TRUE)
 ```
 
-### Prepare blast databases
-rbcL and matk data were downloaded manually from the EBI:
-* [http://www.ebi.ac.uk/ena/data/search?query=rbcl](http://www.ebi.ac.uk/ena/data/search?query=rbcl)
-* [http://www.ebi.ac.uk/ena/data/search?query=matk](http://www.ebi.ac.uk/ena/data/search?query=matk)
+### Prepare rbcL and matK blast databases from downloaded sequences
 
 ```{r,cache=TRUE}
 if(!file.exists('ebi/rbcl.fa.gz'))stop('Please download rbcl data from http://www.ebi.ac.uk/ena/data/search?query=rbcl to ebi/rbcl.fa.gz')
