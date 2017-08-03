@@ -13,6 +13,8 @@ library(Rtsne)
 packageVersion('Rtsne')
 library(ape)
 packageVersion('ape')
+library(dnar)
+packageVersion('dnar')
 ```
 
 ### Load the data
