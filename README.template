@@ -3,6 +3,7 @@
 To regenerate this document, run `make` in this directory.
 
 The code depends on R packages available from CRAN:
+
 * library(actuar)
 * library(ade4)
 * library(ape)
@@ -18,6 +19,7 @@ And convenience function in the package:
 installable with `devtools::install_github('sherrillmix/dnar')`.
 
 And programs:
+
 * [makeblastdb](https://packages.ubuntu.com/xenial/ncbi-blast+)
 * [blastn](https://packages.ubuntu.com/xenial/ncbi-blast+)
 * [miniconda](https://conda.io/miniconda.html)
