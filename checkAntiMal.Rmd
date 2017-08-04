@@ -54,7 +54,7 @@ antiMals<-lapply(names(swarmData),function(ii){
   bestHit<-withAs(sw=swarmData[[ii]][['taxa']][colnames(swarmData[[ii]][['props']]),],sw$bestScore/nchar(sw$seq))
   isAntiMal<-bestHit>hitCut &(species %in% antiMal$species[!is.na(antiMal$species)] | genus %in% antiMal$genus[antiMal$isGenus])
   isPresent<-(antiMal$species %in% species[bestHit>hitCut] &!is.na(antiMal$species))| (antiMal$genus %in% genus[bestHit>hitCut] &antiMal$isGenus)
-  antiMalProp<-swarmData[[ii]][['props']][,isAntiMal]
+  antiMalProp<-swarmData[[ii]][['props']][,isAntiMal,drop=FALSE]
   antiMalTaxa<-swarmData[[ii]][['taxa']][colnames(antiMalProp),]
   antiMalProp<-antiMalProp[swarmData[[ii]][['isEnough']][rownames(antiMalProp)],]
   antiMalPlants<-antiMal[isPresent,]
@@ -81,15 +81,13 @@ for(ii in names(swarmData)){
   message('nOTU: ',ncol(inBonobo),' nTaxa: ',length(unique(antiMals[[ii]][['taxa']][colnames(inBonobo),'species'])))
   ninePs<-apply(inBonobo,2,function(xx)apply(comparisons,1,function(select)suppressWarnings(wilcox.test(xx[tlGroups[[select[1]]]],xx[nonTlGroups[[select[2]]]],alternative='less'))$p.value))
   condenseP<-p.adjust(apply(ninePs,2,fishers,correct=3),'fdr')
+  message("Fisher's method combine p-values of 3 TL2 sites vs 3 non-TL2 sites p<.05")
   print(summary(condenseP<.05))
-  simpleP<-apply(inBonobo,2,function(xx)suppressWarnings(wilcox.test(xx[unlist(tlGroups)],xx[unlist(nonTlGroups)],alternative='less')$p.value))
-  swarmData[[ii]][['taxa']][names(condenseP)[condenseP<.05],]
-  print(summary(simpleP<.05))
+  message('')
   if(any(condenseP<pCut)){
     selectPropAll<-apply(inBonobo[ss$Code,condenseP<pCut&apply(inBonobo>0,2,sum)>1],2,function(x)x/max(x))
     colnames(selectPropAll)<-sprintf('%s p=%0.3f',sub('^[a-z]_','',swarmData[[ii]][['taxa']][colnames(selectPropAll),'bestId']),condenseP[colnames(selectPropAll)])
     breaks<-c(-1e-6,seq(min(c(selectPropAll[selectPropAll>0],.01))-1e-10,max(selectPropAll)+1e-10,length.out=100))
-    print(breaks)
     cols<-c('white',tail(rev(heat.colors(110)),99)) 
     maxTree<-hclust(dist(t(selectPropAll[,])))
     selectPropAll<-selectPropAll[,rev(maxTree$labels[maxTree$order])]
@@ -111,7 +109,7 @@ for(ii in names(swarmData)){
 pCut<-.05
 for(ii in names(swarmData)){
   message(ii)
-  otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
+  otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']][rownames(swarmData[[ii]][['props']])],]
   otuProp<-otuProp[rownames(otuProp) %in% rownames(samples),]
   ss<-samples[rownames(otuProp),]
   ss<-ss[order(!ss$bonobo,ss$area2,ss$malaria),]
