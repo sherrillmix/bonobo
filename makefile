@@ -43,7 +43,7 @@ sensitivity/sensitivity.md: sensitivity/sensitivity.Rmd
 	cd sensitivity && R -e 'knitr::knit("sensitivity.Rmd")'
 
 README.md: README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md checkAntiMal.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md
-	cat README.template getData.md makeOtus.md blastData.md parseBlast.md plotPcoa.md plotHeatmap.md checkAntiMal.md <( sed 's@(figure/@(16s/figure/@' 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md) <( sed 's@(figure/@(sensitivity/figure/@' sensitivity/sensitivity.md) > README.md
+	echo "cat README.template <(echo) getData.md <(echo) makeOtus.md <(echo) blastData.md <(echo) parseBlast.md <(echo) plotHeatmap.md <(echo) plotPcoa.md <(echo) checkAntiMal.md <(echo) <( sed 's@(figure/@(16s/figure/@' <(echo) 16s/runQiime.md <(echo) 16s/plotHeatmap.md <(echo) 16s/plotShannon.md <(echo) 16s/plotPcoa.md <(echo) 16s/plotBetaDiversity.md) <(echo) <( sed 's@(figure/@(sensitivity/figure/@' sensitivity/sensitivity.md) > README.md"|bash
 
 README.html: README.md
 	pandoc --standalone --smart --self-contained  --css=github-pandoc.css --toc README.md -o README.html
