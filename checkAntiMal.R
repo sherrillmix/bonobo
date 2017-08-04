@@ -2,17 +2,49 @@ library(taxonomizr)
 source('readSamples.R')
 library(vipor)
 
-antiMal<-read.csv('AntiMalPlant_List_021817.csv',stringsAsFactors=FALSE)
+antiMal<-read.csv('antimal2.csv',stringsAsFactors=FALSE)
 if(!exists('taxaNodes')){
   getNamesAndNodes('~/db/taxo/')
   taxaNodes<-read.nodes('~/db/taxo/nodes.dmp')
   taxaNamesAmbig<-read.names('~/db/taxo/names.dmp',FALSE)
   taxaNames<-read.names('~/db/taxo/names.dmp')
 }
-antiMal$clean<-sub(' sp$','',sub('([A-Za-z]+ [a-z]+).*','\\1',antiMal$Plant))
+antiMal$clean<-sub(' sp$','',sub('([A-Za-z]+ [a-z]+).*','\\1',trimws(antiMal$Plant)))
 antiMal$clean[antiMal$clean=="AAloe parvibracteata"]<-"Aloe parvibracteata"
 antiMal$clean[antiMal$clean=="Curcuma aromatic"]<-"Curcuma aromatica"
 antiMal$clean[antiMal$clean=="Uvariopsis congensis"]<-"Uvariopsis"
+antiMal$clean[antiMal$clean=="Frostyrax lepidophyllus"]<-"Afrostyrax lepidophyllus"
+antiMal$clean[antiMal$clean=="Ziziphus spina"]<-"Ziziphus spina-christi"
+antiMal$clean[antiMal$clean=="Achromanes difformis"]<-"Anchomanes difformis"
+antiMal$clean[antiMal$clean=="Cassia abbreviate"]<-"Cassia abbreviata"
+antiMal$clean[antiMal$clean=="Burchellia bubaline"]<-"Burchellia bubalina"
+antiMal$clean[antiMal$clean=="Catha eduli"]<-"Catha edulis"
+antiMal$clean[antiMal$clean=="Cartagena ipecacuanha"]<-"Carapichea ipecacuanha"
+antiMal$clean[antiMal$clean=="Anogeissus leiocarpus"]<-"Anogeissus leiocarpa"
+antiMal$clean[antiMal$clean=="Cissus quadrangulari"]<-"Cissus quadrangularis"
+antiMal$clean[antiMal$clean=="Citrus reticulate"]<-"Citrus reticulata"
+antiMal$clean[antiMal$clean=="Crataeva religiosa"]<-"Crateva religiosa"
+antiMal$clean[antiMal$clean=="Croton menyhartii"]<-"Croton menyharthii"
+antiMal$clean[antiMal$clean=="Desmostachia bipinnata"]<-"Desmostachya bipinnata"
+antiMal$clean[antiMal$clean=="Dodonaea viscose"]<-"Dodonaea viscosa"
+antiMal$clean[antiMal$clean=="Fagara macrophylla"]<-"Zanthoxylum gilletii"
+antiMal$clean[antiMal$clean=="Ficus capraefolia"]<-"Ficus capreifolia"
+antiMal$clean[antiMal$clean=="Ficus platyhylla"]<-"Ficus platyphylla"
+antiMal$clean[antiMal$clean=="Mellotus appositofolius"]<-"Mallotus oppositifolius"
+antiMal$clean[antiMal$clean=="Mitragyana stipolosa"]<-"Mitragyna stipulosa"
+antiMal$clean[antiMal$clean=="Opuntia ficus"]<-"Opuntia ficus-indica"
+antiMal$clean[antiMal$clean=="Peschiera fuchsiaefolia"]<-"Tabernaemontana hystrix"
+antiMal$clean[antiMal$clean=="Plantago majo"]<-"Plantago major"
+antiMal$clean[antiMal$clean=="Polgonum glabrium"]<-"Polygonum glabrum"
+antiMal$clean[antiMal$clean=="Pothomorphe peltata"]<-"Pothomorphe peltata"
+antiMal$clean[antiMal$clean=="Pyrenacantha grandiflora"]<-"Pyrenacantha grandifolia"
+antiMal$clean[antiMal$clean=="Rothmania longiflora"]<-"Rothmannia longiflora"
+antiMal$clean[antiMal$clean=="Rutaceae agathosma"]<-"Agathosma"
+antiMal$clean[antiMal$clean=="Syzigium cordatum"]<-"Syzygium cordatum"
+antiMal$clean[antiMal$clean=="Tarchonanthus camphorates"]<-"Tarchonanthus camphoratus"
+antiMal$clean[antiMal$clean=="Turreae heterophylla"]<-"Turraea heterophylla"
+antiMal$Plant<-antiMal$clean
+write.csv(antiMal[,c('Plant','Family','Country','References')],'antiMalarials.csv',row.names=FALSE)
 antiMal$isGenus<-!grepl(' ',antiMal$clean)
 antiMal$id<-getId(antiMal$clean,taxaNamesAmbig)
 antiMal$species<-getTaxonomy(antiMal$id,taxaNodes,taxaNames,'species')
@@ -27,7 +59,7 @@ antiMals<-lapply(names(swarmData),function(ii){
   bestHit<-withAs(sw=swarmData[[ii]][['taxa']][colnames(swarmData[[ii]][['props']]),],sw$bestScore/nchar(sw$seq))
   isAntiMal<-bestHit>hitCut &(species %in% antiMal$species[!is.na(antiMal$species)] | genus %in% antiMal$genus[antiMal$isGenus])
   isPresent<-(antiMal$species %in% species[bestHit>hitCut] &!is.na(antiMal$species))| (antiMal$genus %in% genus[bestHit>hitCut] &antiMal$isGenus)
-  antiMalProp<-swarmData[[ii]][['props']][,isAntiMal]
+  antiMalProp<-swarmData[[ii]][['props']][,isAntiMal,drop=FALSE]
   antiMalTaxa<-swarmData[[ii]][['taxa']][colnames(antiMalProp),]
   antiMalProp<-antiMalProp[swarmData[[ii]][['isEnough']][rownames(antiMalProp)],]
   antiMalPlants<-antiMal[isPresent,]
@@ -64,7 +96,6 @@ dev.off()
 pCut<-Inf #show all
 for(ii in names(swarmData)){
   message(ii)
-  #otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
   otuProp<-antiMals[[ii]][['prop']]
   otuProp<-otuProp[rownames(otuProp) %in% rownames(samples),]
   ss<-samples[rownames(otuProp),]
@@ -109,7 +140,7 @@ system('cp out/nineCompare_rbcL.pdf out/Fig.S7B.pdf')
 pCut<-.05
 for(ii in names(swarmData)){
   message(ii)
-  otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']],]
+  otuProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']][rownames(swarmData[[ii]][['props']])],]
   #otuProp<-antiMals[[ii]][['prop']]
   otuProp<-otuProp[rownames(otuProp) %in% rownames(samples),]
   ss<-samples[rownames(otuProp),]
