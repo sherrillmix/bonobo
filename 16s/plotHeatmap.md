@@ -2,6 +2,8 @@
 
 
 ```r
+#set seed so reproducible
+set.seed(12346)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```

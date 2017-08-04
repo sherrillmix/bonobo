@@ -1,7 +1,17 @@
-## Software versions
+## Blast OTUs against rbcL and matK databases
+
 
 ```r
-system('makeblastdb -version',intern=TRUE)
+#set seed so reproducible
+set.seed(12350)
+#stop on errors
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
+### Software versions
+
+```r
+system("makeblastdb -version", intern = TRUE)
 ```
 
 ```
@@ -10,7 +20,7 @@ system('makeblastdb -version',intern=TRUE)
 ```
 
 ```r
-system('blastn -version',intern=TRUE)
+system("blastn -version", intern = TRUE)
 ```
 
 ```
@@ -19,7 +29,7 @@ system('blastn -version',intern=TRUE)
 ```
 
 ```r
-system('parallel --version',intern=TRUE)
+system("parallel --version", intern = TRUE)
 ```
 
 ```
@@ -39,32 +49,30 @@ system('parallel --version',intern=TRUE)
 ## [14] "Or you can get GNU Parallel without this requirement by paying 10000 EUR."
 ```
 
-## Prepare blast databases
-rbcL and matk data were downloaded manually from the EBI:
-* [http://www.ebi.ac.uk/ena/data/search?query=rbcl](http://www.ebi.ac.uk/ena/data/search?query=rbcl)
-* [http://www.ebi.ac.uk/ena/data/search?query=matk](http://www.ebi.ac.uk/ena/data/search?query=matk)
+### Prepare rbcL and matK blast databases from downloaded sequences
 
 
 ```r
-if(!file.exists('ebi/rbcl.fa.gz'))stop('Please download rbcl data from http://www.ebi.ac.uk/ena/data/search?query=rbcl to ebi/rbcl.fa.gz')
-if(!file.exists('ebi/matk.fa.gz'))stop('Please download matk data from http://www.ebi.ac.uk/ena/data/search?query=matk to ebi/matk.fa.gz')
-system('zcat ebi/matk.fa.gz | makeblastdb -in - -title matk -dbtype nucl -out work/matk')
-system('zcat ebi/rbcl.fa.gz | makeblastdb -in - -title rbcl -dbtype nucl -out work/rbcl')
+if (!file.exists("ebi/rbcl.fa.gz")) stop("Please download rbcl data from http://www.ebi.ac.uk/ena/data/search?query=rbcl to ebi/rbcl.fa.gz")
+if (!file.exists("ebi/matk.fa.gz")) stop("Please download matk data from http://www.ebi.ac.uk/ena/data/search?query=matk to ebi/matk.fa.gz")
+system("zcat ebi/matk.fa.gz | makeblastdb -in - -title matk -dbtype nucl -out work/matk")
+system("zcat ebi/rbcl.fa.gz | makeblastdb -in - -title rbcl -dbtype nucl -out work/rbcl")
 ```
 
-## Blast swarm OTUs against rbcl/matk databases
+### Blast swarm OTUs against rbcl/matk databases
 
 ```r
-contigFa<-list.files('work/swarmPair','.fa.gz$',full.names=TRUE)
-contigFa<-contigFa[!grepl('_align',contigFa)]
-for(fasta in contigFa){
-  outFile<-sub('fa.gz$','blast.gz',fasta)
-  if(grepl('rbcL',fasta))gene<-'rbcl'
-  else if(grepl('matK',fasta))gene<-'matk'
-  else stop('Unknown gene')
-  cmd<-sprintf("zcat %s|parallel --block 1m --recstart '>' -L2 -j 14 --pipe blastn -db work/%s -num_threads 5 -culling_limit 30 -outfmt 6 -query -|gzip > %s",fasta,gene,outFile)
-  message(cmd)
-  system(cmd)
+contigFa <- list.files("work/swarmPair", ".fa.gz$", full.names = TRUE)
+contigFa <- contigFa[!grepl("_align", contigFa)]
+for (fasta in contigFa) {
+    outFile <- sub("fa.gz$", "blast.gz", fasta)
+    if (grepl("rbcL", fasta)) 
+        gene <- "rbcl" else if (grepl("matK", fasta)) 
+        gene <- "matk" else stop("Unknown gene")
+    cmd <- sprintf("zcat %s|parallel --block 1m --recstart '>' -L2 -j 14 --pipe blastn -db work/%s -num_threads 5 -culling_limit 30 -outfmt 6 -query -|gzip > %s", 
+        fasta, gene, outFile)
+    message(cmd)
+    system(cmd)
 }
 ```
 

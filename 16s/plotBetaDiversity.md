@@ -2,6 +2,8 @@
 
 
 ```r
+#set seed so reproducible
+set.seed(12345)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```
@@ -226,11 +228,11 @@ adonis(uniDist ~ bonobo + area2 + malaria, data = samples[labels(uniDist), ],
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
-## bonobo     1    1.4629 1.46293  8.3600 0.07300   1e-07 ***
-## area2      8    3.8192 0.47740  2.7281 0.19059   1e-07 ***
-## malaria    1    0.2325 0.23251  1.3287 0.01160 0.05661 .  
-## Residuals 83   14.5244 0.17499         0.72481            
-## Total     93   20.0390                 1.00000            
+## bonobo     1    1.4842 1.48415  8.5391 0.07453   1e-07 ***
+## area2      8    3.7638 0.47047  2.7069 0.18899   1e-07 ***
+## malaria    1    0.2408 0.24083  1.3856 0.01209 0.04027 *  
+## Residuals 83   14.4260 0.17381         0.72439            
+## Total     93   19.9147                 1.00000            
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -253,10 +255,10 @@ adonis(tlDist ~ area2 + malaria, data = samples[labels(tlDist), ], permutations 
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
-## area2      2    0.8726 0.43632  2.6367 0.14301    1e-07 ***
-## malaria    1    0.2648 0.26475  1.5999 0.04339 0.003986 ** 
-## Residuals 30    4.9644 0.16548         0.81360             
-## Total     33    6.1018                 1.00000             
+## area2      2    0.8385 0.41923  2.5468 0.13879    1e-07 ***
+## malaria    1    0.2642 0.26422  1.6051 0.04374 0.003612 ** 
+## Residuals 30    4.9384 0.16461         0.81747             
+## Total     33    6.0411                 1.00000             
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -279,10 +281,10 @@ adonis(chimpDist ~ area2 + malaria, data = samples[labels(chimpDist), ], permuta
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
-## area2      2    0.9226 0.46129  2.4407 0.17459 2.69e-05 ***
-## malaria    1    0.2035 0.20352  1.0768 0.03852   0.3025    
-## Residuals 22    4.1580 0.18900         0.78689             
-## Total     25    5.2841                 1.00000             
+## area2      2    0.9365 0.46827  2.5190 0.17902 1.84e-05 ***
+## malaria    1    0.2053 0.20528  1.1043 0.03924   0.2742    
+## Residuals 22    4.0897 0.18589         0.78174             
+## Total     25    5.2315                 1.00000             
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

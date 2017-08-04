@@ -2,6 +2,8 @@
 
 
 ```r
+#set seed so reproducible
+set.seed(12349)
 #stop on errors
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```
@@ -103,7 +105,7 @@ system("echo \"source activate qiime1;print_qiime_config.py -t\"|bash 2>&1",
 ## [62] "==============================="                                                                                                                                             
 ## [63] "........."                                                                                                                                                                   
 ## [64] "----------------------------------------------------------------------"                                                                                                      
-## [65] "Ran 9 tests in 0.013s"                                                                                                                                                       
+## [65] "Ran 9 tests in 0.052s"                                                                                                                                                       
 ## [66] ""                                                                                                                                                                            
 ## [67] "OK"
 ```
@@ -452,7 +454,7 @@ out <- runQiime(unlist(allSeq), storeDir = "work/qiime")
 ```
 
 ```
-## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/RtmpXrHG6Z/file941a69811d81/XXX.fa --output /tmp/RtmpXrHG6Z/file941a208f7e57 --parallel --jobs_to_start 32 --force"|bash
+## echo "source activate qiime1; pick_de_novo_otus.py --input /tmp/Rtmp9qlE7h/fileb7a472e0afa1/XXX.fa --output /tmp/Rtmp9qlE7h/fileb7a437ece52a --parallel --jobs_to_start 32 --force"|bash
 ```
 
 ```r

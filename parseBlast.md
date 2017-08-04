@@ -1,8 +1,18 @@
-## Load libraries
+## Assign taxonomy based on BLAST results
+
+
+```r
+#set seed so reproducible
+set.seed(12355)
+#stop on errors
+knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
+```
+
+### Load libraries
 
 ```r
 library(dnar)
-packageVersion('dnar')
+packageVersion("dnar")
 ```
 
 ```
@@ -11,7 +21,7 @@ packageVersion('dnar')
 
 ```r
 library(taxonomizr)
-packageVersion('taxonomizr')
+packageVersion("taxonomizr")
 ```
 
 ```
@@ -20,18 +30,18 @@ packageVersion('taxonomizr')
 
 ```r
 library(parallel)
-packageVersion('parallel')
+packageVersion("parallel")
 ```
 
 ```
 ## [1] '3.4.1'
 ```
 
-## Download NCBI accession numbers and taxonomy
+### Download NCBI accession numbers and taxonomy
 
 ```r
-sqlFile<-'work/accessionTaxa.sql'
-getNamesAndNodes('work')
+sqlFile <- "work/accessionTaxa.sql"
+getNamesAndNodes("work")
 ```
 
 ```
@@ -43,8 +53,8 @@ getNamesAndNodes('work')
 ```
 
 ```r
-#this is a big download
-getAccession2taxid('work')
+# this is a big download
+getAccession2taxid("work")
 ```
 
 ```
@@ -56,12 +66,13 @@ getAccession2taxid('work')
 ## [3] "work/nucl_gss.accession2taxid.gz" "work/nucl_wgs.accession2taxid.gz"
 ```
 
-## Prepare database of accession numbers and taxonomy
+### Prepare database of accession numbers and taxonomy
 
 ```r
-read.nodes2('work/nodes.dmp',sqlFile)
-read.names2('work/names.dmp',sqlFile)
-read.accession2taxid(list.files('work','accession2taxid.gz$',full.names=TRUE),sqlFile,overwrite=TRUE)
+read.nodes2("work/nodes.dmp", sqlFile)
+read.names2("work/names.dmp", sqlFile)
+read.accession2taxid(list.files("work", "accession2taxid.gz$", full.names = TRUE), 
+    sqlFile, overwrite = TRUE)
 ```
 
 ```
@@ -88,43 +99,45 @@ read.accession2taxid(list.files('work','accession2taxid.gz$',full.names=TRUE),sq
 ## Adding index. This may also take a while.
 ```
 
-## Assign taxonomy to blast hits
+### Assign taxonomy to blast hits
 
 ```r
-blastFiles<-list.files('work/swarmPair','\\.blast\\.gz$',full.names=TRUE)
+blastFiles <- list.files("work/swarmPair", "\\.blast\\.gz$", full.names = TRUE)
 
-mclapply(blastFiles,function(ii,sqlFile,...){
-  message('Parsing blast hits in ',ii)
-  outFile<-sub('.blast.gz$','_taxa.csv',ii)
-  outFile2<-sub('.blast.gz$','_allHits.csv',ii)
-  message(' Creating ',outFile)
-  message('  Reading blast')
-  x<-read.blast(ii)
-  x<-x[x$tName!='ref',]
-  x$accession<-sapply(strsplit(x$tName,'\\|'),'[[',3)
-  message('  Accession to taxonomy')
-  x$taxa<-accessionToTaxa(x$accession,sqlFile)
-  x$sumScore<-ave(x$bit,paste(x$tName,x$qName,sep='_-_'),FUN=sum)
-  x$maxScore<-ave(x$sumScore,x$qName,FUN=max)
-  x<-x[x$sumScore>x$maxScore*.98&!is.na(x$taxa),]
-  message('  Getting upstream taxonomy')
-  taxonomy<-getTaxonomy2(x$taxa,sqlFile)
-  taxonomy<-as.data.frame(taxonomy,stringsAsFactors=FALSE)
-  message('  Condensing taxonomy')
-  taxaAssigns<-condenseTaxa2(taxonomy,x$qName)
-  taxaAssigns<-as.data.frame(taxaAssigns,stringsAsFactors=FALSE)
-  rownames(taxaAssigns)<-taxaAssigns$id
-  taxaAssigns<-taxaAssigns[,colnames(taxaAssigns)!='id']
-  taxonomy$qName<-x$qName
-  write.csv(taxonomy,outFile2)
-  taxaAssigns$best<-apply(taxaAssigns,1,lastNotNa)
-  bestScore<-x[x$sumScore==x$maxScore,c('qName','alignLength','percID','sumScore')]
-  bestScore<-bestScore[!duplicated(bestScore$qName),]
-  rownames(bestScore)<-bestScore$qName
-  taxaAssigns<-cbind(taxaAssigns,'bestScore'=bestScore[rownames(taxaAssigns),c('sumScore')])
-  write.csv(taxaAssigns,outFile)
-  return(c('taxa'=outFile,'allHits'=outFile2))
-},sqlFile,mc.cores=2)
+mclapply(blastFiles, function(ii, sqlFile, ...) {
+    message("Parsing blast hits in ", ii)
+    outFile <- sub(".blast.gz$", "_taxa.csv", ii)
+    outFile2 <- sub(".blast.gz$", "_allHits.csv", ii)
+    message(" Creating ", outFile)
+    message("  Reading blast")
+    x <- read.blast(ii)
+    x <- x[x$tName != "ref", ]
+    x$accession <- sapply(strsplit(x$tName, "\\|"), "[[", 3)
+    message("  Accession to taxonomy")
+    x$taxa <- accessionToTaxa(x$accession, sqlFile)
+    x$sumScore <- ave(x$bit, paste(x$tName, x$qName, sep = "_-_"), FUN = sum)
+    x$maxScore <- ave(x$sumScore, x$qName, FUN = max)
+    x <- x[x$sumScore > x$maxScore * 0.98 & !is.na(x$taxa), ]
+    message("  Getting upstream taxonomy")
+    taxonomy <- getTaxonomy2(x$taxa, sqlFile)
+    taxonomy <- as.data.frame(taxonomy, stringsAsFactors = FALSE)
+    message("  Condensing taxonomy")
+    taxaAssigns <- condenseTaxa2(taxonomy, x$qName)
+    taxaAssigns <- as.data.frame(taxaAssigns, stringsAsFactors = FALSE)
+    rownames(taxaAssigns) <- taxaAssigns$id
+    taxaAssigns <- taxaAssigns[, colnames(taxaAssigns) != "id"]
+    taxonomy$qName <- x$qName
+    write.csv(taxonomy, outFile2)
+    taxaAssigns$best <- apply(taxaAssigns, 1, lastNotNa)
+    bestScore <- x[x$sumScore == x$maxScore, c("qName", "alignLength", "percID", 
+        "sumScore")]
+    bestScore <- bestScore[!duplicated(bestScore$qName), ]
+    rownames(bestScore) <- bestScore$qName
+    taxaAssigns <- cbind(taxaAssigns, bestScore = bestScore[rownames(taxaAssigns), 
+        c("sumScore")])
+    write.csv(taxaAssigns, outFile)
+    return(c(taxa = outFile, allHits = outFile2))
+}, sqlFile, mc.cores = 2)
 ```
 
 ```
