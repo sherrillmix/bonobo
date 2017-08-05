@@ -43,7 +43,11 @@ for(primerBase in unique(primerBases)){
     thisFiles<-fastqs[primers==ii]
     reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)},mc.cores=10,mc.preschedule=FALSE)
     if(mean(unlist(lapply(reads,function(xx)substring(xx$seq,1,nchar(thisPrimer))))%in% expandAmbiguous(thisPrimer)[[1]])<.75)stop(simpleError('Expected primer does not match read start'))
-    trimReads<-lapply(reads,function(xx){xx$seq<-substring(xx$seq,nchar(thisPrimer)+1);return(xx)})
+    trimReads<-lapply(reads,function(xx){
+      xx$primerMatch<-substring(xx$seq,1,nchar(thisPrimer)) %in% expandAmbiguous(thisPrimer)[[1]]
+      xx$seq<-substring(xx$seq,nchar(thisPrimer)+1)
+      return(xx)
+    })
     names(trimReads)<-thisFiles
     return(trimReads)
   })
@@ -57,8 +61,8 @@ for(primerBase in unique(primerBases)){
     #last base always low qual so ignore
     q1<-sapply(qualToInts(substring(left$qual,1,nchar(left$qual)-1)),function(xx)sum(10^(-xx/10)))
     q2<-sapply(qualToInts(substring(right$qual,1,nchar(right$qual)-1)),function(xx)sum(10^(-xx/10)))
-    #less than 1 expected error in both reads
-    selector<-q1<1&q2<1 & !grepl('[^ACTG]',left$seq)&!grepl('[^ACTG]',right$seq)
+    #less than 1 expected error in both reads, no Ns and primer match
+    selector<-q1<1&q2<1 & !grepl('[^ACTG]',left$seq)&!grepl('[^ACTG]',right$seq) & left$primerMatch & right$primerMatch
     seqs<-paste(left[selector,'seq'],revComp(right[selector,'seq']),sep='')
     return(seqs)
   },trimReads[[1]],trimReads[[2]],mc.cores=5,SIMPLIFY=FALSE)
@@ -85,6 +89,8 @@ for(primerBase in unique(primerBases)){
   cmd<-sprintf('zcat %s|fasttree -gtr -nt>%s',outAlign,outTree)
   message(cmd)
   system(cmd)
+  tree<-ape::multi2di(phyloseq::read_tree(outTree))
+  pdf(sprintf('out/alignTree_%s.png',primerBase));plot(tree);dev.off()
 }
 
 if(FALSE){
