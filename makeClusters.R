@@ -10,6 +10,7 @@ source('16s/myBiplot.R')
 
 tlAdonis<-interactAdonis<-plantAdonis<-chimpAdonis<-bonoboAdonis<-list()
 mantels<-list()
+unis<-list()
 for(ii in names(swarmData)){
   plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
   plotProp2<-swarmData[[ii]][['rare']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['rare']]) %in% rownames(samples),]
@@ -20,8 +21,9 @@ for(ii in names(swarmData)){
   brayDist<-distance(qiimeDataU,'bray',binary=TRUE)
   brayDistW<-distance(qiimeDataW,'bray',binary=FALSE)
   uniDist<-UniFrac(qiimeDataU,weighted=FALSE)
+  unis[[ii]]<-uniDist
   uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
-  uniDistG<-cacheOperation(sprintf('work/gunifrac_%s.Rdat',ii),GUniFrac,plotProp,swarmData[[ii]][['tree']])$unifracs[,,2]
+  #uniDistG<-cacheOperation(sprintf('work/gunifrac_%s.Rdat',ii),GUniFrac,plotProp,swarmData[[ii]][['tree']])$unifracs[,,2]
   mantels[[ii]]<-list(
     'uniW'=ade4::mantel.rtest(uniDist,uniDistW,nrepet=1e4),
     'brayW'=ade4::mantel.rtest(uniDist,brayDistW,nrepet=1e4),
@@ -30,7 +32,7 @@ for(ii in names(swarmData)){
   brayPca<-pcoa(brayDist)
   uniPca<-pcoa(uniDist)
   uniPcaW<-pcoa(uniDistW)
-  uniPcaG<-pcoa(uniDistG)
+  #uniPcaG<-pcoa(uniDistG)
   tsneBray<-Rtsne(brayDist,is_distance=TRUE,verbose=TRUE,perplexity=10,max_iter=3000)
   tsneUni<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=3000)
   tsneUniW<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=5,max_iter=3000)
@@ -60,8 +62,31 @@ for(ii in names(swarmData)){
   speciesCols<-rainbow.lab(length(unique(selectSamples$Species)),start=-2,end=1,alpha=.8,lightMultiple=.8)
   names(speciesCols)<-names(speciesPch)<-sort(unique(selectSamples$chimpBonobo))
 
-  predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
-  #pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=Inf)
+  pdf(sprintf('work/check_%s.pdf',ii));
+    tmp<-0+(plotProp2>0)
+    tmp<-tmp[,apply(tmp,2,sum)>1]
+    uniTree<-hclust(uniDist)
+    heatmap(0+(tmp>0),col=rev(heat.colors(100)),mar=c(5,5),scale='none',Rowv=as.dendrogram(uniTree))
+    pos<-my.biplot.pcoa(selectPca,plotProp2>0,plot.axes=1:2,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.2,lwd=2.5,mar=c(4,4,1.5,10),arrowsFilter=1)
+    text(pos,rownames(plotProp2),cex=.25)
+    #plot(pos[,1],plotProp2[,'236'],xlab='PCoA 1',ylab='Morus 235 OTU counts')
+    plot(swarmData[[ii]][['tree']])
+    #prob236<-swarmData[['matK']][['taxa']]['236','seq']
+    #matkSample<-swarmData[['matK']][['taxa']][1:20,'seq']
+    #rbclSample<-swarmData[['rbcL']][['taxa']][1:20,'seq'] 
+    #matkAlign<-levenAlign(matkSample,prob236)
+    #rbclAlign<-levenAlign(rbclSample,prob236)
+    #plotDNA(unlist(matkAlign),groups=c('Morus 236',rep('matk',20)))
+    #plotDNA(unlist(rbclAlign),groups=c('Morus 236',rep('rbcl',20)))
+ dev.off();
+
+  #dists<-leven(swarmData[[1]][['taxa']][,'seq'],swarmData[[1]][['taxa']]['236','seq'],nThreads=50)
+  #dists1<-leven(substring(swarmData[[1]][['taxa']][,'seq'],1,220),substring(swarmData[[1]][['taxa']]['236','seq'],1,220),nThreads=50)
+  #dists2<-leven(substring(swarmData[[1]][['taxa']][,'seq'],240),substring(swarmData[[1]][['taxa']]['236','seq'],240),nThreads=50)
+  #dists3<-leven(substring(swarmData[[1]][['taxa']][,'seq'],1,100),substring(swarmData[[1]][['taxa']]['236','seq'],1,100),nThreads=50)
+  #distsRev<-leven(swarmData[[1]][['taxa']][,'seq'],revComp(swarmData[[1]][['taxa']]['236','seq']),nThreads=50)
+  #rbcl<-leven(substring(swarmData[[2]][['taxa']][,'seq'],1),substring(swarmData[[ii]][['taxa']]['236','seq'],1),nThreads=50)
+  #pdf('test.pdf',height=90,width=30);plot(phyloTree);hist(dists);dev.off()
   #legend(
     #par('usr')[2]+.01*diff(par('usr')[1:2]), 
     #mean(par('usr')[3:4]),
@@ -73,6 +98,7 @@ for(ii in names(swarmData)){
     #xjust=0,xpd=NA
   #)
 
+  predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
   print(table(selectSamples$malaria,selectSamples$chimpBonobo))
   pdf(sprintf('out/pcoa_%s.pdf',ii),width=6,height=6)
     pos<-my.biplot.pcoa(selectPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
@@ -117,14 +143,17 @@ for(ii in names(swarmData)){
 
   uniTree<-hclust(uniDist)
   pcoaTree<-hclust(dist(selectPca$vectors[,1:2]))
+  phyloTree<-swarmData[[ii]][['tree']]
   pdf(sprintf('out/tree_%s.pdf',ii),height=12,width=10)
-  par(mar=c(4,0,0,4))
-  plot(as.dendrogram(uniTree),horiz=TRUE,xlab='UniFrac distance')
-  plot(as.dendrogram(pcoaTree),horiz=TRUE,xlab='First two PCoA distance')
-  tmp<-0+(plotProp2>0)
-  tmp<-tmp[,apply(tmp,2,sum)>1]
-  if(ncol(tmp)>2000) tmp<-tmp[,apply(tmp,2,sum)>5]
-  heatmap(0+(tmp>0),col=rev(heat.colors(100)),mar=c(5,5),scale='none',Rowv=as.dendrogram(uniTree))
+    par(mar=c(4,0,0,4))
+    plot(as.dendrogram(uniTree),horiz=TRUE,xlab='UniFrac distance')
+    plot(as.dendrogram(pcoaTree),horiz=TRUE,xlab='First two PCoA distance')
+    tmp<-0+(plotProp2>0)
+    tmp<-tmp[,apply(tmp,2,sum)>1]
+    if(ncol(tmp)>2000) tmp<-tmp[,apply(tmp,2,sum)>5]
+    heatmap(0+(tmp>0),col=rev(heat.colors(100)),mar=c(5,5),scale='none',Rowv=as.dendrogram(uniTree))
+    tmp<-tmp[,orderIn(colnames(tmp),phyloTree$tip.label)]
+    heatmap(0+(tmp>0),col=rev(heat.colors(100)),mar=c(5,5),scale='none',Rowv=as.dendrogram(uniTree),Colv=NA)
   dev.off()
 
   pullDists<-function(xx,distMat){
@@ -244,3 +273,12 @@ system('cp out/pcoa_rbcL.pdf out/Fig.5B.pdf')
 system('cp out/tsne_matK.pdf out/Fig.S6A.pdf')
 system('cp out/tsne_rbcL.pdf out/Fig.S6B.pdf')
 
+table(samples[names(swarmData[['matK']][['isEnough']])[swarmData[['matK']][['isEnough']]],c('chimpBonobo','plasmoPM')])
+table(samples[names(swarmData[['rbcL']][['isEnough']])[swarmData[['rbcL']][['isEnough']]],c('chimpBonobo','plasmoPM')])
+
+tmp<-unis[[1]]
+tmp2<-unis[[2]]
+shared<-intersect(labels(tmp),labels(tmp2))
+tmp<-as.dist(as.matrix(tmp)[shared,shared])
+tmp2<-as.dist(as.matrix(tmp2)[shared,shared])
+mantel.rtest(tmp,tmp2)
