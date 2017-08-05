@@ -4204,7 +4204,7 @@ for (ii in names(swarmData)) {
 ```
 
 ```
-## nOTU: 65 nTaxa: 3
+## nOTU: 57 nTaxa: 3
 ```
 
 ```
@@ -4213,7 +4213,7 @@ for (ii in names(swarmData)) {
 
 ```
 ##    Mode   FALSE 
-## logical      65
+## logical      57
 ```
 
 ```
@@ -4225,7 +4225,7 @@ for (ii in names(swarmData)) {
 ```
 
 ```
-## nOTU: 490 nTaxa: 17
+## nOTU: 493 nTaxa: 18
 ```
 
 ```
@@ -4234,7 +4234,7 @@ for (ii in names(swarmData)) {
 
 ```
 ##    Mode   FALSE 
-## logical     490
+## logical     493
 ```
 
 ```
