@@ -15,7 +15,9 @@ The code depends on R packages available from CRAN:
 * library(taxonomizr)
 
 And convenience function in the package:
+
 * library(dnar)
+
 installable with `devtools::install_github('sherrillmix/dnar')`.
 
 And programs:
