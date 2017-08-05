@@ -9,12 +9,10 @@ if(!exists('taxaNodes')){
   taxaNamesAmbig<-read.names('~/db/taxo/names.dmp',FALSE)
   taxaNames<-read.names('~/db/taxo/names.dmp')
 }
-antiMal$clean<-sub(' sp$','',sub('([A-Za-z]+ [a-z]+).*','\\1',trimws(antiMal$Plant)))
+antiMal$clean<-sub(' sp$','',sub('([A-Za-z]+ [a-z-]+).*','\\1',trimws(antiMal$Plant)))
 antiMal$clean[antiMal$clean=="AAloe parvibracteata"]<-"Aloe parvibracteata"
 antiMal$clean[antiMal$clean=="Curcuma aromatic"]<-"Curcuma aromatica"
-antiMal$clean[antiMal$clean=="Uvariopsis congensis"]<-"Uvariopsis"
 antiMal$clean[antiMal$clean=="Frostyrax lepidophyllus"]<-"Afrostyrax lepidophyllus"
-antiMal$clean[antiMal$clean=="Ziziphus spina"]<-"Ziziphus spina-christi"
 antiMal$clean[antiMal$clean=="Achromanes difformis"]<-"Anchomanes difformis"
 antiMal$clean[antiMal$clean=="Cassia abbreviate"]<-"Cassia abbreviata"
 antiMal$clean[antiMal$clean=="Burchellia bubaline"]<-"Burchellia bubalina"
@@ -28,15 +26,15 @@ antiMal$clean[antiMal$clean=="Croton menyhartii"]<-"Croton menyharthii"
 antiMal$clean[antiMal$clean=="Desmostachia bipinnata"]<-"Desmostachya bipinnata"
 antiMal$clean[antiMal$clean=="Dodonaea viscose"]<-"Dodonaea viscosa"
 antiMal$clean[antiMal$clean=="Fagara macrophylla"]<-"Zanthoxylum gilletii"
+antiMal$clean[antiMal$clean=="Fagara zanthoxyloides"]<-"Zanthoxylum zanthoxyloides"
 antiMal$clean[antiMal$clean=="Ficus capraefolia"]<-"Ficus capreifolia"
 antiMal$clean[antiMal$clean=="Ficus platyhylla"]<-"Ficus platyphylla"
 antiMal$clean[antiMal$clean=="Mellotus appositofolius"]<-"Mallotus oppositifolius"
 antiMal$clean[antiMal$clean=="Mitragyana stipolosa"]<-"Mitragyna stipulosa"
-antiMal$clean[antiMal$clean=="Opuntia ficus"]<-"Opuntia ficus-indica"
 antiMal$clean[antiMal$clean=="Peschiera fuchsiaefolia"]<-"Tabernaemontana hystrix"
 antiMal$clean[antiMal$clean=="Plantago majo"]<-"Plantago major"
 antiMal$clean[antiMal$clean=="Polgonum glabrium"]<-"Polygonum glabrum"
-antiMal$clean[antiMal$clean=="Pothomorphe peltata"]<-"Pothomorphe peltata"
+antiMal$clean[antiMal$clean=="Pothomorphe peltata"]<-"Piper peltatum"
 antiMal$clean[antiMal$clean=="Pyrenacantha grandiflora"]<-"Pyrenacantha grandifolia"
 antiMal$clean[antiMal$clean=="Rothmania longiflora"]<-"Rothmannia longiflora"
 antiMal$clean[antiMal$clean=="Rutaceae agathosma"]<-"Agathosma"
