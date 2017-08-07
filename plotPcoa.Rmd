@@ -32,6 +32,7 @@ source("loadData.R")
 tlAdonis<-interactAdonis<-plantAdonis<-chimpAdonis<-bonoboAdonis<-list()
 mantels<-list()
 for(ii in names(swarmData)){
+  message(ii)
   plotProp<-swarmData[[ii]][['props']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['props']]) %in% rownames(samples),]
   plotProp2<-swarmData[[ii]][['rare']][swarmData[[ii]][['isEnough']]&rownames(swarmData[[ii]][['rare']]) %in% rownames(samples),]
   phyOtuW<-otu_table(plotProp,taxa_are_rows=FALSE)
@@ -43,9 +44,9 @@ for(ii in names(swarmData)){
   uniDist<-UniFrac(qiimeDataU,weighted=FALSE)
   uniDistW<-UniFrac(qiimeDataW,weighted=TRUE)
   mantels[[ii]]<-list(
-    'uniW'=ade4::mantel.rtest(uniDist,uniDistW,nrepet=1e4),
-    'brayW'=ade4::mantel.rtest(uniDist,brayDistW,nrepet=1e4),
-    'brayUW'=ade4::mantel.rtest(uniDist,brayDist,nrepet=1e4)
+    'uniW'=par.mantel.rtest(uniDist,uniDistW,nrepet=1e6,mc.cores=50),
+    'brayW'=par.mantel.rtest(uniDist,brayDistW,nrepet=1e6,mc.cores=50),
+    'brayUW'=par.mantel.rtest(uniDist,brayDist,nrepet=1e6,mc.cores=50)
   )
   uniPca<-pcoa(uniDist)
   tsneUni<-Rtsne(uniDist,is_distance=TRUE,verbose=TRUE,perplexity=15,max_iter=3000)
@@ -73,24 +74,28 @@ for(ii in names(swarmData)){
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
 
   #pcoa
-  pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
-  points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
-  points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
-  title(main=sprintf('%s',ii,1,2))
+  plotAndSavePdf(function(){
+    pos<-my.biplot.pcoa(uniPca,predictors,plot.axes=1:2,pch=21,bg=speciesCols[selectSamples$chimpBonobo],col=malariaCols3[selectSamples$malaria+1],cex=2.25,lwd=4,arrowsFilter=Inf,las=1,mgp=c(2.75,.75,0),sameAxis=FALSE,bty='l',type='n')
+    points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
+    points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
+    title(main=sprintf('%s',ii,1,2))
+  },sprintf('figure/Figure6_%s.pdf',ii),width=2.16,height=2.16)
 
   #tsne
-  par(mar=c(4,4,1.5,10))
-  plot(tsneUni$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
-  legend(
-    par('usr')[2]+.01*diff(par('usr')[1:2]), 
-    mean(par('usr')[3:4]),
-    c(names(malariaCols),names(areaCols),names(speciesPch)),
-    col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
-    pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
-    pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
-    inset=.01,pt.lwd=3,pt.cex=2.5,
-    xjust=0,xpd=NA,bty='n'
-  )
+  plotAndSavePdf(function(){
+    par(mar=c(4,4,1.5,10))
+    plot(tsneUni$Y,pch=speciesPch[selectSamples$chimpBonobo],bg=areaCols[selectSamples$area2],col=malariaCols[selectSamples$malaria+1],cex=2.5,lwd=3,ylab='t-SNE 2',xlab='t-SNE 1',main=sprintf('%s',ii),bty='l',las=1)
+    legend(
+      par('usr')[2]+.01*diff(par('usr')[1:2]), 
+      mean(par('usr')[3:4]),
+      c(names(malariaCols),names(areaCols),names(speciesPch)),
+      col=c(malariaCols,rep(c(malariaCols[1],mediumMalariaCol),c(length(areaCols),length(speciesPch)))),
+      pch=c(rep(21,length(malariaCols)),speciesPch[areaPch],speciesPch),
+      pt.bg=c(rep(NA,length(malariaCols)),areaCols,rep(NA,length(speciesPch))),
+      inset=.01,pt.lwd=3,pt.cex=2.5,
+      xjust=0,xpd=NA,bty='n'
+    )
+  },sprintf('figure/SupplementaryFigure5_%s.pdf',ii),width=10,height=8)
 
   ss<-samples[labels(selectDist),]
   plantAdonis[[ii]]<-adonis(selectDist~bonobo+area2+malaria,data=ss,permutations=1e7,parallel=10)
