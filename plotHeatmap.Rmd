@@ -65,3 +65,12 @@ for(ii in names(swarmData)){
   },sprintf('figure/SupplementaryFigure4_%s.pdf',ii),height=30,width=30)
 }
 ```
+
+### Count reads
+```{r countReads,fig.width=20,fig.height=30,dpi=150}
+for(ii in names(swarmData)){
+  message(ii)
+  print(swarmData[[ii]][['nReads']])
+  print(mean(swarmData[[ii]][['nReads']]))
+}
+```
