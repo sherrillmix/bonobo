@@ -148,7 +148,7 @@ for (ii in names(swarmData)) {
         selectPropAll <- selectPropAll[, rev(maxTree$labels[maxTree$order])]
         selectPropAll <- selectPropAll[, order(colnames(selectPropAll))]
         plotAndSavePdf(function() {
-            par(mar = c(10.5, 0.1, 3, 14), lheight = 0.7)
+            par(mar = c(12, 0.1, 3, 14), lheight = 0.7)
             metadata <- ss[rownames(selectPropAll), c("chimpBonobo", "area2", 
                 "plasmoPM", "Code")]
             colnames(metadata) <- c("Species", "Area", "Laverania", "Sample")
