@@ -41,7 +41,7 @@ for(primerBase in unique(primerBases)){
   trimReads<-lapply(sprintf('%s%d',primerBase,1:2),function(ii){
     thisPrimer<-primerSeqs[[sub('[12]$','',tolower(ii))]][as.numeric(substring(ii,nchar(ii)))]
     thisFiles<-fastqs[primers==ii]
-    reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)},mc.cores=10,mc.preschedule=FALSE)
+    reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');dnar::read.fastq(xx)},mc.cores=10,mc.preschedule=FALSE)
     if(mean(unlist(lapply(reads,function(xx)substring(xx$seq,1,nchar(thisPrimer))))%in% expandAmbiguous(thisPrimer)[[1]])<.75)stop(simpleError('Expected primer does not match read start'))
     trimReads<-lapply(reads,function(xx){
       xx$primerMatch<-substring(xx$seq,1,nchar(thisPrimer)) %in% expandAmbiguous(thisPrimer)[[1]]
@@ -67,7 +67,7 @@ for(primerBase in unique(primerBases)){
     return(seqs)
   },trimReads[[1]],trimReads[[2]],mc.cores=5,SIMPLIFY=FALSE)
   readCounts$filter<-sapply(trimReads,length)
-  write.csv(readCounts,'work/swarmPair/%s_counts.csv')
+  write.csv(readCounts,sprintf('work/swarmPair/%s_counts.csv',primerBase))
   samples<-rep(basename(names(trimReads)),sapply(trimReads,length))
   otus<-runSwarm(unlist(trimReads),'~/installs/swarm/swarm',swarmArgs='-f -t 40')
   swarmOtus<-as.data.frame.matrix(table(samples,otus[['otus']]))
