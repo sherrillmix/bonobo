@@ -50,7 +50,7 @@ for(primerBase in unique(primerBases)){
   trimReads<-lapply(sprintf('%s%d',primerBase,1:2),function(ii){
     thisPrimer<-primerSeqs[[sub('[12]$','',tolower(ii))]][as.numeric(substring(ii,nchar(ii)))]
     thisFiles<-fastqs[primers==ii]
-    reads<-mclapply(thisFiles,function(xx){library(dnar);cat('.');read.fastq(xx)},mc.cores=20,mc.preschedule=FALSE)
+    reads<-mclapply(thisFiles,dnar::read.fastq,mc.cores=20,mc.preschedule=FALSE)
     if(mean(unlist(lapply(reads,function(xx)substring(xx$seq,1,nchar(thisPrimer))))%in% expandAmbiguous(thisPrimer)[[1]])<.75)stop(simpleError('Expected primer does not match read start'))
     trimReads<-lapply(reads,function(xx){
       xx$primerMatch<-substring(xx$seq,1,nchar(thisPrimer)) %in% expandAmbiguous(thisPrimer)[[1]]
@@ -61,8 +61,6 @@ for(primerBase in unique(primerBases)){
     return(trimReads)
   })
   if(any(names(trimReads[[1]])!=sub('_R2_','_R1_',names(trimReads[[2]]))))stop('Read 1 vs reads 2 file name mismatch')
-  readCounts<-as.data.frame(sapply(trimReads,function(xx)sapply(xx,nrow)))
-  colnames(readCounts)<-c('raw1','raw2')
   message('Discarding reads with >1 expected error in left or right read and concatenating left-right')
   trimReads<-mcmapply(function(left,right,...){
     cat('.')
@@ -75,9 +73,6 @@ for(primerBase in unique(primerBases)){
     seqs<-paste(left[selector,'seq'],revComp(right[selector,'seq']),sep='')
     return(seqs)
   },trimReads[[1]],trimReads[[2]],mc.cores=10,SIMPLIFY=FALSE)
-  readCounts$filter<-sapply(trimReads,length)
-  message('Read counts')
-  print(readCounts)
   samples<-rep(basename(names(trimReads)),sapply(trimReads,length))
   message('Running swarm')
   otus<-runSwarm(unlist(trimReads),swarmArgs='-f -t 40')
