@@ -1,5 +1,8 @@
 all: getData.md makeOtus.md downloadDatabases.md blastData.md parseBlast.md plotPcoa.md checkAntiMal.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
 
+clean:
+	rm getData.md makeOtus.md downloadDatabases.md blastData.md parseBlast.md plotPcoa.md checkAntiMal.md plotHeatmap.md 16s/runQiime.md 16s/plotShannon.md 16s/plotHeatmap.md 16s/plotPcoa.md 16s/plotBetaDiversity.md sensitivity/sensitivity.md README.md README.html
+
 getData.md: getData.Rmd
 	R -e 'knitr::knit("getData.Rmd")'
 
