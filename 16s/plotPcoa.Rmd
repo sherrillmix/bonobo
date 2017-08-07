@@ -28,7 +28,7 @@ source('../functions.R')
 
 
 ### Calculate distance matrices from OTU table
-```{r,cache=TRUE}
+```{r calcDist,cache=TRUE}
   selectSamples<-samples[isEnough[samples$Code],]
   subsampledOtus<-apply(otuTab[rownames(otuTab) %in% tree$tip.label,selectSamples$Code],2,rarefyCounts,nRequiredReads)
   phyOtu<-otu_table(subsampledOtus,taxa_are_rows=TRUE)
@@ -42,9 +42,9 @@ source('../functions.R')
   brayDistUW<-distance(qiimeData,'bray',binary=TRUE)
   uniPca<-pcoa(uniDist)
   mantels<-list(
-    'uniW'=ade4::mantel.rtest(uniDist,uniDistW,nrepet=1e4),
-    'brayW'=ade4::mantel.rtest(uniDist,brayDist,nrepet=1e4),
-    'brayUW'=ade4::mantel.rtest(uniDist,brayDistUW,nrepet=1e4)
+    'uniW'=par.mantel.rtest(uniDist,uniDistW,nrepet=1e6,mc.cores=50),
+    'brayW'=par.mantel.rtest(uniDist,brayDist,nrepet=1e6,mc.cores=50),
+    'brayUW'=par.mantel.rtest(uniDist,brayDistUW,nrepet=1e6,mc.cores=50)
   )
   predictors<-model.matrix(~0+Species+malaria+SIV+area,selectSamples)
   colnames(predictors)<-sub('^Species','',colnames(predictors))
