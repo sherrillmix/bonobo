@@ -147,14 +147,17 @@ for (ii in names(swarmData)) {
         maxTree <- hclust(dist(t(selectPropAll[, ])))
         selectPropAll <- selectPropAll[, rev(maxTree$labels[maxTree$order])]
         selectPropAll <- selectPropAll[, order(colnames(selectPropAll))]
-        par(mar = c(10.5, 0.1, 3, 14), lheight = 0.7)
-        metadata <- ss[rownames(selectPropAll), c("chimpBonobo", "area2", "plasmoPM", 
-            "Code")]
-        colnames(metadata) <- c("Species", "Area", "Laverania", "Sample")
-        plotHeat(selectPropAll, breaks, cols, yaxt = "n", xaxt = "n")
-        title(main = ii)
-        axis(1, 1:ncol(selectPropAll), colnames(selectPropAll), las = 2, cex.axis = 0.7)
-        addMetaData(metadata, cex = 0.75)
+        plotAndSavePdf(function() {
+            par(mar = c(10.5, 0.1, 3, 14), lheight = 0.7)
+            metadata <- ss[rownames(selectPropAll), c("chimpBonobo", "area2", 
+                "plasmoPM", "Code")]
+            colnames(metadata) <- c("Species", "Area", "Laverania", "Sample")
+            plotHeat(selectPropAll, breaks, cols, yaxt = "n", xaxt = "n")
+            title(main = ii)
+            axis(1, 1:ncol(selectPropAll), colnames(selectPropAll), las = 2, 
+                cex.axis = 0.7)
+            addMetaData(metadata, cex = 0.75)
+        }, sprintf("figure/SupplementaryFigure6_%s.pdf", ii), width = 13, height = 13)
     }
 }
 ```
@@ -203,7 +206,7 @@ for (ii in names(swarmData)) {
 
 ![plot of chunk compareAntimals](figure/compareAntimals-1.png)![plot of chunk compareAntimals](figure/compareAntimals-2.png)
 
-### Compare antimalarial plant OTUs in plasmodium positive and negative chimps
+### Compare all plant OTUs between endemic and and non-endemic bonobo sites
 
 
 ```r
