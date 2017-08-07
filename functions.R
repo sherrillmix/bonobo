@@ -188,3 +188,10 @@ myBiplot<-function(pcaPoints,pcaArrows,choice=c(1,2),cor=FALSE,prcomp=FALSE,arro
 	plot(pcaPoints,xlim=xlim,ylim=ylim,...)
 }
 
+plotAndSavePdf<-function(func,file,...){
+  if(!dir.exists(dirname(file)))dir.create(dirname(file),recursive=TRUE)
+  pdf(file,...)
+  func()
+  dev.off()
+  func()
+}
