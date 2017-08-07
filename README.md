@@ -1,6 +1,6 @@
 # Analysis code for "Geographically restricted malaria infections of wild bonobos include a new Laverania species"
 
-To regenerate this document, run `make` in this directory.
+To regenerate this document, run `make clean;make` in this directory.
 
 The code depends on R packages available from CRAN:
 
@@ -2622,11 +2622,7 @@ for (primerBase in unique(primerBases)) {
         thisPrimer <- primerSeqs[[sub("[12]$", "", tolower(ii))]][as.numeric(substring(ii, 
             nchar(ii)))]
         thisFiles <- fastqs[primers == ii]
-        reads <- mclapply(thisFiles, function(xx) {
-            library(dnar)
-            cat(".")
-            read.fastq(xx)
-        }, mc.cores = 20, mc.preschedule = FALSE)
+        reads <- mclapply(thisFiles, dnar::read.fastq, mc.cores = 20, mc.preschedule = FALSE)
         if (mean(unlist(lapply(reads, function(xx) substring(xx$seq, 1, nchar(thisPrimer)))) %in% 
             expandAmbiguous(thisPrimer)[[1]]) < 0.75) 
             stop(simpleError("Expected primer does not match read start"))
@@ -2640,8 +2636,6 @@ for (primerBase in unique(primerBases)) {
     })
     if (any(names(trimReads[[1]]) != sub("_R2_", "_R1_", names(trimReads[[2]])))) 
         stop("Read 1 vs reads 2 file name mismatch")
-    readCounts <- as.data.frame(sapply(trimReads, function(xx) sapply(xx, nrow)))
-    colnames(readCounts) <- c("raw1", "raw2")
     message("Discarding reads with >1 expected error in left or right read and concatenating left-right")
     trimReads <- mcmapply(function(left, right, ...) {
         cat(".")
@@ -2659,9 +2653,6 @@ for (primerBase in unique(primerBases)) {
             sep = "")
         return(seqs)
     }, trimReads[[1]], trimReads[[2]], mc.cores = 10, SIMPLIFY = FALSE)
-    readCounts$filter <- sapply(trimReads, length)
-    message("Read counts")
-    print(readCounts)
     samples <- rep(basename(names(trimReads)), sapply(trimReads, length))
     message("Running swarm")
     otus <- runSwarm(unlist(trimReads), swarmArgs = "-f -t 40")
@@ -2704,117 +2695,11 @@ for (primerBase in unique(primerBases)) {
 ```
 
 ```
-## Read counts
-```
-
-```
-##                                 raw1  raw2 filter
-## data//BI0054_matK_R1_.fastq.gz 37716 37716  22419
-## data//BI0055_matK_R1_.fastq.gz 29870 29870  19976
-## data//BI0093_matK_R1_.fastq.gz 23870 23870   8397
-## data//BI0097_matK_R1_.fastq.gz 29597 29597  19234
-## data//BI0246_matK_R1_.fastq.gz 23907 23907  15538
-## data//BI0248_matK_R1_.fastq.gz 52496 52496  24563
-## data//BI0257_matK_R1_.fastq.gz 45035 45035  27103
-## data//BI0260_matK_R1_.fastq.gz 38342 38342  13744
-## data//BI2414_matK_R1_.fastq.gz 42410 42410  24285
-## data//BI2415_matK_R1_.fastq.gz 21547 21547  12159
-## data//IK3158_matK_R1_.fastq.gz 22764 22764  14387
-## data//IK3276_matK_R1_.fastq.gz 51495 51495  35038
-## data//IK3358_matK_R1_.fastq.gz 22084 22084  14917
-## data//IK3469_matK_R1_.fastq.gz 35564 35564  23276
-## data//IK3513_matK_R1_.fastq.gz 43770 43770  25887
-## data//IK3650_matK_R1_.fastq.gz 35772 35772  25011
-## data//IK3701_matK_R1_.fastq.gz 53473 53473  35065
-## data//IK3777_matK_R1_.fastq.gz 24679 24679  13341
-## data//IK4184_matK_R1_.fastq.gz 31518 31518  14978
-## data//IK4214_matK_R1_.fastq.gz 13382 13382    620
-## data//KR02_matK_R1_.fastq.gz   37289 37289  17316
-## data//KR05_matK_R1_.fastq.gz   17096 17096   6343
-## data//KR07_matK_R1_.fastq.gz   49192 49192  30653
-## data//KR10_matK_R1_.fastq.gz   39057 39057  24279
-## data//KR12_matK_R1_.fastq.gz   16755 16755  10786
-## data//KR21_matK_R1_.fastq.gz   31486 31486  18668
-## data//KR33_matK_R1_.fastq.gz   31554 31554  19568
-## data//KR35_matK_R1_.fastq.gz   46935 46935  30066
-## data//KR52_matK_R1_.fastq.gz   50819 50819  33481
-## data//KR57_matK_R1_.fastq.gz   22953 22953   7905
-## data//KR67_matK_R1_.fastq.gz   18119 18119  10759
-## data//LG4300_matK_R1_.fastq.gz 31703 31703  16584
-## data//LG4314_matK_R1_.fastq.gz 24115 24115  15106
-## data//LG4322_matK_R1_.fastq.gz 26690 26690  17135
-## data//LG4327_matK_R1_.fastq.gz 36202 36202  23733
-## data//LK645_matK_R1_.fastq.gz  28947 28947  19557
-## data//LK647_matK_R1_.fastq.gz  39875 39875  27466
-## data//LK653_matK_R1_.fastq.gz  40197 40197  25629
-## data//LK661_matK_R1_.fastq.gz  33390 33390  14521
-## data//LK665_matK_R1_.fastq.gz  54621 54621  35101
-## data//LK668_matK_R1_.fastq.gz  30992 30992  20217
-## data//LK670_matK_R1_.fastq.gz  43269 43269  27602
-## data//LK682_matK_R1_.fastq.gz  32752 32752  20517
-## data//LK685_matK_R1_.fastq.gz  26060 26060   7601
-## data//LK686_matK_R1_.fastq.gz  24219 24219   8620
-## data//PA0367_matK_R1_.fastq.gz 26739 26739  10411
-## data//PA0368_matK_R1_.fastq.gz 23805 23805   8210
-## data//PA0370_matK_R1_.fastq.gz 19569 19569   2627
-## data//PA0456_matK_R1_.fastq.gz 19652 19652   6823
-## data//PA1038_matK_R1_.fastq.gz 25960 25960  13353
-## data//PA1039_matK_R1_.fastq.gz 26785 26785  13824
-## data//PA1044_matK_R1_.fastq.gz 54164 54164  32326
-## data//PA1049_matK_R1_.fastq.gz 46651 46651  29706
-## data//PA1059_matK_R1_.fastq.gz 37381 37381  19092
-## data//PA1065_matK_R1_.fastq.gz 30597 30597  18900
-## data//TL3793_matK_R1_.fastq.gz 21275 21275  10999
-## data//TL3797_matK_R1_.fastq.gz 11636 11636   6806
-## data//TL3814_matK_R1_.fastq.gz 50184 50184  24968
-## data//TL3816_matK_R1_.fastq.gz 46883 46883  23842
-## data//TL3820_matK_R1_.fastq.gz 66064 66064  17098
-## data//TL3821_matK_R1_.fastq.gz 24907 24907  11624
-## data//TL3824_matK_R1_.fastq.gz 29323 29323  15046
-## data//TL3826_matK_R1_.fastq.gz 61039 61039  31482
-## data//TL3838_matK_R1_.fastq.gz 35465 35465  18700
-## data//TL3842_matK_R1_.fastq.gz 38016 38016  18161
-## data//TL3856_matK_R1_.fastq.gz 39587 39587  20218
-## data//TL3862_matK_R1_.fastq.gz 32951 32951  19278
-## data//TL3882_matK_R1_.fastq.gz 15760 15760   9306
-## data//TL3889_matK_R1_.fastq.gz 37674 37674  20620
-## data//TL3905_matK_R1_.fastq.gz 20322 20322  11871
-## data//TL3910_matK_R1_.fastq.gz 24363 24363  13210
-## data//TL3911_matK_R1_.fastq.gz 19392 19392   7831
-## data//TL3915_matK_R1_.fastq.gz 34545 34545  15882
-## data//TL3916_matK_R1_.fastq.gz    35    35      4
-## data//TL3918_matK_R1_.fastq.gz 19370 19370   6740
-## data//TL3925_matK_R1_.fastq.gz 33913 33913  20472
-## data//TL3926_matK_R1_.fastq.gz 27740 27740  15625
-## data//TL3927_matK_R1_.fastq.gz 18085 18085   9124
-## data//TL3929_matK_R1_.fastq.gz 17720 17720  10116
-## data//TL3932_matK_R1_.fastq.gz 19395 19395  11229
-## data//TL3936_matK_R1_.fastq.gz 13435 13435   8603
-## data//TL3939_matK_R1_.fastq.gz 16014 16014   9191
-## data//TL3940_matK_R1_.fastq.gz 12612 12612   5663
-## data//TL3942_matK_R1_.fastq.gz 65864 65864  40859
-## data//TL3943_matK_R1_.fastq.gz 62439 62439  34926
-## data//TL3944_matK_R1_.fastq.gz 48857 48857  29247
-## data//TL3945_matK_R1_.fastq.gz 51533 51533  31465
-## data//TL3946_matK_R1_.fastq.gz 31692 31692  20208
-## data//TL3948_matK_R1_.fastq.gz 58040 58040  32802
-## data//UB0439_matK_R1_.fastq.gz 33727 33727  20532
-## data//UB0445_matK_R1_.fastq.gz 21950 21950   8277
-## data//UB0599_matK_R1_.fastq.gz 30433 30433  19637
-## data//UB1430_matK_R1_.fastq.gz 36057 36057  21126
-## data//UB1435_matK_R1_.fastq.gz 44581 44581  29690
-## data//UB1446_matK_R1_.fastq.gz 22388 22388  11675
-## data//UB1452_matK_R1_.fastq.gz 27983 27983  17216
-## data//UB1454_matK_R1_.fastq.gz 17005 17005   5163
-## data//UB2037_matK_R1_.fastq.gz 28886 28886  18178
-```
-
-```
 ## Running swarm
 ```
 
 ```
-## swarm -f -t 40 /tmp/RtmpX0M3mf/fileb79b7c57cd81 -o /tmp/RtmpX0M3mf/fileb79b185dcc32 -w /tmp/RtmpX0M3mf/fileb79b12db05da
+## swarm -f -t 40 /tmp/RtmppEgiBM/file29f750e0cfaf -o /tmp/RtmppEgiBM/file29f797b4330 -w /tmp/RtmppEgiBM/file29f73e1183fe
 ```
 
 ```
@@ -2826,7 +2711,7 @@ for (primerBase in unique(primerBases)) {
 ```
 
 ```
-## mafft --thread 50 /tmp/RtmpX0M3mf/fileb79b7edc61ae|gzip>work/swarmPair/matK_align.fa.gz
+## mafft --thread 50 /tmp/RtmppEgiBM/file29f739e6d6d|gzip>work/swarmPair/matK_align.fa.gz
 ```
 
 ```
@@ -2870,117 +2755,11 @@ for (primerBase in unique(primerBases)) {
 ```
 
 ```
-## Read counts
-```
-
-```
-##                                  raw1   raw2 filter
-## data//BI0054_rbcL_R1_.fastq.gz 112777 112777  69585
-## data//BI0055_rbcL_R1_.fastq.gz  40341  40341  17662
-## data//BI0093_rbcL_R1_.fastq.gz  60295  60295  38983
-## data//BI0097_rbcL_R1_.fastq.gz  38815  38815  25219
-## data//BI0246_rbcL_R1_.fastq.gz  97069  97069  59088
-## data//BI0248_rbcL_R1_.fastq.gz  63847  63847  37019
-## data//BI0257_rbcL_R1_.fastq.gz  68795  68795  38721
-## data//BI0260_rbcL_R1_.fastq.gz  75418  75418  47727
-## data//BI2414_rbcL_R1_.fastq.gz  72678  72678  37522
-## data//BI2415_rbcL_R1_.fastq.gz  72083  72083  48003
-## data//IK3158_rbcL_R1_.fastq.gz  63877  63877  38759
-## data//IK3276_rbcL_R1_.fastq.gz  75130  75130  45827
-## data//IK3358_rbcL_R1_.fastq.gz  83741  83741  53066
-## data//IK3469_rbcL_R1_.fastq.gz  57184  57184  35361
-## data//IK3513_rbcL_R1_.fastq.gz  72466  72466  45628
-## data//IK3650_rbcL_R1_.fastq.gz  39570  39570  24195
-## data//IK3701_rbcL_R1_.fastq.gz  71382  71382  46583
-## data//IK3777_rbcL_R1_.fastq.gz  65948  65948  41943
-## data//IK4184_rbcL_R1_.fastq.gz  49004  49004  21269
-## data//IK4214_rbcL_R1_.fastq.gz  42566  42566  18519
-## data//KR02_rbcL_R1_.fastq.gz    46441  46441  28595
-## data//KR05_rbcL_R1_.fastq.gz    14003  14003   5182
-## data//KR07_rbcL_R1_.fastq.gz    82888  82888  41950
-## data//KR10_rbcL_R1_.fastq.gz    71966  71966  31446
-## data//KR12_rbcL_R1_.fastq.gz    65322  65322  37758
-## data//KR21_rbcL_R1_.fastq.gz    43489  43489  26051
-## data//KR33_rbcL_R1_.fastq.gz    50031  50031  29133
-## data//KR35_rbcL_R1_.fastq.gz    64584  64584  39959
-## data//KR52_rbcL_R1_.fastq.gz    25519  25519  15825
-## data//KR57_rbcL_R1_.fastq.gz    45206  45206  19134
-## data//KR67_rbcL_R1_.fastq.gz    74544  74544  44921
-## data//LG4300_rbcL_R1_.fastq.gz  64265  64265  21340
-## data//LG4314_rbcL_R1_.fastq.gz  73212  73212  43803
-## data//LG4322_rbcL_R1_.fastq.gz  20771  20771    490
-## data//LG4327_rbcL_R1_.fastq.gz  66867  66867  44228
-## data//LK645_rbcL_R1_.fastq.gz   87554  87554  41568
-## data//LK647_rbcL_R1_.fastq.gz   62652  62652  30685
-## data//LK653_rbcL_R1_.fastq.gz   83147  83147  43127
-## data//LK661_rbcL_R1_.fastq.gz   98343  98343  55578
-## data//LK665_rbcL_R1_.fastq.gz   71165  71165  41582
-## data//LK668_rbcL_R1_.fastq.gz   73765  73765  44586
-## data//LK670_rbcL_R1_.fastq.gz   87593  87593  42477
-## data//LK682_rbcL_R1_.fastq.gz   22211  22211   6347
-## data//LK685_rbcL_R1_.fastq.gz   38567  38567  11181
-## data//LK686_rbcL_R1_.fastq.gz   38183  38183  11242
-## data//PA0367_rbcL_R1_.fastq.gz  41356  41356  15938
-## data//PA0368_rbcL_R1_.fastq.gz  73594  73594  41622
-## data//PA0370_rbcL_R1_.fastq.gz  72373  72373  32032
-## data//PA0456_rbcL_R1_.fastq.gz  33617  33617  12533
-## data//PA1038_rbcL_R1_.fastq.gz  66394  66394  41350
-## data//PA1039_rbcL_R1_.fastq.gz  75997  75997  46225
-## data//PA1044_rbcL_R1_.fastq.gz  35224  35224  19129
-## data//PA1049_rbcL_R1_.fastq.gz  49007  49007  24232
-## data//PA1059_rbcL_R1_.fastq.gz  70463  70463  43821
-## data//PA1065_rbcL_R1_.fastq.gz  81615  81615  46783
-## data//TL3793_rbcL_R1_.fastq.gz  63067  63067  28465
-## data//TL3797_rbcL_R1_.fastq.gz  63333  63333  35573
-## data//TL3814_rbcL_R1_.fastq.gz  51654  51654  29185
-## data//TL3816_rbcL_R1_.fastq.gz  50622  50622  27000
-## data//TL3820_rbcL_R1_.fastq.gz  31450  31450  17230
-## data//TL3821_rbcL_R1_.fastq.gz  44491  44491  25940
-## data//TL3824_rbcL_R1_.fastq.gz  63570  63570  38574
-## data//TL3826_rbcL_R1_.fastq.gz  51304  51304  27871
-## data//TL3838_rbcL_R1_.fastq.gz  60441  60441  30161
-## data//TL3842_rbcL_R1_.fastq.gz  82661  82661  37857
-## data//TL3856_rbcL_R1_.fastq.gz  66213  66213  42606
-## data//TL3862_rbcL_R1_.fastq.gz  81095  81095  48460
-## data//TL3882_rbcL_R1_.fastq.gz  82875  82875  45432
-## data//TL3889_rbcL_R1_.fastq.gz  51434  51434  28092
-## data//TL3905_rbcL_R1_.fastq.gz  57568  57568  34654
-## data//TL3910_rbcL_R1_.fastq.gz  44510  44510  27865
-## data//TL3911_rbcL_R1_.fastq.gz  62300  62300  30603
-## data//TL3915_rbcL_R1_.fastq.gz  56357  56357  31221
-## data//TL3916_rbcL_R1_.fastq.gz  46986  46986  27034
-## data//TL3918_rbcL_R1_.fastq.gz  25204  25204  13423
-## data//TL3925_rbcL_R1_.fastq.gz  38217  38217  21399
-## data//TL3926_rbcL_R1_.fastq.gz  41420  41420  24414
-## data//TL3927_rbcL_R1_.fastq.gz  18964  18964  10807
-## data//TL3929_rbcL_R1_.fastq.gz  35209  35209  19817
-## data//TL3932_rbcL_R1_.fastq.gz  31296  31296  20399
-## data//TL3936_rbcL_R1_.fastq.gz  19524  19524  10383
-## data//TL3939_rbcL_R1_.fastq.gz  47335  47335  30660
-## data//TL3940_rbcL_R1_.fastq.gz  28553  28553  19082
-## data//TL3942_rbcL_R1_.fastq.gz  36835  36835  23240
-## data//TL3943_rbcL_R1_.fastq.gz  35710  35710  21884
-## data//TL3944_rbcL_R1_.fastq.gz  15835  15835   4396
-## data//TL3945_rbcL_R1_.fastq.gz  77135  77135  26415
-## data//TL3946_rbcL_R1_.fastq.gz  68358  68358  20998
-## data//TL3948_rbcL_R1_.fastq.gz  96681  96681  20639
-## data//UB0439_rbcL_R1_.fastq.gz  80079  80079  43612
-## data//UB0445_rbcL_R1_.fastq.gz  45547  45547  17013
-## data//UB0599_rbcL_R1_.fastq.gz  24799  24799  10412
-## data//UB1430_rbcL_R1_.fastq.gz  90585  90585  58837
-## data//UB1435_rbcL_R1_.fastq.gz  56934  56934  21268
-## data//UB1446_rbcL_R1_.fastq.gz  93903  93903  60458
-## data//UB1452_rbcL_R1_.fastq.gz  25249  25249  16096
-## data//UB1454_rbcL_R1_.fastq.gz  49844  49844  17972
-## data//UB2037_rbcL_R1_.fastq.gz  91724  91724  46810
-```
-
-```
 ## Running swarm
 ```
 
 ```
-## swarm -f -t 40 /tmp/RtmpX0M3mf/fileb79b4ad55825 -o /tmp/RtmpX0M3mf/fileb79b64a365dd -w /tmp/RtmpX0M3mf/fileb79b7e560527
+## swarm -f -t 40 /tmp/RtmppEgiBM/file29f7263fd323 -o /tmp/RtmppEgiBM/file29f722ba70c8 -w /tmp/RtmppEgiBM/file29f76248ff3b
 ```
 
 ```
@@ -2992,7 +2771,7 @@ for (primerBase in unique(primerBases)) {
 ```
 
 ```
-## mafft --thread 50 /tmp/RtmpX0M3mf/fileb79b35d4e73a|gzip>work/swarmPair/rbcL_align.fa.gz
+## mafft --thread 50 /tmp/RtmppEgiBM/file29f72c533751|gzip>work/swarmPair/rbcL_align.fa.gz
 ```
 
 ```
@@ -3300,7 +3079,7 @@ source("loadData.R")
 ```
 
 ```
-## Cache work/matK_rarefyOtus.Rdat does not exist. Running operation
+## Cache work/matK_rarefyOtus.Rdat does exist. Loading data
 ```
 
 ```
@@ -3308,7 +3087,7 @@ source("loadData.R")
 ```
 
 ```
-## Cache work/rbcL_rarefyOtus.Rdat does not exist. Running operation
+## Cache work/rbcL_rarefyOtus.Rdat does exist. Loading data
 ```
 
 ### Make heatmap of OTU abundances
@@ -3337,33 +3116,35 @@ for (ii in names(swarmData)) {
         1e-10, length.out = 100))
     breaks2 <- c(-1e-06, seq(min(maxProp[maxProp > 0]) - 1e-10, max(maxProp) + 
         1e-10, length.out = 100))
-    par(mfrow = c(2, 1), mar = c(12, 0.1, 3.5, 15))
-    image(1:ncol(plotProp), 1:nrow(plotProp), t(plotProp), col = cols, breaks = breaks, 
-        xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
-    text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
-        subLetters[1], xpd = NA, cex = 3, adj = 0:1)
-    insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU within each sample")
-    box()
-    axis(1, 1:ncol(plotProp), colnames(plotProp), cex.axis = 0.7, las = 2, tcl = -0.1, 
-        mgp = c(0, 0.3, 0))
-    metadata <- sortSamples[rownames(plotProp), c("chimpBonobo", "area2", "plasmoPM", 
-        "Code")]
-    colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
-    addMetaData(metadata, cex = 0.75)
-    abline(h = 1:nrow(plotProp) - 0.5, v = 1:ncol(plotProp) + 0.5, col = "#00000011")
-    image(1:ncol(maxProp), 1:nrow(maxProp), t(maxProp), col = cols, breaks = breaks2, 
-        xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
-    text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
-        subLetters[2], xpd = NA, cex = 3, adj = 0:1)
-    box()
-    insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU maximum")
-    axis(1, 1:ncol(maxProp), colnames(maxProp), cex.axis = 0.7, las = 2, tcl = -0.1, 
-        mgp = c(0, 0.3, 0))
-    abline(h = 1:nrow(maxProp) - 0.5, v = 1:ncol(maxProp) + 0.5, col = "#00000011")
-    metadata <- sortSamples[rownames(maxProp), c("chimpBonobo", "area2", "plasmoPM", 
-        "Code")]
-    colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
-    addMetaData(metadata, cex = 0.75)
+    plotAndSavePdf(function() {
+        par(mfrow = c(2, 1), mar = c(12, 0.1, 3.5, 15))
+        image(1:ncol(plotProp), 1:nrow(plotProp), t(plotProp), col = cols, breaks = breaks, 
+            xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
+        text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
+            subLetters[1], xpd = NA, cex = 3, adj = 0:1)
+        insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU within each sample")
+        box()
+        axis(1, 1:ncol(plotProp), colnames(plotProp), cex.axis = 0.7, las = 2, 
+            tcl = -0.1, mgp = c(0, 0.3, 0))
+        metadata <- sortSamples[rownames(plotProp), c("chimpBonobo", "area2", 
+            "plasmoPM", "Code")]
+        colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
+        addMetaData(metadata, cex = 0.75)
+        abline(h = 1:nrow(plotProp) - 0.5, v = 1:ncol(plotProp) + 0.5, col = "#00000011")
+        image(1:ncol(maxProp), 1:nrow(maxProp), t(maxProp), col = cols, breaks = breaks2, 
+            xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
+        text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
+            subLetters[2], xpd = NA, cex = 3, adj = 0:1)
+        box()
+        insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU maximum")
+        axis(1, 1:ncol(maxProp), colnames(maxProp), cex.axis = 0.7, las = 2, 
+            tcl = -0.1, mgp = c(0, 0.3, 0))
+        abline(h = 1:nrow(maxProp) - 0.5, v = 1:ncol(maxProp) + 0.5, col = "#00000011")
+        metadata <- sortSamples[rownames(maxProp), c("chimpBonobo", "area2", 
+            "plasmoPM", "Code")]
+        colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
+        addMetaData(metadata, cex = 0.75)
+    }, sprintf("figure/SupplementaryFigure4_%s.pdf", ii), height = 30, width = 30)
 }
 ```
 
@@ -3376,6 +3157,72 @@ for (ii in names(swarmData)) {
 ```
 
 ![plot of chunk plantHeatmap](figure/plantHeatmap-1.png)![plot of chunk plantHeatmap](figure/plantHeatmap-2.png)
+
+### Count reads
+
+```r
+for (ii in names(swarmData)) {
+    message(ii)
+    print(swarmData[[ii]][["nReads"]])
+    print(mean(swarmData[[ii]][["nReads"]]))
+}
+```
+
+```
+## matK
+```
+
+```
+## BI0054 BI0055 BI0093 BI0097 BI0246 BI0248 BI0257 BI0260 BI2414 BI2415 
+##  20681  16785   6138  18241  14555  22069  25117  11974  22075  10745 
+## IK3158 IK3276 IK3358 IK3469 IK3513 IK3650 IK3701 IK3777 IK4184 IK4214 
+##  13214  31517  13822  22060  23806  23584  33665  11927  13565    394 
+##   KR02   KR05   KR07   KR10   KR12   KR21   KR33   KR35   KR52   KR57 
+##  14646   4771  26741  21173   9687  15947  17083  23884  27954   7079 
+##   KR67 LG4300 LG4314 LG4322 LG4327  LK645  LK647  LK653  LK661  LK665 
+##   9515  15492  14440  16035  22440  16112  24322  23559  12913  30148 
+##  LK668  LK670  LK682  LK685  LK686 PA0367 PA0368 PA0370 PA0456 PA1038 
+##  17828  23314  17084   6461   6785   8961   6949   2121   6184  12362 
+## PA1039 PA1044 PA1049 PA1059 PA1065 TL3793 TL3797 TL3814 TL3816 TL3820 
+##  12770  29407  27144  17838  15533   7947   5722  23741  22541  15980 
+## TL3821 TL3824 TL3826 TL3838 TL3842 TL3856 TL3862 TL3882 TL3889 TL3905 
+##  10483  14012  27873  17244  16785  17809  16211   8264  17953   9894 
+## TL3910 TL3911 TL3915 TL3916 TL3918 TL3925 TL3926 TL3927 TL3929 TL3932 
+##   8891   6004  12350      4   5461  17959  14300   7431   9298  10320 
+## TL3936 TL3939 TL3940 TL3942 TL3943 TL3944 TL3945 TL3946 TL3948 UB0439 
+##   8064   8503   4968  38565  27889  27335  29458  19068  28899  14645 
+## UB0445 UB0599 UB1430 UB1435 UB1446 UB1452 UB1454 UB2037 
+##   6465  18716  20021  28602  10862  16446   4718  15020 
+## [1] 16054.46
+```
+
+```
+## rbcL
+```
+
+```
+## BI0054 BI0055 BI0093 BI0097 BI0246 BI0248 BI0257 BI0260 BI2414 BI2415 
+##  47084   8170  24965  19367  43796  27501  24624  37047  34955  42345 
+## IK3158 IK3276 IK3358 IK3469 IK3513 IK3650 IK3701 IK3777 IK4184 IK4214 
+##  28955  26904  33260  26309  34224  20059  37953  35568  18817  12082 
+##   KR02   KR05   KR07   KR10   KR12   KR21   KR33   KR35   KR52   KR57 
+##  21960   2036  33636  20332  25001  22351  20760  25620  12586  12881 
+##   KR67 LG4300 LG4314 LG4322 LG4327  LK645  LK647  LK653  LK661  LK665 
+##  39674  19342  41723    233  40332  24076  17476  29513  39493  31451 
+##  LK668  LK670  LK682  LK685  LK686 PA0367 PA0368 PA0370 PA0456 PA1038 
+##  28286  23285   3625   5684   6631  12530  32878  19918  10997  35343 
+## PA1039 PA1044 PA1049 PA1059 PA1065 TL3793 TL3797 TL3814 TL3816 TL3820 
+##  38723  12169  18341  36066  36026  15360  20919  23377  18222  12504 
+## TL3821 TL3824 TL3826 TL3838 TL3842 TL3856 TL3862 TL3882 TL3889 TL3905 
+##  18662  24745  17856  20509  25138  26892  29615  18803  15524  19654 
+## TL3910 TL3911 TL3915 TL3916 TL3918 TL3925 TL3926 TL3927 TL3929 TL3932 
+##  20337  20126  24011  14324   6455  13637  17784   4185   8935  16768 
+## TL3936 TL3939 TL3940 TL3942 TL3943 TL3944 TL3945 TL3946 TL3948 UB0439 
+##   5543  21353  15543  13599  14550   2675  11265   8706   9829  23095 
+## UB0445 UB0599 UB1430 UB1435 UB1446 UB1452 UB1454 UB2037 
+##  13292   5956  50333  17081  52110  13066  14353  23895 
+## [1] 21995.4
+```
 
 ## PCoA and t-SNE of matK and rbcL abundances
 
@@ -3495,6 +3342,7 @@ source("loadData.R")
 tlAdonis <- interactAdonis <- plantAdonis <- chimpAdonis <- bonoboAdonis <- list()
 mantels <- list()
 for (ii in names(swarmData)) {
+    message(ii)
     plotProp <- swarmData[[ii]][["props"]][swarmData[[ii]][["isEnough"]] & rownames(swarmData[[ii]][["props"]]) %in% 
         rownames(samples), ]
     plotProp2 <- swarmData[[ii]][["rare"]][swarmData[[ii]][["isEnough"]] & rownames(swarmData[[ii]][["rare"]]) %in% 
@@ -3507,9 +3355,10 @@ for (ii in names(swarmData)) {
     brayDistW <- distance(qiimeDataW, "bray", binary = FALSE)
     uniDist <- UniFrac(qiimeDataU, weighted = FALSE)
     uniDistW <- UniFrac(qiimeDataW, weighted = TRUE)
-    mantels[[ii]] <- list(uniW = ade4::mantel.rtest(uniDist, uniDistW, nrepet = 10000), 
-        brayW = ade4::mantel.rtest(uniDist, brayDistW, nrepet = 10000), brayUW = ade4::mantel.rtest(uniDist, 
-            brayDist, nrepet = 10000))
+    mantels[[ii]] <- list(uniW = par.mantel.rtest(uniDist, uniDistW, nrepet = 1e+06, 
+        mc.cores = 50), brayW = par.mantel.rtest(uniDist, brayDistW, nrepet = 1e+06, 
+        mc.cores = 50), brayUW = par.mantel.rtest(uniDist, brayDist, nrepet = 1e+06, 
+        mc.cores = 50))
     uniPca <- pcoa(uniDist)
     tsneUni <- Rtsne(uniDist, is_distance = TRUE, verbose = TRUE, perplexity = 15, 
         max_iter = 3000)
@@ -3544,29 +3393,35 @@ for (ii in names(swarmData)) {
     predictors <- model.matrix(~0 + Species + malaria + SIV + area, selectSamples)
     
     # pcoa
-    pos <- my.biplot.pcoa(uniPca, predictors, plot.axes = 1:2, pch = 21, bg = speciesCols[selectSamples$chimpBonobo], 
-        col = malariaCols3[selectSamples$malaria + 1], cex = 2.25, lwd = 4, 
-        arrowsFilter = Inf, las = 1, mgp = c(2.75, 0.75, 0), sameAxis = FALSE, 
-        bty = "l", type = "n")
-    points(pos[!selectSamples$malaria, ], col = malariaCols3[1], cex = 2.25, 
-        lwd = 4, bg = speciesCols[selectSamples[!selectSamples$malaria, "chimpBonobo"]], 
-        pch = 21)
-    points(pos[selectSamples$malaria, ], col = malariaCols3[2], cex = 2.25, 
-        lwd = 4, bg = speciesCols[selectSamples[selectSamples$malaria, "chimpBonobo"]], 
-        pch = 21)
-    title(main = sprintf("%s", ii, 1, 2))
+    plotAndSavePdf(function() {
+        pos <- my.biplot.pcoa(uniPca, predictors, plot.axes = 1:2, pch = 21, 
+            bg = speciesCols[selectSamples$chimpBonobo], col = malariaCols3[selectSamples$malaria + 
+                1], cex = 2.25, lwd = 4, arrowsFilter = Inf, las = 1, mgp = c(2.75, 
+                0.75, 0), sameAxis = FALSE, bty = "l", type = "n")
+        points(pos[!selectSamples$malaria, ], col = malariaCols3[1], cex = 2.25, 
+            lwd = 4, bg = speciesCols[selectSamples[!selectSamples$malaria, 
+                "chimpBonobo"]], pch = 21)
+        points(pos[selectSamples$malaria, ], col = malariaCols3[2], cex = 2.25, 
+            lwd = 4, bg = speciesCols[selectSamples[selectSamples$malaria, "chimpBonobo"]], 
+            pch = 21)
+        title(main = sprintf("%s", ii, 1, 2))
+    }, sprintf("figure/Figure6_%s.pdf", ii), width = 6, height = 6)
     
     # tsne
-    par(mar = c(4, 4, 1.5, 10))
-    plot(tsneUni$Y, pch = speciesPch[selectSamples$chimpBonobo], bg = areaCols[selectSamples$area2], 
-        col = malariaCols[selectSamples$malaria + 1], cex = 2.5, lwd = 3, ylab = "t-SNE 2", 
-        xlab = "t-SNE 1", main = sprintf("%s", ii), bty = "l", las = 1)
-    legend(par("usr")[2] + 0.01 * diff(par("usr")[1:2]), mean(par("usr")[3:4]), 
-        c(names(malariaCols), names(areaCols), names(speciesPch)), col = c(malariaCols, 
-            rep(c(malariaCols[1], mediumMalariaCol), c(length(areaCols), length(speciesPch)))), 
-        pch = c(rep(21, length(malariaCols)), speciesPch[areaPch], speciesPch), 
-        pt.bg = c(rep(NA, length(malariaCols)), areaCols, rep(NA, length(speciesPch))), 
-        inset = 0.01, pt.lwd = 3, pt.cex = 2.5, xjust = 0, xpd = NA, bty = "n")
+    plotAndSavePdf(function() {
+        par(mar = c(4, 4, 1.5, 10))
+        plot(tsneUni$Y, pch = speciesPch[selectSamples$chimpBonobo], bg = areaCols[selectSamples$area2], 
+            col = malariaCols[selectSamples$malaria + 1], cex = 2.5, lwd = 3, 
+            ylab = "t-SNE 2", xlab = "t-SNE 1", main = sprintf("%s", ii), bty = "l", 
+            las = 1)
+        legend(par("usr")[2] + 0.01 * diff(par("usr")[1:2]), mean(par("usr")[3:4]), 
+            c(names(malariaCols), names(areaCols), names(speciesPch)), col = c(malariaCols, 
+                rep(c(malariaCols[1], mediumMalariaCol), c(length(areaCols), 
+                  length(speciesPch)))), pch = c(rep(21, length(malariaCols)), 
+                speciesPch[areaPch], speciesPch), pt.bg = c(rep(NA, length(malariaCols)), 
+                areaCols, rep(NA, length(speciesPch))), inset = 0.01, pt.lwd = 3, 
+            pt.cex = 2.5, xjust = 0, xpd = NA, bty = "n")
+    }, sprintf("figure/SupplementaryFigure5_%s.pdf", ii), width = 10, height = 8)
     
     ss <- samples[labels(selectDist), ]
     plantAdonis[[ii]] <- adonis(selectDist ~ bonobo + area2 + malaria, data = ss, 
@@ -3588,77 +3443,85 @@ for (ii in names(swarmData)) {
 ```
 
 ```
+## matK
+```
+
+```
 ## Read the 92 x 92 data matrix successfully!
 ## Using no_dims = 2, perplexity = 15.000000, and theta = 0.500000
 ## Computing input similarities...
 ## Building tree...
 ##  - point 0 of 92
-## Done in 0.01 seconds (sparsity = 0.612949)!
+## Done in 0.00 seconds (sparsity = 0.612949)!
 ## Learning embedding...
-## Iteration 50: error is 59.308155 (50 iterations in 0.02 seconds)
-## Iteration 100: error is 58.593163 (50 iterations in 0.02 seconds)
-## Iteration 150: error is 60.708217 (50 iterations in 0.02 seconds)
-## Iteration 200: error is 59.794104 (50 iterations in 0.02 seconds)
-## Iteration 250: error is 58.457877 (50 iterations in 0.02 seconds)
-## Iteration 300: error is 1.975426 (50 iterations in 0.02 seconds)
-## Iteration 350: error is 1.578345 (50 iterations in 0.02 seconds)
-## Iteration 400: error is 0.921924 (50 iterations in 0.02 seconds)
-## Iteration 450: error is 0.490788 (50 iterations in 0.02 seconds)
-## Iteration 500: error is 0.407768 (50 iterations in 0.02 seconds)
-## Iteration 550: error is 0.388120 (50 iterations in 0.02 seconds)
-## Iteration 600: error is 0.386493 (50 iterations in 0.02 seconds)
-## Iteration 650: error is 0.387590 (50 iterations in 0.02 seconds)
-## Iteration 700: error is 0.387036 (50 iterations in 0.02 seconds)
-## Iteration 750: error is 0.389788 (50 iterations in 0.02 seconds)
-## Iteration 800: error is 0.383201 (50 iterations in 0.02 seconds)
-## Iteration 850: error is 0.384217 (50 iterations in 0.02 seconds)
-## Iteration 900: error is 0.385083 (50 iterations in 0.02 seconds)
-## Iteration 950: error is 0.384430 (50 iterations in 0.02 seconds)
-## Iteration 1000: error is 0.383389 (50 iterations in 0.02 seconds)
-## Iteration 1050: error is 0.385522 (50 iterations in 0.02 seconds)
-## Iteration 1100: error is 0.385691 (50 iterations in 0.02 seconds)
-## Iteration 1150: error is 0.386405 (50 iterations in 0.02 seconds)
-## Iteration 1200: error is 0.383763 (50 iterations in 0.02 seconds)
-## Iteration 1250: error is 0.384346 (50 iterations in 0.02 seconds)
-## Iteration 1300: error is 0.384842 (50 iterations in 0.02 seconds)
-## Iteration 1350: error is 0.383884 (50 iterations in 0.02 seconds)
-## Iteration 1400: error is 0.386937 (50 iterations in 0.02 seconds)
-## Iteration 1450: error is 0.386463 (50 iterations in 0.02 seconds)
-## Iteration 1500: error is 0.385156 (50 iterations in 0.02 seconds)
-## Iteration 1550: error is 0.384901 (50 iterations in 0.02 seconds)
-## Iteration 1600: error is 0.386133 (50 iterations in 0.02 seconds)
-## Iteration 1650: error is 0.384762 (50 iterations in 0.02 seconds)
-## Iteration 1700: error is 0.384369 (50 iterations in 0.02 seconds)
-## Iteration 1750: error is 0.386143 (50 iterations in 0.02 seconds)
-## Iteration 1800: error is 0.384961 (50 iterations in 0.02 seconds)
-## Iteration 1850: error is 0.388030 (50 iterations in 0.02 seconds)
-## Iteration 1900: error is 0.386162 (50 iterations in 0.02 seconds)
-## Iteration 1950: error is 0.388101 (50 iterations in 0.02 seconds)
-## Iteration 2000: error is 0.386207 (50 iterations in 0.02 seconds)
-## Iteration 2050: error is 0.383446 (50 iterations in 0.02 seconds)
-## Iteration 2100: error is 0.387669 (50 iterations in 0.02 seconds)
-## Iteration 2150: error is 0.385478 (50 iterations in 0.02 seconds)
-## Iteration 2200: error is 0.384587 (50 iterations in 0.02 seconds)
-## Iteration 2250: error is 0.384071 (50 iterations in 0.02 seconds)
-## Iteration 2300: error is 0.383635 (50 iterations in 0.02 seconds)
-## Iteration 2350: error is 0.385712 (50 iterations in 0.02 seconds)
-## Iteration 2400: error is 0.382410 (50 iterations in 0.02 seconds)
-## Iteration 2450: error is 0.382535 (50 iterations in 0.02 seconds)
-## Iteration 2500: error is 0.381783 (50 iterations in 0.02 seconds)
-## Iteration 2550: error is 0.385160 (50 iterations in 0.02 seconds)
-## Iteration 2600: error is 0.384765 (50 iterations in 0.02 seconds)
-## Iteration 2650: error is 0.383549 (50 iterations in 0.02 seconds)
-## Iteration 2700: error is 0.383773 (50 iterations in 0.02 seconds)
-## Iteration 2750: error is 0.386198 (50 iterations in 0.02 seconds)
-## Iteration 2800: error is 0.388300 (50 iterations in 0.02 seconds)
-## Iteration 2850: error is 0.384728 (50 iterations in 0.02 seconds)
-## Iteration 2900: error is 0.386068 (50 iterations in 0.02 seconds)
-## Iteration 2950: error is 0.386615 (50 iterations in 0.02 seconds)
-## Iteration 3000: error is 0.383927 (50 iterations in 0.02 seconds)
-## Fitting performed in 1.23 seconds.
+## Iteration 50: error is 58.719104 (50 iterations in 0.02 seconds)
+## Iteration 100: error is 58.567620 (50 iterations in 0.02 seconds)
+## Iteration 150: error is 57.021059 (50 iterations in 0.02 seconds)
+## Iteration 200: error is 56.617728 (50 iterations in 0.02 seconds)
+## Iteration 250: error is 57.379297 (50 iterations in 0.02 seconds)
+## Iteration 300: error is 2.065222 (50 iterations in 0.02 seconds)
+## Iteration 350: error is 1.351184 (50 iterations in 0.01 seconds)
+## Iteration 400: error is 1.007928 (50 iterations in 0.02 seconds)
+## Iteration 450: error is 0.591793 (50 iterations in 0.02 seconds)
+## Iteration 500: error is 0.470414 (50 iterations in 0.02 seconds)
+## Iteration 550: error is 0.469102 (50 iterations in 0.02 seconds)
+## Iteration 600: error is 0.466720 (50 iterations in 0.02 seconds)
+## Iteration 650: error is 0.462929 (50 iterations in 0.02 seconds)
+## Iteration 700: error is 0.456742 (50 iterations in 0.02 seconds)
+## Iteration 750: error is 0.456366 (50 iterations in 0.02 seconds)
+## Iteration 800: error is 0.450496 (50 iterations in 0.02 seconds)
+## Iteration 850: error is 0.442971 (50 iterations in 0.02 seconds)
+## Iteration 900: error is 0.435512 (50 iterations in 0.02 seconds)
+## Iteration 950: error is 0.434164 (50 iterations in 0.02 seconds)
+## Iteration 1000: error is 0.436509 (50 iterations in 0.02 seconds)
+## Iteration 1050: error is 0.435496 (50 iterations in 0.02 seconds)
+## Iteration 1100: error is 0.442039 (50 iterations in 0.02 seconds)
+## Iteration 1150: error is 0.441736 (50 iterations in 0.02 seconds)
+## Iteration 1200: error is 0.417068 (50 iterations in 0.02 seconds)
+## Iteration 1250: error is 0.409714 (50 iterations in 0.02 seconds)
+## Iteration 1300: error is 0.407327 (50 iterations in 0.02 seconds)
+## Iteration 1350: error is 0.411369 (50 iterations in 0.02 seconds)
+## Iteration 1400: error is 0.406387 (50 iterations in 0.02 seconds)
+## Iteration 1450: error is 0.408077 (50 iterations in 0.02 seconds)
+## Iteration 1500: error is 0.406306 (50 iterations in 0.02 seconds)
+## Iteration 1550: error is 0.403656 (50 iterations in 0.02 seconds)
+## Iteration 1600: error is 0.408456 (50 iterations in 0.02 seconds)
+## Iteration 1650: error is 0.408556 (50 iterations in 0.02 seconds)
+## Iteration 1700: error is 0.407118 (50 iterations in 0.02 seconds)
+## Iteration 1750: error is 0.407297 (50 iterations in 0.02 seconds)
+## Iteration 1800: error is 0.407234 (50 iterations in 0.02 seconds)
+## Iteration 1850: error is 0.409799 (50 iterations in 0.02 seconds)
+## Iteration 1900: error is 0.411649 (50 iterations in 0.02 seconds)
+## Iteration 1950: error is 0.410366 (50 iterations in 0.02 seconds)
+## Iteration 2000: error is 0.412817 (50 iterations in 0.02 seconds)
+## Iteration 2050: error is 0.410824 (50 iterations in 0.02 seconds)
+## Iteration 2100: error is 0.411522 (50 iterations in 0.02 seconds)
+## Iteration 2150: error is 0.414082 (50 iterations in 0.02 seconds)
+## Iteration 2200: error is 0.412718 (50 iterations in 0.02 seconds)
+## Iteration 2250: error is 0.414112 (50 iterations in 0.02 seconds)
+## Iteration 2300: error is 0.414789 (50 iterations in 0.02 seconds)
+## Iteration 2350: error is 0.411167 (50 iterations in 0.02 seconds)
+## Iteration 2400: error is 0.407961 (50 iterations in 0.02 seconds)
+## Iteration 2450: error is 0.408797 (50 iterations in 0.02 seconds)
+## Iteration 2500: error is 0.407236 (50 iterations in 0.02 seconds)
+## Iteration 2550: error is 0.403260 (50 iterations in 0.02 seconds)
+## Iteration 2600: error is 0.398490 (50 iterations in 0.02 seconds)
+## Iteration 2650: error is 0.389625 (50 iterations in 0.02 seconds)
+## Iteration 2700: error is 0.383527 (50 iterations in 0.02 seconds)
+## Iteration 2750: error is 0.381044 (50 iterations in 0.02 seconds)
+## Iteration 2800: error is 0.381362 (50 iterations in 0.02 seconds)
+## Iteration 2850: error is 0.380018 (50 iterations in 0.02 seconds)
+## Iteration 2900: error is 0.371803 (50 iterations in 0.02 seconds)
+## Iteration 2950: error is 0.374023 (50 iterations in 0.02 seconds)
+## Iteration 3000: error is 0.371292 (50 iterations in 0.02 seconds)
+## Fitting performed in 1.06 seconds.
 ```
 
-![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-1.png)![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-2.png)
+![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-1.png)
+
+```
+## rbcL
+```
 
 ```
 ## Read the 93 x 93 data matrix successfully!
@@ -3668,70 +3531,70 @@ for (ii in names(swarmData)) {
 ##  - point 0 of 93
 ## Done in 0.01 seconds (sparsity = 0.622731)!
 ## Learning embedding...
-## Iteration 50: error is 62.584210 (50 iterations in 0.03 seconds)
-## Iteration 100: error is 58.409560 (50 iterations in 0.03 seconds)
-## Iteration 150: error is 61.465872 (50 iterations in 0.03 seconds)
-## Iteration 200: error is 60.004902 (50 iterations in 0.03 seconds)
-## Iteration 250: error is 61.116887 (50 iterations in 0.03 seconds)
-## Iteration 300: error is 2.227520 (50 iterations in 0.02 seconds)
-## Iteration 350: error is 1.562859 (50 iterations in 0.02 seconds)
-## Iteration 400: error is 1.179063 (50 iterations in 0.02 seconds)
-## Iteration 450: error is 0.758984 (50 iterations in 0.02 seconds)
-## Iteration 500: error is 0.559950 (50 iterations in 0.02 seconds)
-## Iteration 550: error is 0.472228 (50 iterations in 0.02 seconds)
-## Iteration 600: error is 0.410945 (50 iterations in 0.02 seconds)
-## Iteration 650: error is 0.354830 (50 iterations in 0.02 seconds)
-## Iteration 700: error is 0.330662 (50 iterations in 0.02 seconds)
-## Iteration 750: error is 0.333520 (50 iterations in 0.02 seconds)
-## Iteration 800: error is 0.334242 (50 iterations in 0.02 seconds)
-## Iteration 850: error is 0.335824 (50 iterations in 0.02 seconds)
-## Iteration 900: error is 0.333828 (50 iterations in 0.02 seconds)
-## Iteration 950: error is 0.338101 (50 iterations in 0.02 seconds)
-## Iteration 1000: error is 0.336269 (50 iterations in 0.02 seconds)
-## Iteration 1050: error is 0.333786 (50 iterations in 0.03 seconds)
-## Iteration 1100: error is 0.336763 (50 iterations in 0.02 seconds)
-## Iteration 1150: error is 0.331937 (50 iterations in 0.02 seconds)
-## Iteration 1200: error is 0.333717 (50 iterations in 0.02 seconds)
-## Iteration 1250: error is 0.332186 (50 iterations in 0.02 seconds)
-## Iteration 1300: error is 0.332396 (50 iterations in 0.02 seconds)
-## Iteration 1350: error is 0.334494 (50 iterations in 0.02 seconds)
-## Iteration 1400: error is 0.333192 (50 iterations in 0.02 seconds)
-## Iteration 1450: error is 0.334094 (50 iterations in 0.02 seconds)
-## Iteration 1500: error is 0.330746 (50 iterations in 0.02 seconds)
-## Iteration 1550: error is 0.332237 (50 iterations in 0.02 seconds)
-## Iteration 1600: error is 0.331692 (50 iterations in 0.02 seconds)
-## Iteration 1650: error is 0.329536 (50 iterations in 0.02 seconds)
-## Iteration 1700: error is 0.330279 (50 iterations in 0.02 seconds)
-## Iteration 1750: error is 0.331773 (50 iterations in 0.02 seconds)
-## Iteration 1800: error is 0.330683 (50 iterations in 0.02 seconds)
-## Iteration 1850: error is 0.330146 (50 iterations in 0.02 seconds)
-## Iteration 1900: error is 0.330949 (50 iterations in 0.02 seconds)
-## Iteration 1950: error is 0.330708 (50 iterations in 0.02 seconds)
-## Iteration 2000: error is 0.331051 (50 iterations in 0.02 seconds)
-## Iteration 2050: error is 0.329961 (50 iterations in 0.02 seconds)
-## Iteration 2100: error is 0.332392 (50 iterations in 0.02 seconds)
-## Iteration 2150: error is 0.330381 (50 iterations in 0.02 seconds)
-## Iteration 2200: error is 0.333374 (50 iterations in 0.02 seconds)
-## Iteration 2250: error is 0.332611 (50 iterations in 0.02 seconds)
-## Iteration 2300: error is 0.332196 (50 iterations in 0.02 seconds)
-## Iteration 2350: error is 0.331385 (50 iterations in 0.02 seconds)
-## Iteration 2400: error is 0.329833 (50 iterations in 0.03 seconds)
-## Iteration 2450: error is 0.331202 (50 iterations in 0.02 seconds)
-## Iteration 2500: error is 0.330622 (50 iterations in 0.02 seconds)
-## Iteration 2550: error is 0.330168 (50 iterations in 0.02 seconds)
-## Iteration 2600: error is 0.333865 (50 iterations in 0.03 seconds)
-## Iteration 2650: error is 0.335342 (50 iterations in 0.03 seconds)
-## Iteration 2700: error is 0.335566 (50 iterations in 0.03 seconds)
-## Iteration 2750: error is 0.337193 (50 iterations in 0.02 seconds)
-## Iteration 2800: error is 0.335639 (50 iterations in 0.02 seconds)
-## Iteration 2850: error is 0.337042 (50 iterations in 0.02 seconds)
-## Iteration 2900: error is 0.334436 (50 iterations in 0.02 seconds)
-## Iteration 2950: error is 0.333870 (50 iterations in 0.02 seconds)
-## Iteration 3000: error is 0.337300 (50 iterations in 0.02 seconds)
-## Fitting performed in 1.40 seconds.
+## Iteration 50: error is 59.020644 (50 iterations in 0.03 seconds)
+## Iteration 100: error is 57.987725 (50 iterations in 0.02 seconds)
+## Iteration 150: error is 61.045261 (50 iterations in 0.03 seconds)
+## Iteration 200: error is 61.861628 (50 iterations in 0.03 seconds)
+## Iteration 250: error is 59.978866 (50 iterations in 0.03 seconds)
+## Iteration 300: error is 2.328754 (50 iterations in 0.02 seconds)
+## Iteration 350: error is 1.639063 (50 iterations in 0.01 seconds)
+## Iteration 400: error is 1.025190 (50 iterations in 0.02 seconds)
+## Iteration 450: error is 0.767524 (50 iterations in 0.02 seconds)
+## Iteration 500: error is 0.615584 (50 iterations in 0.02 seconds)
+## Iteration 550: error is 0.430137 (50 iterations in 0.02 seconds)
+## Iteration 600: error is 0.378942 (50 iterations in 0.02 seconds)
+## Iteration 650: error is 0.361895 (50 iterations in 0.02 seconds)
+## Iteration 700: error is 0.365773 (50 iterations in 0.02 seconds)
+## Iteration 750: error is 0.368216 (50 iterations in 0.02 seconds)
+## Iteration 800: error is 0.368330 (50 iterations in 0.02 seconds)
+## Iteration 850: error is 0.369341 (50 iterations in 0.02 seconds)
+## Iteration 900: error is 0.369145 (50 iterations in 0.03 seconds)
+## Iteration 950: error is 0.372049 (50 iterations in 0.02 seconds)
+## Iteration 1000: error is 0.366698 (50 iterations in 0.02 seconds)
+## Iteration 1050: error is 0.367843 (50 iterations in 0.02 seconds)
+## Iteration 1100: error is 0.367702 (50 iterations in 0.02 seconds)
+## Iteration 1150: error is 0.369351 (50 iterations in 0.02 seconds)
+## Iteration 1200: error is 0.369186 (50 iterations in 0.02 seconds)
+## Iteration 1250: error is 0.368449 (50 iterations in 0.02 seconds)
+## Iteration 1300: error is 0.369701 (50 iterations in 0.02 seconds)
+## Iteration 1350: error is 0.370307 (50 iterations in 0.02 seconds)
+## Iteration 1400: error is 0.369501 (50 iterations in 0.02 seconds)
+## Iteration 1450: error is 0.367378 (50 iterations in 0.02 seconds)
+## Iteration 1500: error is 0.368661 (50 iterations in 0.02 seconds)
+## Iteration 1550: error is 0.370676 (50 iterations in 0.02 seconds)
+## Iteration 1600: error is 0.367996 (50 iterations in 0.02 seconds)
+## Iteration 1650: error is 0.344720 (50 iterations in 0.02 seconds)
+## Iteration 1700: error is 0.330878 (50 iterations in 0.02 seconds)
+## Iteration 1750: error is 0.333038 (50 iterations in 0.02 seconds)
+## Iteration 1800: error is 0.329276 (50 iterations in 0.02 seconds)
+## Iteration 1850: error is 0.326203 (50 iterations in 0.02 seconds)
+## Iteration 1900: error is 0.324818 (50 iterations in 0.02 seconds)
+## Iteration 1950: error is 0.328856 (50 iterations in 0.02 seconds)
+## Iteration 2000: error is 0.329636 (50 iterations in 0.02 seconds)
+## Iteration 2050: error is 0.331549 (50 iterations in 0.02 seconds)
+## Iteration 2100: error is 0.331870 (50 iterations in 0.02 seconds)
+## Iteration 2150: error is 0.331254 (50 iterations in 0.02 seconds)
+## Iteration 2200: error is 0.330270 (50 iterations in 0.02 seconds)
+## Iteration 2250: error is 0.331499 (50 iterations in 0.02 seconds)
+## Iteration 2300: error is 0.331114 (50 iterations in 0.02 seconds)
+## Iteration 2350: error is 0.332107 (50 iterations in 0.02 seconds)
+## Iteration 2400: error is 0.332440 (50 iterations in 0.02 seconds)
+## Iteration 2450: error is 0.330584 (50 iterations in 0.02 seconds)
+## Iteration 2500: error is 0.332428 (50 iterations in 0.02 seconds)
+## Iteration 2550: error is 0.331233 (50 iterations in 0.02 seconds)
+## Iteration 2600: error is 0.331958 (50 iterations in 0.02 seconds)
+## Iteration 2650: error is 0.333140 (50 iterations in 0.02 seconds)
+## Iteration 2700: error is 0.333409 (50 iterations in 0.02 seconds)
+## Iteration 2750: error is 0.330139 (50 iterations in 0.02 seconds)
+## Iteration 2800: error is 0.331013 (50 iterations in 0.02 seconds)
+## Iteration 2850: error is 0.332076 (50 iterations in 0.03 seconds)
+## Iteration 2900: error is 0.331733 (50 iterations in 0.02 seconds)
+## Iteration 2950: error is 0.332814 (50 iterations in 0.02 seconds)
+## Iteration 3000: error is 0.331438 (50 iterations in 0.02 seconds)
+## Fitting performed in 1.26 seconds.
 ```
 
-![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-3.png)![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-4.png)
+![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-2.png)![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-3.png)![plot of chunk plantPcoaTsne](figure/plantPcoaTsne-4.png)
 
 ### Mantel test of different distances
 
@@ -3747,12 +3610,12 @@ mantels
 ## 
 ## Observation: 0.3447672 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
 ##       Std.Obs   Expectation      Variance 
-## 11.3227990708 -0.0003840247  0.0009292044 
+##  1.132792e+01 -2.729873e-05  9.264458e-04 
 ## 
 ## $matK$brayW
 ## Monte-Carlo test
@@ -3760,12 +3623,12 @@ mantels
 ## 
 ## Observation: 0.3717721 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
-##      Std.Obs  Expectation     Variance 
-## 1.163445e+01 5.545013e-04 1.018040e-03 
+##       Std.Obs   Expectation      Variance 
+##  1.171818e+01 -5.065037e-05  1.006819e-03 
 ## 
 ## $matK$brayUW
 ## Monte-Carlo test
@@ -3773,12 +3636,12 @@ mantels
 ## 
 ## Observation: 0.5529449 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
-##       Std.Obs   Expectation      Variance 
-## 18.3486620614 -0.0003570226  0.0009093174 
+##      Std.Obs  Expectation     Variance 
+## 1.836084e+01 1.628117e-05 9.068866e-04 
 ## 
 ## 
 ## $rbcL
@@ -3788,12 +3651,12 @@ mantels
 ## 
 ## Observation: 0.689035 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
-##      Std.Obs  Expectation     Variance 
-## 2.272761e+01 1.117186e-04 9.188278e-04 
+##       Std.Obs   Expectation      Variance 
+##  2.279943e+01 -5.908820e-06  9.133600e-04 
 ## 
 ## $rbcL$brayW
 ## Monte-Carlo test
@@ -3801,25 +3664,26 @@ mantels
 ## 
 ## Observation: 0.6839004 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
-## Alternative hypothesis: greater 
-## 
-##      Std.Obs  Expectation     Variance 
-## 2.711865e+01 2.996594e-05 6.359333e-04 
-## 
-## $rbcL$brayUW
-## Monte-Carlo test
-## Call: ade4::mantel.rtest(m1 = uniDist, m2 = brayDist, nrepet = 10000)
-## 
-## Observation: 0.8692566 
-## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
 ##       Std.Obs   Expectation      Variance 
-##  3.332147e+01 -4.095156e-05  6.805949e-04
+##  2.712222e+01 -2.825286e-06  6.358267e-04 
+## 
+## $rbcL$brayUW
+## Monte-Carlo test
+## Call: par.mantel.rtest(m1 = uniDist, m2 = brayDist, nrepet = 1e+06, 
+##     mc.cores = 50)
+## 
+## Observation: 0.8692566 
+## 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
+## Alternative hypothesis: greater 
+## 
+##      Std.Obs  Expectation     Variance 
+## 3.354830e+01 2.743856e-05 6.713169e-04
 ```
 
 ### PERMANOVA testing of covariates
@@ -3839,12 +3703,12 @@ plantAdonis
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
-## bonobo     1    0.5987 0.59874  2.1572 0.02049 0.002361 ** 
-## area2      8    5.8053 0.72567  2.6146 0.19864    1e-07 ***
-## malaria    1    0.3402 0.34024  1.2259 0.01164 0.179559    
-## Residuals 81   22.4814 0.27755         0.76923             
-## Total     91   29.2257                 1.00000             
+##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
+## bonobo     1    0.5987 0.59874  2.1572 0.02049 0.00234 ** 
+## area2      8    5.8053 0.72567  2.6146 0.19864   1e-07 ***
+## malaria    1    0.3402 0.34024  1.2259 0.01164 0.17983    
+## Residuals 81   22.4814 0.27755         0.76923            
+## Total     91   29.2257                 1.00000            
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -3861,7 +3725,7 @@ plantAdonis
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
 ## bonobo     1     1.084 1.08356 2.95779 0.02801  1e-07 ***
 ## area2      8     7.229 0.90357 2.46646 0.18684  1e-07 ***
-## malaria    1     0.336 0.33640 0.91826 0.00869 0.7085    
+## malaria    1     0.336 0.33640 0.91826 0.00869 0.7084    
 ## Residuals 82    30.040 0.36634         0.77646           
 ## Total     92    38.689                 1.00000           
 ## ---
@@ -3883,13 +3747,13 @@ interactAdonis
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##                Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
-## bonobo          1    0.5987 0.59874  2.1643 0.02049 0.002277 ** 
-## area2           8    5.8053 0.72567  2.6231 0.19864    1e-07 ***
-## malaria         1    0.3402 0.34024  1.2299 0.01164 0.176727    
-## bonobo:malaria  1    0.3498 0.34978  1.2644 0.01197 0.152542    
-## Residuals      80   22.1316 0.27664         0.75726             
-## Total          91   29.2257                 1.00000             
+##                Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
+## bonobo          1    0.5987 0.59874  2.1643 0.02049 0.00228 ** 
+## area2           8    5.8053 0.72567  2.6231 0.19864   1e-07 ***
+## malaria         1    0.3402 0.34024  1.2299 0.01164 0.17658    
+## bonobo:malaria  1    0.3498 0.34978  1.2644 0.01197 0.15248    
+## Residuals      80   22.1316 0.27664         0.75726            
+## Total          91   29.2257                 1.00000            
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -3906,7 +3770,7 @@ interactAdonis
 ##                Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
 ## bonobo          1     1.084 1.08356 2.95440 0.02801  1e-07 ***
 ## area2           8     7.229 0.90357 2.46364 0.18684  1e-07 ***
-## malaria         1     0.336 0.33640 0.91720 0.00869 0.7117    
+## malaria         1     0.336 0.33640 0.91720 0.00869 0.7118    
 ## bonobo:malaria  1     0.332 0.33230 0.90604 0.00859 0.7487    
 ## Residuals      81    29.708 0.36676         0.76787           
 ## Total          92    38.689                 1.00000           
@@ -3929,11 +3793,11 @@ chimpAdonis
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##           Df SumsOfSqs MeanSqs F.Model      R2    Pr(>F)    
-## area2      2    1.3470 0.67350 2.28831 0.16106 0.0009979 ***
-## malaria    1    0.2469 0.24691 0.83891 0.02952 0.6179779    
-## Residuals 23    6.7694 0.29432         0.80942              
-## Total     26    8.3633                 1.00000              
+##           Df SumsOfSqs MeanSqs F.Model      R2   Pr(>F)    
+## area2      2    1.3470 0.67350 2.28831 0.16106 0.000984 ***
+## malaria    1    0.2469 0.24691 0.83891 0.02952 0.617997    
+## Residuals 23    6.7694 0.29432         0.80942             
+## Total     26    8.3633                 1.00000             
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -3947,11 +3811,11 @@ chimpAdonis
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
-## area2      2    1.6955 0.84775  2.1430 0.14237  9e-07 ***
-## malaria    1    0.3238 0.32379  0.8185 0.02719  0.858    
-## Residuals 25    9.8898 0.39559         0.83044           
-## Total     28   11.9091                 1.00000           
+##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
+## area2      2    1.6955 0.84775  2.1430 0.14237 1.2e-06 ***
+## malaria    1    0.3238 0.32379  0.8185 0.02719   0.858    
+## Residuals 25    9.8898 0.39559         0.83044            
+## Total     28   11.9091                 1.00000            
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -3973,7 +3837,7 @@ bonoboAdonis
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)    
 ## area2      6    4.4583 0.74306  2.7571 0.22002   1e-07 ***
-## malaria    1    0.4431 0.44311  1.6441 0.02187 0.02601 *  
+## malaria    1    0.4431 0.44311  1.6441 0.02187 0.02606 *  
 ## Residuals 57   15.3622 0.26951         0.75812            
 ## Total     64   20.2636                 1.00000            
 ## ---
@@ -3991,7 +3855,7 @@ bonoboAdonis
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
 ## area2      6    5.5330 0.92217 2.60581 0.21533  1e-07 ***
-## malaria    1    0.3449 0.34491 0.97461 0.01342 0.5051    
+## malaria    1    0.3449 0.34491 0.97461 0.01342 0.5054    
 ## Residuals 56   19.8180 0.35389         0.77125           
 ## Total     63   25.6959                 1.00000           
 ## ---
@@ -4013,10 +3877,10 @@ tlAdonis
 ## 
 ## Terms added sequentially (first to last)
 ## 
-##           Df SumsOfSqs MeanSqs F.Model      R2  Pr(>F)   
-## malaria    1    0.5703 0.57031  1.9651 0.06148 0.00648 **
-## Residuals 30    8.7065 0.29022         0.93852           
-## Total     31    9.2769                 1.00000           
+##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
+## malaria    1    0.5703 0.57031  1.9651 0.06148 0.0065 **
+## Residuals 30    8.7065 0.29022         0.93852          
+## Total     31    9.2769                 1.00000          
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -4031,7 +3895,7 @@ tlAdonis
 ## Terms added sequentially (first to last)
 ## 
 ##           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-## malaria    1    0.4097 0.40966  1.0546 0.03396 0.3114
+## malaria    1    0.4097 0.40966  1.0546 0.03396 0.3115
 ## Residuals 30   11.6533 0.38844         0.96604       
 ## Total     31   12.0630                 1.00000
 ```
@@ -4187,14 +4051,17 @@ for (ii in names(swarmData)) {
         maxTree <- hclust(dist(t(selectPropAll[, ])))
         selectPropAll <- selectPropAll[, rev(maxTree$labels[maxTree$order])]
         selectPropAll <- selectPropAll[, order(colnames(selectPropAll))]
-        par(mar = c(10.5, 0.1, 3, 14), lheight = 0.7)
-        metadata <- ss[rownames(selectPropAll), c("chimpBonobo", "area2", "plasmoPM", 
-            "Code")]
-        colnames(metadata) <- c("Species", "Area", "Laverania", "Sample")
-        plotHeat(selectPropAll, breaks, cols, yaxt = "n", xaxt = "n")
-        title(main = ii)
-        axis(1, 1:ncol(selectPropAll), colnames(selectPropAll), las = 2, cex.axis = 0.7)
-        addMetaData(metadata, cex = 0.75)
+        plotAndSavePdf(function() {
+            par(mar = c(12, 0.1, 3, 14), lheight = 0.7)
+            metadata <- ss[rownames(selectPropAll), c("chimpBonobo", "area2", 
+                "plasmoPM", "Code")]
+            colnames(metadata) <- c("Species", "Area", "Laverania", "Sample")
+            plotHeat(selectPropAll, breaks, cols, yaxt = "n", xaxt = "n")
+            title(main = ii)
+            axis(1, 1:ncol(selectPropAll), colnames(selectPropAll), las = 2, 
+                cex.axis = 0.7)
+            addMetaData(metadata, cex = 0.75)
+        }, sprintf("figure/SupplementaryFigure6_%s.pdf", ii), width = 13, height = 13)
     }
 }
 ```
@@ -4243,7 +4110,7 @@ for (ii in names(swarmData)) {
 
 ![plot of chunk compareAntimals](figure/compareAntimals-1.png)![plot of chunk compareAntimals](figure/compareAntimals-2.png)
 
-### Compare antimalarial plant OTUs in plasmodium positive and negative chimps
+### Compare all plant OTUs between endemic and and non-endemic bonobo sites
 
 
 ```r
@@ -5248,9 +5115,9 @@ uniDistW <- UniFrac(qiimeDataW, weighted = TRUE)
 brayDist <- distance(qiimeDataW, "bray")
 brayDistUW <- distance(qiimeData, "bray", binary = TRUE)
 uniPca <- pcoa(uniDist)
-mantels <- list(uniW = ade4::mantel.rtest(uniDist, uniDistW, nrepet = 10000), 
-    brayW = ade4::mantel.rtest(uniDist, brayDist, nrepet = 10000), brayUW = ade4::mantel.rtest(uniDist, 
-        brayDistUW, nrepet = 10000))
+mantels <- list(uniW = par.mantel.rtest(uniDist, uniDistW, nrepet = 1e+06, mc.cores = 50), 
+    brayW = par.mantel.rtest(uniDist, brayDist, nrepet = 1e+06, mc.cores = 50), 
+    brayUW = par.mantel.rtest(uniDist, brayDistUW, nrepet = 1e+06, mc.cores = 50))
 predictors <- model.matrix(~0 + Species + malaria + SIV + area, selectSamples)
 colnames(predictors) <- sub("^Species", "", colnames(predictors))
 colnames(predictors)[colnames(predictors) == "malariaTRUE"] <- "malariaPos"
@@ -5313,107 +5180,107 @@ tsne <- Rtsne(uniDist, is_distance = TRUE, verbose = TRUE, perplexity = 15,
 ##  - point 0 of 94
 ## Done in 0.01 seconds (sparsity = 0.615663)!
 ## Learning embedding...
-## Iteration 50: error is 57.776462 (50 iterations in 0.03 seconds)
-## Iteration 100: error is 60.157961 (50 iterations in 0.03 seconds)
-## Iteration 150: error is 56.717544 (50 iterations in 0.03 seconds)
-## Iteration 200: error is 60.515947 (50 iterations in 0.03 seconds)
-## Iteration 250: error is 57.452715 (50 iterations in 0.03 seconds)
-## Iteration 300: error is 2.171593 (50 iterations in 0.02 seconds)
-## Iteration 350: error is 1.774119 (50 iterations in 0.02 seconds)
-## Iteration 400: error is 1.346610 (50 iterations in 0.03 seconds)
-## Iteration 450: error is 0.769498 (50 iterations in 0.03 seconds)
-## Iteration 500: error is 0.529437 (50 iterations in 0.02 seconds)
-## Iteration 550: error is 0.377875 (50 iterations in 0.02 seconds)
-## Iteration 600: error is 0.334615 (50 iterations in 0.02 seconds)
-## Iteration 650: error is 0.334729 (50 iterations in 0.02 seconds)
-## Iteration 700: error is 0.336010 (50 iterations in 0.02 seconds)
-## Iteration 750: error is 0.333992 (50 iterations in 0.02 seconds)
-## Iteration 800: error is 0.335069 (50 iterations in 0.02 seconds)
-## Iteration 850: error is 0.336401 (50 iterations in 0.02 seconds)
-## Iteration 900: error is 0.335287 (50 iterations in 0.02 seconds)
-## Iteration 950: error is 0.329394 (50 iterations in 0.02 seconds)
-## Iteration 1000: error is 0.328712 (50 iterations in 0.02 seconds)
-## Iteration 1050: error is 0.326385 (50 iterations in 0.02 seconds)
-## Iteration 1100: error is 0.326025 (50 iterations in 0.02 seconds)
-## Iteration 1150: error is 0.326891 (50 iterations in 0.02 seconds)
-## Iteration 1200: error is 0.326633 (50 iterations in 0.02 seconds)
-## Iteration 1250: error is 0.327421 (50 iterations in 0.02 seconds)
-## Iteration 1300: error is 0.326536 (50 iterations in 0.02 seconds)
-## Iteration 1350: error is 0.328307 (50 iterations in 0.02 seconds)
-## Iteration 1400: error is 0.328226 (50 iterations in 0.02 seconds)
-## Iteration 1450: error is 0.327241 (50 iterations in 0.02 seconds)
-## Iteration 1500: error is 0.323475 (50 iterations in 0.02 seconds)
-## Iteration 1550: error is 0.323590 (50 iterations in 0.02 seconds)
-## Iteration 1600: error is 0.321918 (50 iterations in 0.02 seconds)
-## Iteration 1650: error is 0.316715 (50 iterations in 0.02 seconds)
-## Iteration 1700: error is 0.311777 (50 iterations in 0.02 seconds)
-## Iteration 1750: error is 0.314672 (50 iterations in 0.02 seconds)
-## Iteration 1800: error is 0.313022 (50 iterations in 0.02 seconds)
-## Iteration 1850: error is 0.314298 (50 iterations in 0.02 seconds)
-## Iteration 1900: error is 0.313061 (50 iterations in 0.02 seconds)
-## Iteration 1950: error is 0.312969 (50 iterations in 0.02 seconds)
-## Iteration 2000: error is 0.314639 (50 iterations in 0.02 seconds)
-## Iteration 2050: error is 0.314482 (50 iterations in 0.02 seconds)
-## Iteration 2100: error is 0.314457 (50 iterations in 0.02 seconds)
-## Iteration 2150: error is 0.315632 (50 iterations in 0.02 seconds)
-## Iteration 2200: error is 0.311858 (50 iterations in 0.02 seconds)
-## Iteration 2250: error is 0.310721 (50 iterations in 0.02 seconds)
-## Iteration 2300: error is 0.313586 (50 iterations in 0.02 seconds)
-## Iteration 2350: error is 0.315006 (50 iterations in 0.02 seconds)
-## Iteration 2400: error is 0.315964 (50 iterations in 0.02 seconds)
-## Iteration 2450: error is 0.316741 (50 iterations in 0.02 seconds)
-## Iteration 2500: error is 0.312261 (50 iterations in 0.02 seconds)
-## Iteration 2550: error is 0.313988 (50 iterations in 0.02 seconds)
-## Iteration 2600: error is 0.311918 (50 iterations in 0.02 seconds)
-## Iteration 2650: error is 0.313202 (50 iterations in 0.02 seconds)
-## Iteration 2700: error is 0.314197 (50 iterations in 0.02 seconds)
-## Iteration 2750: error is 0.314592 (50 iterations in 0.02 seconds)
-## Iteration 2800: error is 0.313473 (50 iterations in 0.02 seconds)
-## Iteration 2850: error is 0.312996 (50 iterations in 0.02 seconds)
-## Iteration 2900: error is 0.313797 (50 iterations in 0.02 seconds)
-## Iteration 2950: error is 0.305799 (50 iterations in 0.02 seconds)
-## Iteration 3000: error is 0.303026 (50 iterations in 0.02 seconds)
-## Iteration 3050: error is 0.298283 (50 iterations in 0.02 seconds)
-## Iteration 3100: error is 0.293219 (50 iterations in 0.02 seconds)
-## Iteration 3150: error is 0.298178 (50 iterations in 0.01 seconds)
-## Iteration 3200: error is 0.295282 (50 iterations in 0.02 seconds)
-## Iteration 3250: error is 0.289790 (50 iterations in 0.02 seconds)
-## Iteration 3300: error is 0.288655 (50 iterations in 0.02 seconds)
-## Iteration 3350: error is 0.287032 (50 iterations in 0.02 seconds)
-## Iteration 3400: error is 0.280200 (50 iterations in 0.02 seconds)
-## Iteration 3450: error is 0.285493 (50 iterations in 0.02 seconds)
-## Iteration 3500: error is 0.280844 (50 iterations in 0.02 seconds)
-## Iteration 3550: error is 0.279393 (50 iterations in 0.01 seconds)
-## Iteration 3600: error is 0.280075 (50 iterations in 0.02 seconds)
-## Iteration 3650: error is 0.277137 (50 iterations in 0.02 seconds)
-## Iteration 3700: error is 0.282026 (50 iterations in 0.01 seconds)
-## Iteration 3750: error is 0.279302 (50 iterations in 0.02 seconds)
-## Iteration 3800: error is 0.286377 (50 iterations in 0.02 seconds)
-## Iteration 3850: error is 0.282784 (50 iterations in 0.01 seconds)
-## Iteration 3900: error is 0.285249 (50 iterations in 0.02 seconds)
-## Iteration 3950: error is 0.282413 (50 iterations in 0.02 seconds)
-## Iteration 4000: error is 0.282510 (50 iterations in 0.02 seconds)
-## Iteration 4050: error is 0.283087 (50 iterations in 0.01 seconds)
-## Iteration 4100: error is 0.283233 (50 iterations in 0.01 seconds)
-## Iteration 4150: error is 0.284478 (50 iterations in 0.02 seconds)
-## Iteration 4200: error is 0.287311 (50 iterations in 0.02 seconds)
-## Iteration 4250: error is 0.281903 (50 iterations in 0.02 seconds)
-## Iteration 4300: error is 0.284236 (50 iterations in 0.01 seconds)
-## Iteration 4350: error is 0.282260 (50 iterations in 0.01 seconds)
-## Iteration 4400: error is 0.284366 (50 iterations in 0.02 seconds)
-## Iteration 4450: error is 0.279708 (50 iterations in 0.01 seconds)
-## Iteration 4500: error is 0.282415 (50 iterations in 0.01 seconds)
-## Iteration 4550: error is 0.282188 (50 iterations in 0.02 seconds)
-## Iteration 4600: error is 0.284465 (50 iterations in 0.01 seconds)
-## Iteration 4650: error is 0.283660 (50 iterations in 0.01 seconds)
-## Iteration 4700: error is 0.283742 (50 iterations in 0.02 seconds)
-## Iteration 4750: error is 0.282003 (50 iterations in 0.01 seconds)
-## Iteration 4800: error is 0.282184 (50 iterations in 0.01 seconds)
-## Iteration 4850: error is 0.282141 (50 iterations in 0.01 seconds)
-## Iteration 4900: error is 0.285211 (50 iterations in 0.02 seconds)
-## Iteration 4950: error is 0.285636 (50 iterations in 0.01 seconds)
-## Iteration 5000: error is 0.290868 (50 iterations in 0.02 seconds)
-## Fitting performed in 1.78 seconds.
+## Iteration 50: error is 57.791901 (50 iterations in 0.02 seconds)
+## Iteration 100: error is 56.155573 (50 iterations in 0.02 seconds)
+## Iteration 150: error is 58.959705 (50 iterations in 0.02 seconds)
+## Iteration 200: error is 58.969031 (50 iterations in 0.02 seconds)
+## Iteration 250: error is 59.461153 (50 iterations in 0.02 seconds)
+## Iteration 300: error is 2.128314 (50 iterations in 0.02 seconds)
+## Iteration 350: error is 1.689770 (50 iterations in 0.01 seconds)
+## Iteration 400: error is 0.968216 (50 iterations in 0.01 seconds)
+## Iteration 450: error is 0.602084 (50 iterations in 0.01 seconds)
+## Iteration 500: error is 0.478844 (50 iterations in 0.01 seconds)
+## Iteration 550: error is 0.389704 (50 iterations in 0.01 seconds)
+## Iteration 600: error is 0.327868 (50 iterations in 0.02 seconds)
+## Iteration 650: error is 0.323923 (50 iterations in 0.02 seconds)
+## Iteration 700: error is 0.322488 (50 iterations in 0.02 seconds)
+## Iteration 750: error is 0.319755 (50 iterations in 0.01 seconds)
+## Iteration 800: error is 0.320664 (50 iterations in 0.02 seconds)
+## Iteration 850: error is 0.322015 (50 iterations in 0.02 seconds)
+## Iteration 900: error is 0.322143 (50 iterations in 0.02 seconds)
+## Iteration 950: error is 0.321175 (50 iterations in 0.02 seconds)
+## Iteration 1000: error is 0.321544 (50 iterations in 0.01 seconds)
+## Iteration 1050: error is 0.320146 (50 iterations in 0.02 seconds)
+## Iteration 1100: error is 0.318984 (50 iterations in 0.01 seconds)
+## Iteration 1150: error is 0.317414 (50 iterations in 0.01 seconds)
+## Iteration 1200: error is 0.305882 (50 iterations in 0.02 seconds)
+## Iteration 1250: error is 0.305468 (50 iterations in 0.03 seconds)
+## Iteration 1300: error is 0.296131 (50 iterations in 0.03 seconds)
+## Iteration 1350: error is 0.296669 (50 iterations in 0.02 seconds)
+## Iteration 1400: error is 0.293320 (50 iterations in 0.02 seconds)
+## Iteration 1450: error is 0.297961 (50 iterations in 0.03 seconds)
+## Iteration 1500: error is 0.297408 (50 iterations in 0.03 seconds)
+## Iteration 1550: error is 0.295546 (50 iterations in 0.02 seconds)
+## Iteration 1600: error is 0.296670 (50 iterations in 0.02 seconds)
+## Iteration 1650: error is 0.297130 (50 iterations in 0.02 seconds)
+## Iteration 1700: error is 0.297418 (50 iterations in 0.01 seconds)
+## Iteration 1750: error is 0.289717 (50 iterations in 0.01 seconds)
+## Iteration 1800: error is 0.297007 (50 iterations in 0.01 seconds)
+## Iteration 1850: error is 0.294462 (50 iterations in 0.02 seconds)
+## Iteration 1900: error is 0.293311 (50 iterations in 0.02 seconds)
+## Iteration 1950: error is 0.291866 (50 iterations in 0.02 seconds)
+## Iteration 2000: error is 0.288221 (50 iterations in 0.02 seconds)
+## Iteration 2050: error is 0.292921 (50 iterations in 0.02 seconds)
+## Iteration 2100: error is 0.279985 (50 iterations in 0.02 seconds)
+## Iteration 2150: error is 0.281056 (50 iterations in 0.02 seconds)
+## Iteration 2200: error is 0.283368 (50 iterations in 0.02 seconds)
+## Iteration 2250: error is 0.281381 (50 iterations in 0.02 seconds)
+## Iteration 2300: error is 0.281759 (50 iterations in 0.02 seconds)
+## Iteration 2350: error is 0.278164 (50 iterations in 0.02 seconds)
+## Iteration 2400: error is 0.280115 (50 iterations in 0.02 seconds)
+## Iteration 2450: error is 0.281389 (50 iterations in 0.02 seconds)
+## Iteration 2500: error is 0.281228 (50 iterations in 0.02 seconds)
+## Iteration 2550: error is 0.281503 (50 iterations in 0.02 seconds)
+## Iteration 2600: error is 0.282700 (50 iterations in 0.02 seconds)
+## Iteration 2650: error is 0.280738 (50 iterations in 0.02 seconds)
+## Iteration 2700: error is 0.279450 (50 iterations in 0.02 seconds)
+## Iteration 2750: error is 0.278541 (50 iterations in 0.01 seconds)
+## Iteration 2800: error is 0.280860 (50 iterations in 0.02 seconds)
+## Iteration 2850: error is 0.280306 (50 iterations in 0.01 seconds)
+## Iteration 2900: error is 0.285119 (50 iterations in 0.02 seconds)
+## Iteration 2950: error is 0.284443 (50 iterations in 0.01 seconds)
+## Iteration 3000: error is 0.277262 (50 iterations in 0.02 seconds)
+## Iteration 3050: error is 0.279996 (50 iterations in 0.01 seconds)
+## Iteration 3100: error is 0.281981 (50 iterations in 0.02 seconds)
+## Iteration 3150: error is 0.279731 (50 iterations in 0.02 seconds)
+## Iteration 3200: error is 0.281016 (50 iterations in 0.02 seconds)
+## Iteration 3250: error is 0.281423 (50 iterations in 0.02 seconds)
+## Iteration 3300: error is 0.284260 (50 iterations in 0.02 seconds)
+## Iteration 3350: error is 0.281261 (50 iterations in 0.02 seconds)
+## Iteration 3400: error is 0.281621 (50 iterations in 0.02 seconds)
+## Iteration 3450: error is 0.282758 (50 iterations in 0.02 seconds)
+## Iteration 3500: error is 0.282549 (50 iterations in 0.02 seconds)
+## Iteration 3550: error is 0.282788 (50 iterations in 0.02 seconds)
+## Iteration 3600: error is 0.284095 (50 iterations in 0.02 seconds)
+## Iteration 3650: error is 0.282938 (50 iterations in 0.02 seconds)
+## Iteration 3700: error is 0.284721 (50 iterations in 0.02 seconds)
+## Iteration 3750: error is 0.282497 (50 iterations in 0.02 seconds)
+## Iteration 3800: error is 0.284040 (50 iterations in 0.02 seconds)
+## Iteration 3850: error is 0.283785 (50 iterations in 0.02 seconds)
+## Iteration 3900: error is 0.281112 (50 iterations in 0.02 seconds)
+## Iteration 3950: error is 0.283261 (50 iterations in 0.02 seconds)
+## Iteration 4000: error is 0.284872 (50 iterations in 0.02 seconds)
+## Iteration 4050: error is 0.282900 (50 iterations in 0.02 seconds)
+## Iteration 4100: error is 0.283433 (50 iterations in 0.03 seconds)
+## Iteration 4150: error is 0.284836 (50 iterations in 0.03 seconds)
+## Iteration 4200: error is 0.280966 (50 iterations in 0.03 seconds)
+## Iteration 4250: error is 0.285434 (50 iterations in 0.02 seconds)
+## Iteration 4300: error is 0.284487 (50 iterations in 0.02 seconds)
+## Iteration 4350: error is 0.278490 (50 iterations in 0.03 seconds)
+## Iteration 4400: error is 0.282180 (50 iterations in 0.03 seconds)
+## Iteration 4450: error is 0.279602 (50 iterations in 0.03 seconds)
+## Iteration 4500: error is 0.282018 (50 iterations in 0.02 seconds)
+## Iteration 4550: error is 0.277555 (50 iterations in 0.02 seconds)
+## Iteration 4600: error is 0.279747 (50 iterations in 0.01 seconds)
+## Iteration 4650: error is 0.278449 (50 iterations in 0.02 seconds)
+## Iteration 4700: error is 0.280113 (50 iterations in 0.02 seconds)
+## Iteration 4750: error is 0.276057 (50 iterations in 0.01 seconds)
+## Iteration 4800: error is 0.276825 (50 iterations in 0.01 seconds)
+## Iteration 4850: error is 0.281237 (50 iterations in 0.01 seconds)
+## Iteration 4900: error is 0.283043 (50 iterations in 0.01 seconds)
+## Iteration 4950: error is 0.283272 (50 iterations in 0.02 seconds)
+## Iteration 5000: error is 0.279746 (50 iterations in 0.02 seconds)
+## Fitting performed in 1.74 seconds.
 ```
 
 ```r
@@ -5444,12 +5311,12 @@ mantels
 ## 
 ## Observation: 0.7340055 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
-##      Std.Obs  Expectation     Variance 
-## 11.505723187 -0.000565269  0.004076050 
+##       Std.Obs   Expectation      Variance 
+##  1.148261e+01 -9.565459e-05  4.087243e-03 
 ## 
 ## $brayW
 ## Monte-Carlo test
@@ -5457,25 +5324,26 @@ mantels
 ## 
 ## Observation: 0.8217656 
 ## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
-## Alternative hypothesis: greater 
-## 
-##       Std.Obs   Expectation      Variance 
-## 14.1499856782 -0.0005342276  0.0033771347 
-## 
-## $brayUW
-## Monte-Carlo test
-## Call: ade4::mantel.rtest(m1 = uniDist, m2 = brayDistUW, nrepet = 10000)
-## 
-## Observation: 0.9090206 
-## 
-## Based on 10000 replicates
-## Simulated p-value: 9.999e-05 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
 ## Alternative hypothesis: greater 
 ## 
 ##      Std.Obs  Expectation     Variance 
-## 15.845955033  0.000170829  0.003289633
+## 1.381064e+01 7.907122e-05 3.539848e-03 
+## 
+## $brayUW
+## Monte-Carlo test
+## Call: par.mantel.rtest(m1 = uniDist, m2 = brayDistUW, nrepet = 1e+06, 
+##     mc.cores = 50)
+## 
+## Observation: 0.9090206 
+## 
+## Based on 1000000 replicates
+## Simulated p-value: 9.99999e-07 
+## Alternative hypothesis: greater 
+## 
+##      Std.Obs  Expectation     Variance 
+## 1.603117e+01 6.180044e-05 3.214832e-03
 ```
 
 ## Beta diversity between samples
