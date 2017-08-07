@@ -36,7 +36,7 @@ source("loadData.R")
 ```
 
 ```
-## Cache work/matK_rarefyOtus.Rdat does not exist. Running operation
+## Cache work/matK_rarefyOtus.Rdat does exist. Loading data
 ```
 
 ```
@@ -44,7 +44,7 @@ source("loadData.R")
 ```
 
 ```
-## Cache work/rbcL_rarefyOtus.Rdat does not exist. Running operation
+## Cache work/rbcL_rarefyOtus.Rdat does exist. Loading data
 ```
 
 ### Make heatmap of OTU abundances
@@ -73,33 +73,35 @@ for (ii in names(swarmData)) {
         1e-10, length.out = 100))
     breaks2 <- c(-1e-06, seq(min(maxProp[maxProp > 0]) - 1e-10, max(maxProp) + 
         1e-10, length.out = 100))
-    par(mfrow = c(2, 1), mar = c(12, 0.1, 3.5, 15))
-    image(1:ncol(plotProp), 1:nrow(plotProp), t(plotProp), col = cols, breaks = breaks, 
-        xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
-    text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
-        subLetters[1], xpd = NA, cex = 3, adj = 0:1)
-    insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU within each sample")
-    box()
-    axis(1, 1:ncol(plotProp), colnames(plotProp), cex.axis = 0.7, las = 2, tcl = -0.1, 
-        mgp = c(0, 0.3, 0))
-    metadata <- sortSamples[rownames(plotProp), c("chimpBonobo", "area2", "plasmoPM", 
-        "Code")]
-    colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
-    addMetaData(metadata, cex = 0.75)
-    abline(h = 1:nrow(plotProp) - 0.5, v = 1:ncol(plotProp) + 0.5, col = "#00000011")
-    image(1:ncol(maxProp), 1:nrow(maxProp), t(maxProp), col = cols, breaks = breaks2, 
-        xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
-    text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
-        subLetters[2], xpd = NA, cex = 3, adj = 0:1)
-    box()
-    insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU maximum")
-    axis(1, 1:ncol(maxProp), colnames(maxProp), cex.axis = 0.7, las = 2, tcl = -0.1, 
-        mgp = c(0, 0.3, 0))
-    abline(h = 1:nrow(maxProp) - 0.5, v = 1:ncol(maxProp) + 0.5, col = "#00000011")
-    metadata <- sortSamples[rownames(maxProp), c("chimpBonobo", "area2", "plasmoPM", 
-        "Code")]
-    colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
-    addMetaData(metadata, cex = 0.75)
+    plotAndSavePdf(function() {
+        par(mfrow = c(2, 1), mar = c(12, 0.1, 3.5, 15))
+        image(1:ncol(plotProp), 1:nrow(plotProp), t(plotProp), col = cols, breaks = breaks, 
+            xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
+        text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
+            subLetters[1], xpd = NA, cex = 3, adj = 0:1)
+        insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU within each sample")
+        box()
+        axis(1, 1:ncol(plotProp), colnames(plotProp), cex.axis = 0.7, las = 2, 
+            tcl = -0.1, mgp = c(0, 0.3, 0))
+        metadata <- sortSamples[rownames(plotProp), c("chimpBonobo", "area2", 
+            "plasmoPM", "Code")]
+        colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
+        addMetaData(metadata, cex = 0.75)
+        abline(h = 1:nrow(plotProp) - 0.5, v = 1:ncol(plotProp) + 0.5, col = "#00000011")
+        image(1:ncol(maxProp), 1:nrow(maxProp), t(maxProp), col = cols, breaks = breaks2, 
+            xlab = "", ylab = "", xaxt = "n", yaxt = "n", main = ii)
+        text(grconvertX(0.005, "nfc", "user"), grconvertY(0.995, "nfc", "user"), 
+            subLetters[2], xpd = NA, cex = 3, adj = 0:1)
+        box()
+        insetScale(round(breaks2, 6), cols, c(0.97, 0.58, 0.98, 0.83), label = "Proportion of OTU maximum")
+        axis(1, 1:ncol(maxProp), colnames(maxProp), cex.axis = 0.7, las = 2, 
+            tcl = -0.1, mgp = c(0, 0.3, 0))
+        abline(h = 1:nrow(maxProp) - 0.5, v = 1:ncol(maxProp) + 0.5, col = "#00000011")
+        metadata <- sortSamples[rownames(maxProp), c("chimpBonobo", "area2", 
+            "plasmoPM", "Code")]
+        colnames(metadata) <- c("Species", "Site", "Laverania", "Sample")
+        addMetaData(metadata, cex = 0.75)
+    }, sprintf("figure/SupplementaryFigure4_%s.pdf", ii), height = 30, width = 30)
 }
 ```
 
