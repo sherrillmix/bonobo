@@ -79,7 +79,7 @@ for(ii in names(swarmData)){
     points(pos[!selectSamples$malaria,],col=malariaCols3[1],cex=2.25,lwd=4,bg=speciesCols[selectSamples[!selectSamples$malaria,'chimpBonobo']],pch=21)
     points(pos[selectSamples$malaria,],col=malariaCols3[2],cex=2.25,lwd=4,bg=speciesCols[selectSamples[selectSamples$malaria,'chimpBonobo']],pch=21)
     title(main=sprintf('%s',ii,1,2))
-  },sprintf('figure/Figure6_%s.pdf',ii),width=2.16,height=2.16)
+  },sprintf('figure/Figure6_%s.pdf',ii),width=6,height=6)
 
   #tsne
   plotAndSavePdf(function(){
