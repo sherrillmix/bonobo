@@ -16,7 +16,7 @@ system('parallel --version',intern=TRUE)
 
 ### Prepare rbcL and matK blast databases from downloaded sequences
 
-```{r,cache=TRUE}
+```{r prepareDb,cache=TRUE}
 if(!file.exists('ebi/rbcl.fa.gz'))stop('Please download rbcl data from http://www.ebi.ac.uk/ena/data/search?query=rbcl to ebi/rbcl.fa.gz')
 if(!file.exists('ebi/matk.fa.gz'))stop('Please download matk data from http://www.ebi.ac.uk/ena/data/search?query=matk to ebi/matk.fa.gz')
 system('zcat ebi/matk.fa.gz | makeblastdb -in - -title matk -dbtype nucl -out work/matk')
@@ -24,7 +24,7 @@ system('zcat ebi/rbcl.fa.gz | makeblastdb -in - -title rbcl -dbtype nucl -out wo
 ```
 
 ### Blast swarm OTUs against rbcl/matk databases
-```{r,cache=TRUE}
+```{r blastData,cache=TRUE}
 contigFa<-list.files('work/swarmPair','.fa.gz$',full.names=TRUE)
 contigFa<-contigFa[!grepl('_align',contigFa)]
 for(fasta in contigFa){
