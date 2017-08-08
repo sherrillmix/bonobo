@@ -1,6 +1,6 @@
 # Analysis code for "Geographically restricted malaria infections of wild bonobos include a new Laverania species"
 
-To regenerate this document, run `make clean;make` in this directory.
+To regenerate this document, run `make clean;make` in this directory. Note that the code is fairly processor and memory hungry so you would not want to run this on a small machine.
 
 The code depends on R packages available from CRAN:
 
