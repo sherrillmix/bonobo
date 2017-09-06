@@ -4,7 +4,6 @@ To regenerate this document, run `make clean;make` in this directory. Note that 
 
 The code depends on R packages available from CRAN:
 
-* library(actuar)
 * library(ade4)
 * library(ape)
 * library(parallel)

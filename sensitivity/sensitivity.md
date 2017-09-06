@@ -8,7 +8,7 @@ set.seed(12358)
 knitr::opts_chunk$set(error=FALSE,tidy=TRUE)
 ```
 
-### Libraries
+### Probability functions
 
 ```r
 # probability of k positives out of n trials in a zero truncated binomial
